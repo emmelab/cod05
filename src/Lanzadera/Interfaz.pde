@@ -4,12 +4,14 @@
 
 class Interfaz implements AutoSetup, AutoDraw {
   BotonModulo lienzo, observador, carrete;
+  InterfazYSensorConexion interfazYSensorConexion;
 
   Interfaz() {
     autoSetup.add(this);
     autoDraw.add(this);
   }
   void setup() {
+    interfazYSensorConexion = new InterfazYSensorConexion();
     {
       float verti = height/2;
       float sepHoriz = 160;
@@ -20,6 +22,7 @@ class Interfaz implements AutoSetup, AutoDraw {
   }
   void draw() {
     if(introActiva)intro();
+    interfazYSensorConexion.visible = !lienzo.local || !observador.local || !carreta.local;
   }
   
   float introTime = 0;

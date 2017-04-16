@@ -1,5 +1,3 @@
-InterfazYSensorConexion interfazYSensorConexion = new InterfazYSensorConexion();
-
 //void reintentarConexion
 
 void oscStatus(OscStatus estado){
@@ -12,19 +10,18 @@ void oscStatus(int estado){
   }
 }
 
-class InterfazYSensorConexion implements AutoSetup,AutoDraw{
+class InterfazYSensorConexion implements AutoDraw {
   TwOutQuad animacion;
+  PImage iconoConexion;
   boolean visible = true;// Esto debe ser true si al menos hay uno de los modulos desactivados
   
   boolean reintantando;
   final String ipLocalHost = "127.0.0.1";  
   
   InterfazYSensorConexion(){
-    autoSetup.add(this);
     autoDraw.add(this);
-  }
-  
-  void setup(){
+    icono = iconos.get(conexion);
+    if (this.icono == null) this.icono = iconos.iconoVacio();
     animacion = (TwOutQuad)(new TwOutQuad()).inicializar(0.5f);
   }
   void draw(){
