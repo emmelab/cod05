@@ -1,5 +1,3 @@
-
-
 class Boton {
   int posX;
   int posY;

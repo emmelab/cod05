@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<gestor>
+<lanzadera>
   <conexion id="0" ip="127.0.0.1" nombre="Kinect" puerto="11000"/>
   <conexion id="1" ip="127.0.0.1" nombre="Interfaz" puerto="11000"/>
   <conexion id="2" ip="127.0.0.1" nombre="Particulas" puerto="11000"/>
-</gestor>
+</lanzadera>

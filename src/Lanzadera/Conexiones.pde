@@ -1,17 +1,15 @@
 final class Conexiones {
-
   private String nombreArchivo;
   private XML configuracion;
 
   Conexiones() {
-    nombreArchivo = "data/configuracion.xml";
+    nombreArchivo = "../lanzadera.xml";
     configuracion = cargarConfiguracion(nombreArchivo);
-  }
-  
+  }  
   Conexiones(String rutaArchivo) {
     nombreArchivo = rutaArchivo;
     configuracion = cargarConfiguracion(nombreArchivo);
-  }  
+  }
 
   public String[][] getConexiones() {
     XML[] conexiones = configuracion.getChildren("conexion");
@@ -37,7 +35,10 @@ final class Conexiones {
   }
 
   private void guardarXML(XML archivo) {
-    saveXML(archivo, nombreArchivo);
+    guardarXML(archivo, nombreArchivo);
+  }
+  private void guardarXML(XML archivo, String ruta) {
+    saveXML(archivo, ruta);
   }
 
   public void agregarConexion(String nombre, String ip, int puerto) {
