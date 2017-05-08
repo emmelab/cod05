@@ -7,6 +7,7 @@ float dt = 1f/60;
 PFont openSans_Semibold;
 PFont openSans_Light;
 
+int oscTesterPort = 5000;
 OscP5 oscTester;
 InterfazIPs g;
 Conexiones IPs;
@@ -14,9 +15,8 @@ Conexiones IPs;
 void setup() {
   size( 800, 600 );
   
-  
   inicializarTipografias(29);
-  oscTester = new OscP5(this,5000);
+  oscTester = new OscP5(this,oscTesterPort);
   IPs = new Conexiones("../lanzadera.xml");
   //g = new InterfazIPs(IPs);
   
@@ -34,7 +34,7 @@ void draw() {
   dt = (millis()-lt)/1000f;
   lt = millis();
   
-    background(#25292b);
+    background(paleta.fondo);
   for(AutoDraw auto : autoDraw) auto.draw();
 }
 void keyPressed() {

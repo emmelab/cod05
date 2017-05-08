@@ -13,15 +13,19 @@ void oscStatus(int estado){
 class InterfazYSensorConexion implements AutoDraw {
   TwOutQuad animacion;
   PImage iconoConexion;
+  //String iconoConexion;
   boolean visible = true;// Esto debe ser true si al menos hay uno de los modulos desactivados
   
   boolean reintantando;
-  final String ipLocalHost = "127.0.0.1";  
+  final String ipLocalHost = "127.0.0.1";
+  
+  String ipCarrete = ipLocalHost,ipObservador = ipLocalHost,ipLienzo = ipLocalHost;
+  String portCarrete = "12000", portObservador = "11000", portLienzo = "10000";
   
   InterfazYSensorConexion(){
     autoDraw.add(this);
-    icono = iconos.get(conexion);
-    if (this.icono == null) this.icono = iconos.iconoVacio();
+    iconoConexion = iconos.get(dicIcos.conexion);
+    //if (this.iconoConexion == null) this.iconoConexion = iconos.iconoVacio();
     animacion = (TwOutQuad)(new TwOutQuad()).inicializar(0.5f);
   }
   void draw(){
@@ -29,6 +33,7 @@ class InterfazYSensorConexion implements AutoDraw {
     pushStyle();
     //if (sinConexion)
     {
+      
       fill(255,0,0);
       textAlign(LEFT,TOP);
       textSize(16);

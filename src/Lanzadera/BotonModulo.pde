@@ -1,20 +1,23 @@
 class BotonModulo implements AutoDraw, AutoMousePressed {
   boolean local = true;
   boolean mostrar = false;
+  float todoGris = 0;
   TwOutBack animPos, animAro;
   TwOutQuad animAlfa, animColor;
   PVector pos;
-  PImage icono;
+  PImage icono, aroCerrado, aroAbierto;
   color colEncendido, colApagado;
 
   BotonModulo(PVector pos, String icono, color col) {
     this.pos = pos;
     this.icono = iconos.get(icono);
+    this.aroCerrado = iconos.get(dicIcos.aroCerrado);
+    this.aroAbierto = iconos.get(dicIcos.aroAbierto);
     if (this.icono == null) this.icono = iconos.iconoVacio();
     this.colEncendido = col;
     this.colApagado = color(red(col)*.299+green(col)*.587+blue(col)*.144);
     animAlfa = (TwOutQuad)(new TwOutQuad()).inicializar(.5, 0, 255);
-    animAro = (TwOutBack)(new TwOutBack()).inicializar(.5, this.icono.width*.8, this.icono.width*1.2);
+    animAro = (TwOutBack)(new TwOutBack()).inicializar(.5, this.icono.width*.8, this.icono.width*1.2, .5);
     animPos = (TwOutBack)(new TwOutBack()).inicializar(.3, pos.y-100, pos.y);
     animColor = (TwOutQuad)(new TwOutQuad()).inicializar(.3);
 
@@ -32,25 +35,27 @@ class BotonModulo implements AutoDraw, AutoMousePressed {
     if (mostrar) {
       animAlfa.actualizar(dt);
       animPos.actualizar(dt);
-      animColor.actualizar(local?-dt:dt);
-      animAro.actualizar(local?-dt:dt);
+      if (animPos.estado >= animPos.duracion) {
+        animColor.actualizar(local?-dt:dt);
+        animAro.actualizar(local?dt:-dt);
+      }
     }
-    pushMatrix();
     pushStyle();
     imageMode(CENTER);
-    tint(lerpColor(colEncendido, colApagado, animColor.valor()), animAlfa.valor());
-    noFill();
-    stroke(colEncendido, animAlfa.valor());
+    tint( lerpColor( colEncendido, colApagado, todoGris), animAlfa.valor());
+    pushMatrix();
+    translate(pos.x, animPos.valor());
+    rotate(pos.z);
+    pos.z += dt*.75;
     if (animAro.estado>0) {
-      float rot = millis()*.001;
-      ellipseMode(CENTER);
-      strokeWeight(4);
-      strokeCap(SQUARE);
-      aro(pos.x, animPos.valor(), animAro.valor(), animAro.valor(), 11, rot);
+      image(aroAbierto, 0, 0, animAro.valor(), animAro.valor());
     }
+    rotate(HALF_PI);
+    image(aroAbierto, 0, 0, animAro.valorMayor, animAro.valorMayor);
+    popMatrix();
+    tint( lerpColor( lerpColor(colEncendido, colApagado, animColor.valor()), colApagado, todoGris), animAlfa.valor());
     image(icono, pos.x, animPos.valor());    
     popStyle();
-    popMatrix();
   }
 
   void aro(float x, float y, float w, float h, float divs, float offset) {
