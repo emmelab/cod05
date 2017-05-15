@@ -12,21 +12,32 @@ void oscStatus(int estado){
 
 class InterfazYSensorConexion implements AutoDraw {
   TwOutQuad animacion;
+  TwInOutBack tweenPanel;
   PImage iconoConexion;
   //String iconoConexion;
-  boolean visible = true;// Esto debe ser true si al menos hay uno de los modulos desactivados
+  boolean visible = false;// Esto debe ser true si al menos hay uno de los modulos desactivados
   
   boolean reintantando;
   final String ipLocalHost = "127.0.0.1";
   
   String ipCarrete = ipLocalHost,ipObservador = ipLocalHost,ipLienzo = ipLocalHost;
   String portCarrete = "12000", portObservador = "11000", portLienzo = "10000";
+  float tamPanelInferior = 180;
+  
+  BotonBasico mas,menos;
+  PVector ejeMasMenos;
   
   InterfazYSensorConexion(){
     autoDraw.add(this);
     iconoConexion = iconos.get(dicIcos.conexion);
     //if (this.iconoConexion == null) this.iconoConexion = iconos.iconoVacio();
     animacion = (TwOutQuad)(new TwOutQuad()).inicializar(0.5f);
+    tweenPanel = (TwInOutBack)(new TwInOutBack()).inicializar(.7);
+    
+    ejeMasMenos = new PVector(width + tamPanelInferior/2, height-tamPanelInferior/2,tamPanelInferior);
+    mas = new BotonBasico( ejeMasMenos.x - ejeMasMenos.z , ejeMasMenos.y, 0, dicIcos.mas,paleta.panelSuperior );
+    menos = new BotonBasico( ejeMasMenos.x , ejeMasMenos.y + ejeMasMenos.z, HALF_PI, dicIcos.menos,paleta.fondo );
+    mas.escala = menos.escala = (tamPanelInferior-90)/mas.icono.height;
   }
   void draw(){
     boolean sinConexion = oscTester.ip().equals(ipLocalHost);
@@ -39,6 +50,28 @@ class InterfazYSensorConexion implements AutoDraw {
       textSize(16);
       text("Sin Conexion (posiblemente)",12,8);
     }
+    popStyle();
+    panelInferior();
+  }
+  
+  void panelInferior() {
+    tweenPanel.actualizar(visible?dt:-dt);
+    
+    menos.pos.z = tweenPanel.valor()*HALF_PI+HALF_PI;
+    mas.pos.z = menos.pos.z+HALF_PI;
+    menos.pos.set(ejeMasMenos.x+ejeMasMenos.z*cos(menos.pos.z),ejeMasMenos.y+ejeMasMenos.z*sin(menos.pos.z));
+    mas.pos.set(ejeMasMenos.x+ejeMasMenos.z*cos(mas.pos.z),ejeMasMenos.y+ejeMasMenos.z*sin(mas.pos.z));
+    if (menos.presionado || mas.presionado) {
+      visible = !visible;
+    }
+    
+    pushStyle();
+    pushMatrix();
+    noStroke();
+    fill(paleta.panelSuperior);
+    translate(0,height-tweenPanel.valor()*tamPanelInferior);
+    rect(0,0,width,tamPanelInferior*2);
+    popMatrix();
     popStyle();
   }
 }

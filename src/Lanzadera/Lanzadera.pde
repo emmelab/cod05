@@ -20,7 +20,6 @@ void setup() {
   IPs = new Conexiones("../lanzadera.xml");
   //g = new InterfazIPs(IPs);
   
-  
   for(AutoSetup auto : autoSetup) auto.setup();
 }
 

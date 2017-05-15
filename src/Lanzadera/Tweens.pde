@@ -1,3 +1,4 @@
+//      10/5/2017
 class TweenerLineal {
   boolean limitado = true;
   float valorMenor = 0, valorMayor = 1;
@@ -67,5 +68,14 @@ class TwOutBack extends TweenerLineal {
   float valor(){
     float t = estado;
     return lerp(valorMenor, valorMayor, ((t=t/duracion-1)*t*((s+1)*t + s) + 1));
+  }
+}
+class TwInOutBack extends TweenerLineal {
+    float s = 1.70158f;
+  float valor(){
+    float tempS = s;
+    float t = estado;
+    if ((t/=duracion/2) < 1) return lerp(valorMenor,valorMayor,1./2*(t*t*(((tempS*=(1.525f))+1)*t - tempS)));
+    return lerp(valorMenor,valorMayor, 1./2*((t-=2)*t*(((tempS*=(1.525f))+1)*t + tempS) + 2));
   }
 }

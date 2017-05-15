@@ -3,6 +3,7 @@ class Interfaz implements AutoSetup, AutoDraw {
   InterfazYSensorConexion interfazYSensorConexion;
   BarraSuperior barraSuperior;
   TwOutQuad animTodoGris;
+  boolean todoLocal = true;
 
   Interfaz() {
     autoSetup.add(this);
@@ -23,7 +24,8 @@ class Interfaz implements AutoSetup, AutoDraw {
   void draw() {
     if(introActiva)intro();
     else {
-      interfazYSensorConexion.visible = !lienzo.local || !observador.local || !carrete.local;
+      //interfazYSensorConexion.visible = !lienzo.local || !observador.local || !carrete.local;
+      todoLocal = lienzo.local && observador.local && carrete.local;
       grisPorTodoLocal();
     }
   }
@@ -44,7 +46,6 @@ class Interfaz implements AutoSetup, AutoDraw {
   }
   
   void grisPorTodoLocal(){
-    boolean todoLocal = !  interfazYSensorConexion.visible;
     animTodoGris.actualizar(todoLocal?dt:-dt);
     carrete.todoGris = constrain(animTodoGris.valor()-2,0,1);
     observador.todoGris = constrain(animTodoGris.valor()-1,0,1);

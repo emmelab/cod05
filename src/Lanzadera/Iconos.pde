@@ -5,6 +5,7 @@ class DiccionarioIconos {
     play = "play", 
     marca = "marca", 
     mas = "mas", 
+    menos = "menos", 
     ayuda = "ayuda", 
     observador = "observador", 
     carrete = "carrete", 
@@ -22,7 +23,9 @@ class Iconos implements AutoSetup {
     dicIcos.observador, 
     dicIcos.play, 
     dicIcos.aroCerrado, 
-    dicIcos.aroAbierto
+    dicIcos.aroAbierto,
+    dicIcos.mas,
+    dicIcos.menos,
   };
 
   Iconos() {
