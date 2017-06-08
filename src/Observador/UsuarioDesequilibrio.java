@@ -1,11 +1,16 @@
-class UsuarioDesequilibrio {
+import processing.core.PApplet;
+import SimpleOpenNI.*;
+import processing.core.PVector;
+
+public class UsuarioDesequilibrio {
   SimpleOpenNI  context;
   int idUsuario;
 
   int estabilidad, minimoEstabilidad;
 
   PVector centroMasa2D, centroMasa, centroCaja; //centro del boundingbox  
-  float umbralMenor,umbralMaximo;
+  private static float umbralMenor = 20, umbralMaximo = 35;
+  public static final int MAXIMO_VALOR_UMBRAL = 100;
   int[] userMap;
 
   float[] memoriaDesequilibrio;
@@ -16,20 +21,38 @@ class UsuarioDesequilibrio {
   boolean entroIzquierda, salioIzquierda, entroDerecha, salioDerecha;
   boolean entroIzquierdaBruto, salioIzquierdaBruto, entroDerechaBruto, salioDerechaBruto;
 
-  UsuarioDesequilibrio(SimpleOpenNI context, int idUsuario, int minimoEstabilidad, float umbralMenor, float umbralMaximo) {
+  public UsuarioDesequilibrio(SimpleOpenNI context, int idUsuario, int minimoEstabilidad ) {
     this.context = context;
     this.idUsuario = idUsuario;
     this.minimoEstabilidad = minimoEstabilidad;
-    this.umbralMenor = umbralMenor;
-    this.umbralMaximo = umbralMaximo;
     memoriaDesequilibrio = new float[minimoEstabilidad];
 
     centroMasa2D = new PVector();
     centroMasa = new PVector();
     centroCaja = new PVector();
   }
+  
+  //-------------------------------------------------- METODOS PUBLICOS
 
-  void actualizar() {
+  //--sets y gets
+  public static void setUmbralMenor( float _umbralMenor ){
+    umbralMenor = PApplet.constrain( _umbralMenor, 0.0f, umbralMaximo );
+  }
+  
+  public static void setUmbralMaximo( float _umbralMaximo ){
+    umbralMaximo = PApplet.constrain( _umbralMaximo, umbralMenor, MAXIMO_VALOR_UMBRAL );
+  }
+  
+  public static float getUmbralMenor(){
+    return umbralMenor;
+  }
+  
+  public static float getUmbralMaximo(){
+    return umbralMaximo;
+  }
+  //--
+
+  public void actualizar() {
     if (context.getCoM(idUsuario, centroMasa)) {
       context.convertRealWorldToProjective(centroMasa, centroMasa2D);
       actualizarCentroCaja();
@@ -38,8 +61,10 @@ class UsuarioDesequilibrio {
       actualizarBooleanas();
     }
   }
+  
+  //-------------------------------------------------- METODOS PRIVADOS
 
-  void actualizarValor(){
+  private void actualizarValor(){
     desequilibrioBruto = (centroCaja.x - centroMasa2D.x) / umbralMaximo;
     
     memoriaDesequilibrio[punteroMemoriaDesequilibrio] = desequilibrioBruto;
@@ -52,7 +77,7 @@ class UsuarioDesequilibrio {
     }
     desequilibrio /= memoriaDesequilibrio.length;
   }
-  void actualizarBooleanas() {
+  private void actualizarBooleanas() {
     
     boolean izqAnt = izquierda;
     boolean derAnt = derecha;
@@ -91,7 +116,7 @@ class UsuarioDesequilibrio {
     salioDerecha = !derecha && derAnt;
   }
 
-  void actualizarCentroCaja() {
+  private void actualizarCentroCaja() {
     if (userMap == null) userMap = context.userMap();
     else context.userMap(userMap);
     

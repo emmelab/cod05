@@ -1,28 +1,50 @@
 import oscP5.*;
 import netP5.*;
 
-class ComunicacionOSC{
+public class ComunicacionOSC{
   
-  OscP5 oscP5;
-  NetAddress direccionAPI;
-  NetAddress direccionSistema;
+  private OscP5 oscP5;
+  private NetAddress direccionAPI;
+  private NetAddress direccionSistema;
   
-  ComunicacionOSC(){
+  private boolean invertidoEjeX, invertidoEjeY;
+  
+  public ComunicacionOSC( PApplet p5 ){
     
-    oscP5 = new OscP5( p5, 13500); 
-    direccionAPI = new NetAddress("192.168.0.102", 13000 );
-    //direccionSistema = new NetAddress( "127.0.0.1", 12000 );
-    direccionSistema = new NetAddress( "169.254.254.166", 12000 );
+    oscP5 = new OscP5( p5, 12300); 
+    direccionAPI = new NetAddress("127.0.0.1", 13000 );
+    direccionSistema = new NetAddress( "127.0.0.1", 12000 );
+    
+    invertidoEjeX = true;
     
   }
   
-  void actualizarMensajes( int user, Motor m ) {
+  //-------------------------------------------------- METODOS PUBLICOS
+  
+  //---- gets y sets
+  public void setInvertidoEjeX( boolean invertidoEjeX ){
+    this.invertidoEjeX = invertidoEjeX;
+  }
+  
+  public void setInvertidoEjeY( boolean invertidoEjeY ){
+    this.invertidoEjeY = invertidoEjeY;
+  }
+  
+  public boolean getInvertidoEjeX(){
+    return invertidoEjeX;
+  }
+  
+  public boolean getInvertidoEjeY(){
+    return invertidoEjeY;
+  }
+  //----
+  
+  //----- HACIA LA API
+  public void enviarMensajesAPI( Usuario usuario ){
     
-    //-------------------------------------------------- HACIA LA API
-    
-    UsuarioCerrado uCerrado = m.cerrados.get(user);
-    UsuarioNivel uNivel = m.niveles.get(user);
-    UsuarioDesequilibrio uDeseq = m.desequilibrios.get(user);
+    UsuarioCerrado uCerrado = usuario.getCerrado();
+    UsuarioNivel uNivel = usuario.getNivel();
+    UsuarioDesequilibrio uDeseq = usuario.getDesequilibrio();
     
     if (uNivel.entroAlto) enviarMensaje("/nivel",0);
     else if (uNivel.entroMedio) enviarMensaje("/nivel",1);
@@ -58,8 +80,9 @@ class ComunicacionOSC{
         enviarMensajes("/MenuAgregarModificador");
       }
     }
+    /*
     else if (uNivel.medio || uNivel.bajo) {
-      /*if (uDeseq.entroIzquierda) {
+      if (uDeseq.entroIzquierda) {
         enviarMensajes("/MenuNavegarIzquierda");
       }
       else if (uDeseq.entroDerecha) {
@@ -70,8 +93,9 @@ class ComunicacionOSC{
          if (uDeseq.desequilibrio > 0) enviarMensajes("/MenuNavegarDerecha");
          else enviarMensajes("/MenuNavegarIzquierda");
         }
-      }*/
+      }
     }
+    */
     else if (uNivel.entroAlto) {
       if (uCerrado.cerrado) {
         enviarMensajes("/Cancelar");
@@ -81,57 +105,87 @@ class ComunicacionOSC{
       }
     }
     
+    /*
     PVector jointCursor = new PVector();
     
-    m.context.getJointPositionSkeleton( user, SimpleOpenNI.SKEL_RIGHT_HAND, jointCursor );
+    m.kinect.getJointPositionSkeleton( user, SimpleOpenNI.SKEL_RIGHT_HAND, jointCursor );
   
     float xCursor = m.espacio3D.screenX( jointCursor.x, jointCursor.y, jointCursor.z ) / m.espacio3D.width;
     float yCursor = m.espacio3D.screenY( jointCursor.x, jointCursor.y, jointCursor.z ) / m.espacio3D.height;
     
     enviarMensajeJoint( "/cursor", xCursor, yCursor, direccionAPI );
-    
-    //-------------------------------------------------- HACIA EL SISTEMA
-    
-    PVector joint = new PVector();
-    
-    for( int i = 0; i < m.tiposDeJoint.length; i++ ){
-      
-      m.context.getJointPositionSkeleton( user, i, joint );
-      
-      String nombreJoint = m.nombreDeJoint[ m.tiposDeJoint[ i ] ];
-      float x = m.espacio3D.screenX( joint.x, joint.y, joint.z ) / m.espacio3D.width;
-      float y = m.espacio3D.screenY( joint.x, joint.y, joint.z ) / m.espacio3D.height;
-      
-      enviarMensajeJoint( "/enviar/estimulos", nombreJoint, x, y, direccionSistema );
+    */
+  }
   
+  //----- HACIA EL SISTEMA
+  public void enviarMensajesSISTEMA( Usuario usuario ){
+    
+    PVector[] posicionesJoints = usuario.getPosicionesJoints();
+    PVector[] velocidadesJoints = usuario.getVelocidadesJoints();
+    float[] confianzasJoints = usuario.getConfianzasJoints();
+    
+    for( int i = 0; i < posicionesJoints.length; i++ ){
+      
+      String nombreJoint = Usuario.nombresDeJoints[ i ];
+      float x = motor.espacio3D.screenX( posicionesJoints[ i ].x, posicionesJoints[ i ].y, posicionesJoints[ i ].z ) / motor.espacio3D.width;
+      float y = motor.espacio3D.screenY( posicionesJoints[ i ].x, posicionesJoints[ i ].y, posicionesJoints[ i ].z ) / motor.espacio3D.height;
+      
+      //NO ENVIO MAS VELOCIDAD
+      //float velocidadX = motor.espacio3D.screenX( velocidadesJoints[ i ].x, velocidadesJoints[ i ].y, velocidadesJoints[ i ].z ) / motor.espacio3D.width;
+      //float velocidadY = motor.espacio3D.screenY( velocidadesJoints[ i ].x, velocidadesJoints[ i ].y, velocidadesJoints[ i ].z ) / motor.espacio3D.height;
+      
+      if( invertidoEjeX ) {
+        x = 1 - x;
+        //velocidadX = 1 - velocidadX;
+      }
+      
+      if( invertidoEjeY ) {
+        y = 1 - y;
+        //velocidadY = 1 - velocidadY;
+      }
+      
+      enviarMensajeJoint( "/enviar/usuario/joint", usuario.getId(), nombreJoint, x, y, confianzasJoints[ i ], direccionSistema );
+      
     }
     
   }
   
-  void enviarMensajes(String addPat) {
+  //-------------------------------------------------- METODOS PRIVADOS
+  
+  private void enviarMensajes(String addPat) {
     OscMessage myMessage = new OscMessage(addPat);  
     oscP5.send(myMessage, direccionAPI);
   }
-  void enviarMensaje(String addPat, int data) {
+  
+  private void enviarMensaje(String addPat, int data) {
     OscMessage myMessage = new OscMessage(addPat);
     myMessage.add(data);
     oscP5.send(myMessage, direccionAPI);
     oscP5.send(new OscMessage("/actualizarMovimiento"), direccionAPI);
   }
   
-  void enviarMensajeJoint( String addPat, float x, float y, NetAddress direccion ){
+  private void enviarMensajeJoint( String addPat, float x, float y, NetAddress direccion ){
     OscMessage mensaje = new OscMessage( addPat );
     mensaje.add( x );
     mensaje.add( y );
     oscP5.send( mensaje, direccion);
   }
   
-  void enviarMensajeJoint( String addPat, String nombre, float x, float y, NetAddress direccion ){
+  private void enviarMensajeJoint( String addPat, int user, String nombre, float x, float y, float confianza, NetAddress direccion ){
     OscMessage mensaje = new OscMessage( addPat );
+    mensaje.add( user );
     mensaje.add( nombre );
     mensaje.add( x );
     mensaje.add( y );
+    //YA NO mensaje.add( velocidadX ); mensaje.add( velocidadY );
+    mensaje.add( confianza );
     oscP5.send( mensaje, direccion);
+  }
+  
+  private void enviarMensajeRemoverUsuario( int user ){
+    OscMessage mensaje = new OscMessage( "/remover/usuario" );
+    mensaje.add( user );
+    oscP5.send( mensaje, direccionSistema );
   }
 
 }
