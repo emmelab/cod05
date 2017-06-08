@@ -28,6 +28,10 @@ class Interfaz implements AutoSetup, AutoDraw {
       todoLocal = lienzo.local && observador.local && carrete.local;
       grisPorTodoLocal();
     }
+    
+    lienzo.colEncendido = interfazYSensorConexion.lienzo.col;
+    observador.colEncendido = interfazYSensorConexion.observador.col;
+    carrete.colEncendido = interfazYSensorConexion.carrete.col;
   }
   
   float introTime = 0;
