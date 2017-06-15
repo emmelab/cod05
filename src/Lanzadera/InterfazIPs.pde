@@ -1,4 +1,4 @@
-class InterfazIPs implements AutoDraw,AutoKeyPressed,AutoMousePressed,AutoMouseReleased {
+/*class InterfazIPs implements AutoDraw,AutoKeyPressed,AutoMousePressed,AutoMouseReleased {
 
   String miIP;
 
@@ -348,4 +348,4 @@ class Scroll {
   void mouseReleased() {
     activo = false;
   }
-}
+}*/

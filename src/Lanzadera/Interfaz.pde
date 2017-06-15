@@ -25,7 +25,7 @@ class Interfaz implements AutoSetup, AutoDraw {
     if(introActiva)intro();
     else {
       //interfazYSensorConexion.visible = !lienzo.local || !observador.local || !carrete.local;
-      todoLocal = lienzo.local && observador.local && carrete.local;
+      todoLocal = lienzo.estado != EstadoModulo.REMOTO && observador.estado != EstadoModulo.REMOTO && carrete.estado != EstadoModulo.REMOTO;
       grisPorTodoLocal();
     }
     

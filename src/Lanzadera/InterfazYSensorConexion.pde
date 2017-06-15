@@ -49,7 +49,7 @@ class InterfazYSensorConexion implements AutoDraw {
     carrete = new CampoIP(xBase, posYBase[2], anchoCampoIP, altoCampoIP, paleta.ips[2]);
   }
   void draw() {
-    boolean sinConexion = oscTester.ip().equals(ipLocalHost);
+    boolean sinConexion = oscP5.ip().equals(ipLocalHost);
     pushStyle();
     //if (sinConexion)
     {

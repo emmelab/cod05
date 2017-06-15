@@ -1,6 +1,6 @@
 class BotonModulo implements AutoDraw, AutoMousePressed {
-  boolean local = true;
-  boolean mostrar = false;
+  EstadoModulo estado = EstadoModulo.LOCAL;
+  boolean mostrar = false, remotoEncontrado = false;
   float todoGris = 0;
   TwOutBack animPos, animAro;
   TwOutQuad animAlfa, animColor;
@@ -27,7 +27,9 @@ class BotonModulo implements AutoDraw, AutoMousePressed {
 
   void mousePressed() {
     if (dist(pos.x, pos.y, mouseX, mouseY) < icono.width/2) {
-      local = !local;
+      if (estado == EstadoModulo.APAGADO) estado = EstadoModulo.LOCAL;
+      else if (estado == EstadoModulo.LOCAL) estado = EstadoModulo.REMOTO;
+      else if (estado == EstadoModulo.REMOTO) estado = EstadoModulo.APAGADO;
     }
   }
 
@@ -36,8 +38,8 @@ class BotonModulo implements AutoDraw, AutoMousePressed {
       animAlfa.actualizar(dt);
       animPos.actualizar(dt);
       if (animPos.estado >= animPos.duracion) {
-        animColor.actualizar(local?-dt:dt);
-        animAro.actualizar(local?dt:-dt);
+        animColor.actualizar(estado==EstadoModulo.LOCAL?-dt:dt);
+        animAro.actualizar(estado!=EstadoModulo.APAGADO?dt:-dt);
       }
     }
     pushStyle();

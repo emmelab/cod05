@@ -1,17 +1,17 @@
 class CampoIP implements AutoDraw, AutoKeyPressed, AutoMousePressed {
-  boolean focus = false;
+  boolean focus = false, borrarTodo = true;
   PVector pos, tam;
   int seccion, caracter;
-  String port = "50000";
-  char[][] ips = new char[4][3];
-  String ip = "127.0.0.1";
+  String port = "12000", portInput;
+  //char[][] ips = new char[4][3];
+  String ip = "127.0.0.1", ipInput = ip;
   color col;
 
   CampoIP(float x, float y, float w, float h, color col) {
     pos = new PVector(x, y);
     tam = new PVector(w, h);
-    ips = new char[][]{new char[]{'1', '2', '7'}, new char[]{'0', '0', '0'}, 
-      new char[]{'0', '0', '0'}, new char[]{'0', '0', '1'}};
+    /*ips = new char[][]{new char[]{'1', '2', '7'}, new char[]{'0', '0', '0'}, 
+      new char[]{'0', '0', '0'}, new char[]{'0', '0', '1'}};*/
 
     this.col = col;
 
@@ -29,46 +29,57 @@ class CampoIP implements AutoDraw, AutoKeyPressed, AutoMousePressed {
     if (over(mouseX, mouseY)) {
       focus = true;
     }
+    if(!focus){
+      borrarTodo=true;
+        ipInput = ip;
+    }
   }
 
-  void keyPressed() {
-    if (focus) {
-      if (keyCode == ENTER || keyCode == RETURN) {
-        focus = false;
-      } else if (keyCode == BACKSPACE) {
-        caracter--;
-        if (caracter < 0) {
-          seccion --;
-          if (seccion < 0) {
-            seccion = 0;
-            caracter = 0;
-          } else {
-            caracter = ips[seccion].length-1;
-          }
-        }
-      } else if (key=='.') {
-        if (caracter > 0) {
-          seccion ++;
-          if (seccion >= ips.length) {
-            seccion = ips.length-1;
-            caracter = ips[seccion].length-1;
-            focus = false;
-          } else {
-            caracter = 0;
-          }
-        }
-      } else if (key >= '0' && key <= '9') {
-        if (seccion < 0) seccion = 0;
-        else if (seccion >= ips.length) seccion = ips.length-1;
-        if (caracter < 0) caracter = 0;
-        else if (caracter >= ips[seccion].length) caracter = ips[seccion].length-1;
-        ips[seccion][caracter] = key;
-        caracter++;
-        if (caracter >= ips[seccion].length) {
-          caracter = 0;
-          seccion++;
-        }
+  void digerirIp(){
+    focus = false;
+    borrarTodo = true;
+    String[] partesIp = ipInput.split("\\.");
+    ipInput = "";
+    for (int i=0; i<4; i++){
+      if (i!=0)ipInput+=".";
+      if (i<partesIp.length){
+        if (partesIp[i].length() == 0) ipInput += "0";
+        else if (partesIp[i].length() > 3) ipInput += partesIp[i].substring(0,3);
+        else ipInput += partesIp[i];
       }
+      else ipInput += "0";
+    }
+    ip = ipInput;
+  }
+
+  void keyPressed(){
+    if (focus) {
+      if (keyCode == ESC) {
+        keyCode = RETURN;
+        key = ' ';
+        focus = false;
+        borrarTodo = true;
+        ipInput = ip;
+      }
+      else if (keyCode == BACKSPACE) {
+        if (borrarTodo) ipInput = "";
+        else if (ipInput.length()>0) ipInput = ipInput.substring(0,ipInput.length()-1);
+        borrarTodo = false;
+      }
+      else{
+        borrarTodo = false;
+        if (keyCode == ENTER || keyCode == RETURN){
+        digerirIp();
+      }
+      else if (key == '.') {
+        if (ipInput.matches("[0-9]*\\.[0-9]*\\.[0-9]*\\.[0-9]*")){
+          digerirIp();
+        }
+        else ipInput += key;
+      }
+      else if (key >= '0' && key <= '9') {
+         ipInput += key;
+      }}
     }
   }
 
@@ -89,7 +100,7 @@ class CampoIP implements AutoDraw, AutoKeyPressed, AutoMousePressed {
     translate((tam.x-textWidth("999.999.999.999"))/2, tam.y/2);
     fill(focus?255:paleta.fondo);
     ip = "";
-    for (int i=0; i<ips.length; i++) {
+    /*for (int i=0; i<ips.length; i++) {
       if (i>0)ip += ".";
       boolean showZero = false || focus;
       for (int j=0; j<ips[i].length; j++) {
@@ -100,8 +111,8 @@ class CampoIP implements AutoDraw, AutoKeyPressed, AutoMousePressed {
         }
       }
       if (focus && i>=seccion) break;
-    }
-    text(ip + (focus && frameCount%60<30?"|":""), 0, -textAscent()/6);
+    }*/
+    text(ipInput + (focus && frameCount%60<30?"|":""), 0, -textAscent()/6);
     popMatrix();
     popStyle();
   }

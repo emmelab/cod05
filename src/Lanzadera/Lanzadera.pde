@@ -7,17 +7,17 @@ float dt = 1f/60;
 PFont openSans_Semibold;
 PFont openSans_Light;
 
-int oscTesterPort = 5000;
-OscP5 oscTester;
-InterfazIPs g;
-Conexiones IPs;
+int oscP5Port = 5000;
+OscP5 oscP5;
+//InterfazIPs g;
+//Conexiones IPs;
 //comments
 void setup() {
   size( 800, 600 );
   
   inicializarTipografias(29);
-  oscTester = new OscP5(this,oscTesterPort);
-  IPs = new Conexiones("../lanzadera.xml");
+  oscP5 = new OscP5(this,oscP5Port);
+  //IPs = new Conexiones("../lanzadera.xml");
   //g = new InterfazIPs(IPs);
   
   for(AutoSetup auto : autoSetup) auto.setup();
