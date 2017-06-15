@@ -25,7 +25,7 @@ class InterfazYSensorConexion implements AutoDraw {
   float tamPanelInferior = 180;
   CampoIP lienzo, observador, carrete;
   float[] posYBase;
-  float anchoCampoIP = 300, altoCampoIP = 30;
+  float anchoCampoIP = 400, altoCampoIP = 30;
 
   BotonBasico mas, menos;
   PVector ejeMasMenos;
@@ -44,9 +44,9 @@ class InterfazYSensorConexion implements AutoDraw {
 
     float xBase = width/2-anchoCampoIP/2;
     posYBase = new float[]{ tamPanelInferior/2-altoCampoIP*2, tamPanelInferior/2-altoCampoIP*.5, tamPanelInferior/2+altoCampoIP*1 };
-    lienzo = new CampoIP(xBase, posYBase[0], anchoCampoIP, altoCampoIP, paleta.ips[0]);
-    observador = new CampoIP(xBase, posYBase[1], anchoCampoIP, altoCampoIP, paleta.ips[1]);
-    carrete = new CampoIP(xBase, posYBase[2], anchoCampoIP, altoCampoIP, paleta.ips[2]);
+    lienzo = new CampoIP(xBase, posYBase[0], anchoCampoIP, altoCampoIP, paleta.ips[0], .4f);
+    observador = new CampoIP(xBase, posYBase[1], anchoCampoIP, altoCampoIP, paleta.ips[1], .4f);
+    carrete = new CampoIP(xBase, posYBase[2], anchoCampoIP, altoCampoIP, paleta.ips[2], .4f);
   }
   void draw() {
     boolean sinConexion = oscP5.ip().equals(ipLocalHost);
