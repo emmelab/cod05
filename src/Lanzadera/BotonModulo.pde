@@ -39,7 +39,7 @@ class BotonModulo implements AutoDraw, AutoMousePressed {
       animPos.actualizar(dt);
       if (animPos.estado >= animPos.duracion) {
         animColor.actualizar(estado==EstadoModulo.LOCAL?-dt:dt);
-        animAro.actualizar(estado!=EstadoModulo.APAGADO?dt:-dt);
+        animAro.actualizar(remotoEncontrado?dt:-dt);
       }
     }
     pushStyle();

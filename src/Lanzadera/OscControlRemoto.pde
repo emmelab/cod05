@@ -8,6 +8,8 @@ void callbackPedirEstados(String estadoLienzo, String estadoObservador, String e
 class ControlOsc implements AutoSetup {
   OscP5 osc;
   
+  //String 
+  
   String resultado = "/resultado";
   
   String establecerIPs = "/establecerIPs";
