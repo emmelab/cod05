@@ -22,13 +22,13 @@ void dibujarDebugDesequilibrio ( UsuarioDesequilibrio deseq, PGraphics g2d, floa
   g2d.stroke(#1D9534);
   float tamSegmento = 10;
   for (float offY = 0; offY < h; offY += tamSegmento*2) {
-    g2d.line(x + w/2 - deseq.umbralMenor , y + offY , x + w/2 - deseq.umbralMenor , min(y + offY+tamSegmento, y+h));
-    g2d.line(x + w/2 + deseq.umbralMenor , y + offY , x + w/2 + deseq.umbralMenor , min(y + offY+tamSegmento, y+h));
+    g2d.line(x + w/2 - UsuarioDesequilibrio.getUmbralMenor() , y + offY , x + w/2 - UsuarioDesequilibrio.getUmbralMenor() , min(y + offY+tamSegmento, y+h));
+    g2d.line(x + w/2 + UsuarioDesequilibrio.getUmbralMenor() , y + offY , x + w/2 + UsuarioDesequilibrio.getUmbralMenor() , min(y + offY+tamSegmento, y+h));
   }
-  //line(x + w/2 - deseq.umbralMenor , y , x + w/2 - deseq.umbralMenor , y+ h);
-  //line(x + w/2 + deseq.umbralMenor , y , x + w/2 + deseq.umbralMenor , y+ h);
-  g2d.line(x + w/2 - deseq.umbralMaximo , y , x + w/2 - deseq.umbralMaximo , y+ h);
-  g2d.line(x + w/2 + deseq.umbralMaximo , y , x + w/2 + deseq.umbralMaximo , y+ h);
+  //line(x + w/2 - UsuarioDesequilibrio.getUmbralMenor() , y , x + w/2 - UsuarioDesequilibrio.getUmbralMenor() , y+ h);
+  //line(x + w/2 + UsuarioDesequilibrio.getUmbralMenor() , y , x + w/2 + UsuarioDesequilibrio.getUmbralMenor() , y+ h);
+  g2d.line(x + w/2 - UsuarioDesequilibrio.getUmbralMaximo() , y , x + w/2 - UsuarioDesequilibrio.getUmbralMaximo() , y+ h);
+  g2d.line(x + w/2 + UsuarioDesequilibrio.getUmbralMaximo() , y , x + w/2 + UsuarioDesequilibrio.getUmbralMaximo() , y+ h);
   
   g2d.noStroke();
   
