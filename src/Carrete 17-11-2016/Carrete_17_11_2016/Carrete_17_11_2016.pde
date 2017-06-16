@@ -1,3 +1,4 @@
+// Soy un triangulooo....
 
 ///////////////////////CONTROLES TECLADO
 //--- flechas izquierda y derecha: para navegacion
@@ -430,4 +431,3 @@ void nivel(int valor) {
 void cursorMoCap(float x, float y) {
   consola.setCursor(x*width, y*height);
 }
-
