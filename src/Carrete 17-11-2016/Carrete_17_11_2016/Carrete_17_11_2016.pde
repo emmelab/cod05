@@ -15,7 +15,7 @@
 //--- navegar por los modificadores 
 //--- dar click para agregar o quitar
 
-
+// HOLA triangulo
 import controlP5.*; 
 import oscP5.*;
 import netP5.*;
@@ -430,4 +430,3 @@ void nivel(int valor) {
 void cursorMoCap(float x, float y) {
   consola.setCursor(x*width, y*height);
 }
-
