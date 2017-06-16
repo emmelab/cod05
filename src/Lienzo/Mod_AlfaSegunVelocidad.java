@@ -30,4 +30,3 @@ class Mod_AlfaSegunVelocidad extends Modificador {
     public Mod_AlfaSegunVelocidad generarInstancia(){return new Mod_AlfaSegunVelocidad();}
   };
 }
-

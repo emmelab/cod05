@@ -22,4 +22,3 @@ class Mod_RastroElastico extends Modificador {
     }
   };
 }
-

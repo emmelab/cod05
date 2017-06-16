@@ -38,4 +38,3 @@ class Mod_ResetLluvia extends Modificador {
     }
   };
 }
-

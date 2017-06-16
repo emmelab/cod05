@@ -1,46 +1,65 @@
 import processing.core.PVector;
 
 class Mod_FuerzasPorSemejanza extends Modificador {
-  float factor = .001f;
+  float factor = .001f;//.001f
 
   void ejecutar(Sistema s) {
     Atr_Posicion posiciones = s.requerir(Atr_Posicion.manager, Atributo.OBLIGATORIO);
-    Atr_Color colores = s.requerir(Atr_Color.manager, Atributo.OBLIGATORIO);
     Atr_Aceleracion fuerzas = s.requerir(Atr_Aceleracion.manager, Atributo.OBLIGATORIO);
-
+    Atr_Tamano tamanos = s.requerir(Atr_Tamano.manager, Atributo.OBLIGATORIO);
+    Atr_Color colores = s.requerir(Atr_Color.manager, Atributo.OPCIONAL);
+    
+    float rangoMenor = ( colores != null )? 255 * .25f : 0 ;
+    float rangoMayor = ( colores != null )? 255 * .75f : Atr_Tamano.inicialMaximo2Dados * 2 * .04f ;
+    
     for (int i=0; i<s.tamano; i++) {
       PVector p=posiciones.p[i];
-      int c=colores.c[i];
-      float tinte = s.p5.hue(c);
       PVector f=fuerzas.a[i];
       PVector atraccionFinal = new PVector();
-
-      for (int j=0; j<s.tamano; j++) {
+      
+      float criterio = getCriterioDeComparacion( s, i, tamanos, colores );
+      
+      for( int j=0; j<s.tamano; j++ ){
         if (i!=j) {
-
+          
           PVector pj = posiciones.p[j];
-          int cj = colores.c[j];
-          float diferenciaTinte = s.p5.abs( s.p5.hue(cj)-tinte );
+          float criterioJ = getCriterioDeComparacion( s, j, tamanos, colores );
+          
+          float diferencia = s.p5.abs( criterioJ - criterio );
 
           //calculo la direccion entre la particula y la otra
           float angulo = s.p5.atan2( p.y-pj.y, p.x-pj.x );
-
-          if ( diferenciaTinte <= 63 || diferenciaTinte > 191 ) {
+          
+          if ( diferencia <= rangoMenor || diferencia > rangoMayor ) {
             atraccionFinal.add ( PVector.fromAngle(angulo + s.p5.PI) );
           } else {
             atraccionFinal.add ( PVector.fromAngle(angulo) );
           }
-
+          
           if (s.debug) {
-            if (s.p5.dist(s.p5.mouseX, s.p5.mouseY, p.x, p.y) < 15) dibujarDebug(s,p, pj, diferenciaTinte <= 63 || diferenciaTinte > 191);
+            if (s.p5.dist(s.p5.mouseX, s.p5.mouseY, p.x, p.y) < 15) dibujarDebug(s,p, pj, diferencia <= rangoMenor || diferencia > rangoMayor);
           }
+          
         }
       }
-
+      
       f.add(atraccionFinal);
       f.mult( factor );
-      f.add( PVector.mult(PVector.fromAngle(s.p5.atan2(s.p5.height/2-p.y,s.p5.width/2-p.x)),factor*s.tamano*.4f *0) );
+      //f.add( PVector.mult(PVector.fromAngle(s.p5.atan2(s.p5.height/2-p.y,s.p5.width/2-p.x)),factor*s.tamano*.4f *0) );
+      
     }
+    
+  }
+  
+  float getCriterioDeComparacion( Sistema s, int indice, Atr_Tamano tamanos, Atr_Color colores ){
+    
+    if( colores != null ){
+      int c = colores.c[ indice ];
+      return s.p5.hue(c);
+    }else{
+      return tamanos.d[ indice ];
+    }
+    
   }
 
   void dibujarDebug(Sistema s, PVector desde, PVector hasta, boolean atrae) {
@@ -60,4 +79,3 @@ class Mod_FuerzasPorSemejanza extends Modificador {
     }
   };
 }
-

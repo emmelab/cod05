@@ -79,4 +79,3 @@ class Mod_ColisionSimple extends Modificador {
     }
   };
 }
-

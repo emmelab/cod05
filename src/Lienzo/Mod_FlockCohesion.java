@@ -63,7 +63,3 @@ class Mod_FlockCohesion extends Modificador {
     }
   };
 }
-
-
-
-

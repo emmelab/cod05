@@ -24,4 +24,3 @@ class Mod_EspacioToroidal extends Modificador {
     }
   };
 }
-

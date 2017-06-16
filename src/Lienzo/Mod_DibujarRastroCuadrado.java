@@ -1,6 +1,6 @@
 import processing.core.PVector;
 
-class Mod_DibujarRastroCircular extends Modificador {
+class Mod_DibujarRastroCuadrado extends Modificador {
   float factor = .08f;
 
   void ejecutar(Sistema sistema) {
@@ -19,22 +19,22 @@ class Mod_DibujarRastroCircular extends Modificador {
       for (int j = 0; j < rastro.r[i].length; j++) {
         float d = s.p5.map(j, 0, rastro.r[i].length-1, tamanos.d[i], tamanos.d[i]/5);
         PVector p = rastro.r[i][j];
-          s.p5.ellipse(p.x, p.y, d, d);
+          s.p5.rect(p.x, p.y, d, d);
       }
     }
       s.p5.popStyle(); 
   }
 
 
-  static Registrador<Mod_DibujarRastroCircular> registrador = new Registrador() {
+  static Registrador<Mod_DibujarRastroCuadrado> registrador = new Registrador() {
     public String key() {
-      return "Dibujar Rastro Circular";
+      return "Dibujar Rastro Cuadrado";
     }
     public String categoria() {
       return "Forma De Rastro";
     }
-    public Mod_DibujarRastroCircular generarInstancia() {
-      return new Mod_DibujarRastroCircular();
+    public Mod_DibujarRastroCuadrado generarInstancia() {
+      return new Mod_DibujarRastroCuadrado();
     }
   };
 }

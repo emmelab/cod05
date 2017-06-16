@@ -21,4 +21,3 @@ class Mod_AtraccionAlCentro extends Modificador {
     public Mod_AtraccionAlCentro generarInstancia(){return new Mod_AtraccionAlCentro();}
   };
 }
-

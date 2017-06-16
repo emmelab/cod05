@@ -24,4 +24,3 @@ class Atr_Velocidad extends Atributo {
     }
   };
 }
-

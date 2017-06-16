@@ -18,4 +18,3 @@ class Atr_Aceleracion extends Atributo {
     }
   };
 }
-

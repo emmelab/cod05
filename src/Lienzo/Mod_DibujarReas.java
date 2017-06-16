@@ -3,7 +3,7 @@
 import processing.core.PVector;
 
 class Mod_DibujarReas extends Modificador { 
-  float factorTamanio = 4;
+  float factorTamanio = 1.7f;
 
   void ejecutar(Sistema s) {
     Atr_Posicion posiciones = s.requerir(Atr_Posicion.manager, Atributo.OBLIGATORIO);
@@ -44,4 +44,3 @@ class Mod_DibujarReas extends Modificador {
     }
   };
 }
-

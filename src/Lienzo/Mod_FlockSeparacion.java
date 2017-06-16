@@ -61,7 +61,3 @@ class Mod_FlockSeparacion extends Modificador {
     }
   };
 }
-
-
-
-

@@ -66,4 +66,3 @@ class Mod_EspacioCerrado extends Modificador {
     }
   };
 }
-

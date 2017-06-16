@@ -3,6 +3,7 @@ import java.util.HashMap;
 import java.util.ArrayList;
 
 class Sistema {
+  static char separadorMaquinarias = '|';
   static HashMap<String, Registrador<Modificador>> registroModificadores;
   static void registrar(Registrador regist) {
     if (registroModificadores == null) registroModificadores = new HashMap();
@@ -16,15 +17,27 @@ class Sistema {
   final PApplet p5;
   final int tamano;
   final HashMap<String, Atributo> atributos = new HashMap();
-
+  
+  private ManagerUsuarios managerUsuarios;
+  
   Sistema(PApplet p5, int tamano) {
     this.p5 = p5;
     this.tamano = tamano;
   }
+  
+  Sistema(PApplet p5, int tamano, ManagerUsuarios managerUsuarios) {
+    this.p5 = p5;
+    this.tamano = tamano;
+    this.managerUsuarios = managerUsuarios;
+  }
+  
+  ManagerUsuarios getManagerUsuarios(){
+    return managerUsuarios;
+  }
 
   void actualizar() {
-    for (int i=modificadores.size()-1; i>=0; i--){
-    //for (Modificador m : modificadores) {
+    for (int i=modificadores.size ()-1; i>=0; i--) {
+      //for (Modificador m : modificadores) {
       modificadores.get(i).modificar(this);
     }
   }
@@ -139,12 +152,49 @@ class Sistema {
     directorioModificadores.remove(nombre);
     modificadores.remove(posicion);
   }
-  void eliminar(String nombre) {
+
+  Modificador eliminar(String nombre) {
     Modificador m = directorioModificadores.get(nombre);
     if (m != null) {
+      m.finalizar( this );
       modificadores.remove(m);
       directorioModificadores.remove(nombre);
+    }    
+    return m;
+  }
+
+  String modificadoresActivos_lista() {     
+    String nombres = "vacio";   
+    p5.println("modificadores: " +modificadores.size());
+    p5.println("directorio: " +directorioModificadores.size());
+    for (java.util.Map.Entry<String, Modificador> entry : directorioModificadores.entrySet ()) {
+      String codigo = entry.getKey(); //tiene la forma ......... nombre_0      
+      nombres = (nombres.equals("vacio"))?codigo:nombres+separadorMaquinarias+codigo;
+    }     
+    if (nombres.equals("vacio")) {
+      nombres = null;
     }
+    return nombres;
+  }
+
+  void vaciarModificadores() {
+    String[] lista = new String[modificadores.size()];
+    int contador = 0;  
+    for (java.util.Map.Entry<String, Modificador> entry : directorioModificadores.entrySet ()) {
+      String codigo = entry.getKey(); //tiene la forma ......... nombre_0     
+      lista[contador] = codigo;
+      contador++;
+    }   
+    for (int i=0; i<lista.length; i++) {
+      Modificador m = directorioModificadores.get(lista[i]);
+      if (m != null) {
+        modificadores.remove(m);
+        directorioModificadores.remove(lista[i]);
+      }
+    }
+  }
+
+  void rellenar(String cadenaDeModificadores) {
   }
 }
 
@@ -163,6 +213,7 @@ abstract class Modificador {
   public void modificar(Sistema s) {
     if (estado)ejecutar(s);
   }
+  public void finalizar(Sistema s){}
 }
 
 abstract class Atributo {
@@ -177,4 +228,3 @@ abstract class Atributo {
     T generarInstancia(Sistema s);
   }
 }
-

@@ -30,4 +30,3 @@ class Mod_Mover extends Modificador {
     }
   };
 }
-

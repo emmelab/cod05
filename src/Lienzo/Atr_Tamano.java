@@ -21,4 +21,3 @@ class Atr_Tamano extends Atributo {
     }
   };
 }
-

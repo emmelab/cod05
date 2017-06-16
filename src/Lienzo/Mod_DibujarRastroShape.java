@@ -45,4 +45,3 @@ class Mod_DibujarRastroShape extends Modificador {
     }
   };
 }
-

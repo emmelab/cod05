@@ -31,4 +31,3 @@ class Mod_Gravedad extends Modificador {
     }
   };
 }
-

@@ -25,4 +25,3 @@ class Atr_Posicion extends Atributo {
     }
   };
 }
-
