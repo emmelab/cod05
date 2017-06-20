@@ -1,4 +1,5 @@
 class Interfaz implements AutoSetup, AutoDraw {
+  ConfiguracionCOD05 config;
   BotonModulo lienzo, observador, carrete;
   InterfazYSensorConexion interfazYSensorConexion;
   BarraSuperior barraSuperior;
@@ -32,6 +33,15 @@ class Interfaz implements AutoSetup, AutoDraw {
     lienzo.colEncendido = interfazYSensorConexion.lienzo.col;
     observador.colEncendido = interfazYSensorConexion.observador.col;
     carrete.colEncendido = interfazYSensorConexion.carrete.col;
+  }
+  
+  void cargarDatos(){
+    if (config == null) config = new ConfiguracionCOD05();
+    XML xmlConfig = loadXML( archivoConfigXML );
+    if (xmlConfig != null) config.cargar(xmlConfig);
+      lienzo.estado = config.lienzo.estado;
+      observador.estado = config.observador.estado;
+      carrete.estado = config.carrete.estado;
   }
   
   float introTime = 0;

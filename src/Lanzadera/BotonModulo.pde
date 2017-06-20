@@ -1,6 +1,7 @@
 class BotonModulo implements AutoDraw, AutoMousePressed {
+  ConfiguracionCOD05.ConfigModulo config;
   EstadoModulo estado = EstadoModulo.LOCAL;
-  boolean mostrar = false, remotoEncontrado = false;
+  boolean mostrar = false, remotoEncontrado = false, panelIPsAbierto = false;
   float todoGris = 0;
   TwOutBack animPos, animAro;
   TwOutQuad animAlfa, animColor;
@@ -25,11 +26,17 @@ class BotonModulo implements AutoDraw, AutoMousePressed {
     autoMousePressed.add(this);
   }
 
+  void set(ConfiguracionCOD05.ConfigModulo config){
+  this.config = config;
+  estado = config.estado;
+  }
+
   void mousePressed() {
     if (dist(pos.x, pos.y, mouseX, mouseY) < icono.width/2) {
       if (estado == EstadoModulo.APAGADO) estado = EstadoModulo.LOCAL;
-      else if (estado == EstadoModulo.LOCAL) estado = EstadoModulo.REMOTO;
+      else if (estado == EstadoModulo.LOCAL) estado = panelIPsAbierto ? EstadoModulo.REMOTO : EstadoModulo.APAGADO;
       else if (estado == EstadoModulo.REMOTO) estado = EstadoModulo.APAGADO;
+      if(config!=null)config.estado = estado;
     }
   }
 

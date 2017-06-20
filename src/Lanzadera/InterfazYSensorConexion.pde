@@ -11,6 +11,7 @@ void oscStatus(int estado) {
 }
 
 class InterfazYSensorConexion implements AutoDraw {
+  ConfiguracionCOD05 config;
   TwOutQuad animacion;
   TwInOutBack tweenPanel;
   PImage iconoConexion;
@@ -64,6 +65,13 @@ class InterfazYSensorConexion implements AutoDraw {
 
     observador.col = (lienzo.ip .equals( observador.ip) ) ? paleta.ips[0] : paleta.ips[1];
     carrete.col = (observador.ip .equals( carrete.ip) ) ? observador.col : (lienzo.ip .equals( carrete.ip) ) ? lienzo.col : paleta.ips[2];
+  }
+
+  void setConfig(ConfiguracionCOD05 config) {
+    this.config = config;
+    lienzo.set(config.lienzo);
+    observador.set(config.observador);
+    carrete.set(config.carrete);
   }
 
   void panelInferior() {
