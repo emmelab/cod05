@@ -72,7 +72,6 @@ void setup() {
   println(Mod_Egoespacio.registrador);
   println(Mod_PaletaDefault.registrador);
   println(Mod_PaletaPersonalizada.registrador);
-  println(Mod_PaletaPersonalizada2.registrador);
   //Atr_Tamano.inicialMinimo2Dados = 1;
   // Atr_Tamano.inicialMaximo2Dados = 20;
 
