@@ -1,5 +1,6 @@
 class Interfaz implements AutoSetup, AutoDraw {
   ConfiguracionCOD05 config;
+  BotonBasico botonPlay;
   BotonModulo lienzo, observador, carrete;
   InterfazYSensorConexion interfazYSensorConexion;
   BarraSuperior barraSuperior;
@@ -24,6 +25,11 @@ class Interfaz implements AutoSetup, AutoDraw {
     interfazYSensorConexion = new InterfazYSensorConexion();
     barraSuperior = new BarraSuperior();
     cargarDatos();
+    
+    botonPlay = new BotonBasico(80, height-80, 0, "play", paleta.play);
+    botonPlay.escala = .5f;
+    botonPlay.hoverEscala = new TwOutBack().inicializar(.25,1,1.1,0);
+    botonPlay.toggleAlfa = new TwOutQuad().inicializar(.25,255,25,0);
   }
   void draw() {
     if(introActiva)intro();
@@ -37,6 +43,14 @@ class Interfaz implements AutoSetup, AutoDraw {
     lienzo.colEncendido = interfazYSensorConexion.lienzo.col;
     observador.colEncendido = interfazYSensorConexion.observador.col;
     carrete.colEncendido = interfazYSensorConexion.carrete.col;
+    
+    if (botonPlay.presionado && botonPlay.toggle) ejecutar();
+  }
+  
+  void ejecutar() {
+    Ejecutador local = new Ejecutador(config,modoPDE);
+    local.ejecutarLocales();
+    controlOsc.ejecutarRemotos(config);
   }
   
   void cargarDatos(){

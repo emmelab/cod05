@@ -1,7 +1,12 @@
-//v 14/06/2017
+//v 22/06/2017
+String archivoConfigXML = "../configcod05.xml";
+String xmlTagPanel = "panel", xmlTagEjecucion = "ejecucion";
+
 enum EstadoModulo {
   APAGADO, LOCAL, REMOTO
 }
+final EstadoModulo[] EstadoModuloList = new EstadoModulo[]{EstadoModulo.APAGADO, EstadoModulo.LOCAL, EstadoModulo.REMOTO};
+int EstadoModuloToInt(EstadoModulo estado) {return estado==EstadoModulo.APAGADO?0:estado==EstadoModulo.LOCAL?1:2;};
 
 class ConfiguracionCOD05 {
   ConfigModulo lienzo, observador, carrete;

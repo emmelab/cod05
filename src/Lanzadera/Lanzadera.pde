@@ -1,4 +1,5 @@
 boolean modoPDE = true;// poner en false cuando se haga una exportacion posta
+boolean modoDummies = true && modoPDE;// lo mismo
 
 import oscP5.*;
 import netP5.*;
@@ -9,11 +10,8 @@ float dt = 1f/60;
 PFont openSans_Semibold;
 PFont openSans_Light;
 
-int oscP5Port = 5000;
+int oscP5Port = 12000;
 OscP5 oscP5;
-
-String archivoConfigXML = "../configcod05.xml";
-String xmlTagPanel = "panel", xmlTagEjecucion = "ejecucion";
 
 void setup() {
   size( 800, 600 );
