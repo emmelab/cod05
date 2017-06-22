@@ -438,6 +438,11 @@ class ConfiguracionCOD05 {
   ConfigModulo lienzo, observador, carrete;
   boolean panelConexiones = false;
 
+ConfiguracionCOD05(){
+    lienzo = new ConfigModulo().Iniciar("lienzo", 12010);
+    observador = new ConfigModulo().Iniciar("observador", 12020);
+    carrete = new ConfigModulo().Iniciar("carrete", 12030);
+}
   class ConfigModulo {
     String id = "indefinido";
     String ip = "127.0.0.1";
@@ -467,9 +472,9 @@ class ConfiguracionCOD05 {
     }
   }
   public void cargar(XML xml) {
-    lienzo = new ConfigModulo().Iniciar("lienzo", 12010);
-    observador = new ConfigModulo().Iniciar("observador", 12020);
-    carrete = new ConfigModulo().Iniciar("carrete", 12030);
+    if(lienzo==null)lienzo = new ConfigModulo().Iniciar("lienzo", 12010);
+    if(observador==null)observador = new ConfigModulo().Iniciar("observador", 12020);
+    if(carrete==null)carrete = new ConfigModulo().Iniciar("carrete", 12030);
     if (xml != null) {
       panelConexiones = xml.getInt("panelConexiones", panelConexiones?1:0)==1;
       XML[] configs = xml.getChildren("ConfigModulo");
@@ -873,6 +878,9 @@ public void oscStatus(int estado) {
     println("algun problema de conexion: "+estado);
   }
 }
+/*void oscEvent(OscMessage msj) {
+  println(msj);
+}*/
 
 class InterfazYSensorConexion implements AutoDraw {
   ConfiguracionCOD05 config;
@@ -1079,6 +1087,7 @@ class ControlOsc implements AutoSetup {
   }
   
   public void responderLanzar(int moduloID){
+    println("responderLanzar("+moduloID+")");
   if (configRemota == null) configRemota = new ConfiguracionCOD05();
   if(ejecutador == null) ejecutador = new Ejecutador(configRemota,modoPDE);
   else if(millis()-ejecutador.nacimiento>6000) ejecutador = new Ejecutador(configRemota,modoPDE);

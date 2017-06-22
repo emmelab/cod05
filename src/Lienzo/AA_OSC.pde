@@ -7,7 +7,7 @@ void initOSC() {
   if (config == null) config = new ConfiguracionCOD05();
   XML xmlConfig = null;
   if (new File(sketchPath(archivoConfigXML)).exists()) xmlConfig = loadXML( archivoConfigXML );
-  if (xmlConfig != null) xmlConfig = xmlConfig.getChild(xmlTagPanel);
+  if (xmlConfig != null) xmlConfig = xmlConfig.getChild(xmlTagEjecucion);
 
   config.cargar(xmlConfig);
 

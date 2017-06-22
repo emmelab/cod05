@@ -9,6 +9,9 @@ void oscStatus(int estado) {
     println("algun problema de conexion: "+estado);
   }
 }
+/*void oscEvent(OscMessage msj) {
+  println(msj);
+}*/
 
 class InterfazYSensorConexion implements AutoDraw {
   ConfiguracionCOD05 config;

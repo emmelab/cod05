@@ -110,6 +110,7 @@ class ControlOsc implements AutoSetup {
   }
   
   void responderLanzar(int moduloID){
+    println("responderLanzar("+moduloID+")");
   if (configRemota == null) configRemota = new ConfiguracionCOD05();
   if(ejecutador == null) ejecutador = new Ejecutador(configRemota,modoPDE);
   else if(millis()-ejecutador.nacimiento>6000) ejecutador = new Ejecutador(configRemota,modoPDE);
