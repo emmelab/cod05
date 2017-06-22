@@ -1,7 +1,7 @@
 //void reintentarConexion
 
 void oscStatus(OscStatus estado) {
-  println(estado);
+  println("OscStatus = "+estado);
   oscStatus(estado.id());
 }
 void oscStatus(int estado) {

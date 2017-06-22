@@ -21,9 +21,9 @@ class Interfaz implements AutoSetup, AutoDraw {
       observador = new BotonModulo(new PVector(width/2, verti), dicIcos.observador, paleta.ips[1]);
       carrete = new BotonModulo(new PVector(width/2+sepHoriz, verti), dicIcos.carrete, paleta.ips[2]);
     }
-    cargarDatos();
     interfazYSensorConexion = new InterfazYSensorConexion();
     barraSuperior = new BarraSuperior();
+    cargarDatos();
   }
   void draw() {
     if(introActiva)intro();
@@ -49,7 +49,7 @@ class Interfaz implements AutoSetup, AutoDraw {
       lienzo.set(config.lienzo);
       observador.set(config.observador);
       carrete.set(config.carrete);
-    
+    interfazYSensorConexion.setConfig(config);
   }
   
   float introTime = 0;
