@@ -158,7 +158,7 @@ void digerirPort(){
     pushStyle();
     pushMatrix();
     if (focus) {
-      stroke(255);
+      stroke(paleta.play);
       noFill();
     } else {
       noStroke();
@@ -169,7 +169,7 @@ void digerirPort(){
     textSize(tam.y-5);
     textAlign(LEFT, CENTER);
     translate((tam.x-textWidth(tamRefText))/2, tam.y/2);
-    fill(focus?255:paleta.fondo);
+    fill(focus?paleta.play:paleta.fondo);
     text(text + (focus && frameCount%60<30?"|":""), 0, -textAscent()/6);
     popMatrix();
     popStyle();

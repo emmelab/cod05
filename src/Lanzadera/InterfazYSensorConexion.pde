@@ -72,6 +72,7 @@ class InterfazYSensorConexion implements AutoDraw {
     lienzo.set(config.lienzo);
     observador.set(config.observador);
     carrete.set(config.carrete);
+    visible = config.panelConexiones;
   }
 
   void panelInferior() {
@@ -83,6 +84,7 @@ class InterfazYSensorConexion implements AutoDraw {
     mas.pos.set(ejeMasMenos.x+ejeMasMenos.z*cos(mas.pos.z), ejeMasMenos.y+ejeMasMenos.z*sin(mas.pos.z));
     if (menos.presionado || mas.presionado) {
       visible = !visible;
+      config.panelConexiones = visible;
     }
 
     float offsetPanel = height-tweenPanel.valor()*tamPanelInferior;

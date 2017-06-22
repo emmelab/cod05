@@ -19,6 +19,9 @@ class BarraSuperior implements AutoDraw {
       rect(0, 0, width, alto);
       image(marca, marca.width/2+ margen/2, margen);
       image(ayuda, width - ayuda.width/2 - margen/2, margen);
+    fill(paleta.ips[0]);
+    textSize(32);
+    text(oscP5.ip(),margen/2,alto+48);
     popStyle();
   }
 }

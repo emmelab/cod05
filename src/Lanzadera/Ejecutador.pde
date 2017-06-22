@@ -2,10 +2,12 @@ class Ejecutador {
   ConfiguracionCOD05 config;
   boolean modoUtileria;
   int nacimiento;
+  
+  Process lienzo,observador,carrete;
 
   String javaPath = System.getProperty("java.home");
 
-  String dirReal = sketchPath("..\\"), //sketchPath("..\\lib\\*"),
+  String dirReal = sketchPath(""), //sketchPath("..\\lib\\*"),
     lienzoReal = "Lienzo", 
     observadorReal = "Observador", 
     carreteReal = "Carrete";
@@ -34,37 +36,53 @@ class Ejecutador {
     templateLanzador = "\""+javaPath+"\\bin\\java\" -cp "+dirUtileria+" "+ejecutarKeyword ;
   }
   
+  boolean enEjecucion() {
+    if (lienzo == null && observador == null && carrete == null) return false;
+    else {
+      if (lienzo != null) {
+        if(!lienzo.isAlive()) lienzo = null;
+      }
+      if (observador != null) {
+        if(!observador.isAlive()) observador = null;
+      }
+      if (carrete != null) {
+        if(!carrete.isAlive()) carrete = null;
+      }
+    return true;
+    }
+  }
+  
   void ejecutarLocales() {
     if (modoUtileria) {
-      if (config.lienzo.estado == EstadoModulo.LOCAL) launch( templateLanzador.replace(ejecutarKeyword, lienzoUtileria));
-      if (config.observador.estado == EstadoModulo.LOCAL) launch( templateLanzador.replace(ejecutarKeyword, observadorUtileria));
-      if (config.carrete.estado == EstadoModulo.LOCAL) launch( templateLanzador.replace(ejecutarKeyword, carreteUtileria));
+      if (config.lienzo.estado == EstadoModulo.LOCAL) lienzo=launch( templateLanzador.replace(ejecutarKeyword, lienzoUtileria));
+      if (config.observador.estado == EstadoModulo.LOCAL) observador=launch( templateLanzador.replace(ejecutarKeyword, observadorUtileria));
+      if (config.carrete.estado == EstadoModulo.LOCAL) carrete=launch( templateLanzador.replace(ejecutarKeyword, carreteUtileria));
     } else {
-      if (config.lienzo.estado == EstadoModulo.LOCAL) launch( templateLanzador.replace(ejecutarKeyword, lienzoReal));
-      if (config.observador.estado == EstadoModulo.LOCAL) launch( templateLanzador.replace(ejecutarKeyword, observadorReal));
-      if (config.carrete.estado == EstadoModulo.LOCAL) launch( templateLanzador.replace(ejecutarKeyword, carreteReal));
+      if (config.lienzo.estado == EstadoModulo.LOCAL) lienzo=launch( templateLanzador.replace(ejecutarKeyword, lienzoReal));
+      if (config.observador.estado == EstadoModulo.LOCAL) observador=launch( templateLanzador.replace(ejecutarKeyword, observadorReal));
+      if (config.carrete.estado == EstadoModulo.LOCAL) carrete=launch( templateLanzador.replace(ejecutarKeyword, carreteReal));
     }
   }
 
   void ejecutarLienzo() {
     if (modoUtileria) {
-      launch( templateLanzador.replace(ejecutarKeyword, lienzoUtileria));
+      lienzo=launch( templateLanzador.replace(ejecutarKeyword, lienzoUtileria));
     } else {
-      launch( templateLanzador.replace(ejecutarKeyword, lienzoReal));
+      lienzo=launch( templateLanzador.replace(ejecutarKeyword, lienzoReal));
     }
   }
   void ejecutarObservador() {
     if (modoUtileria) {
-      launch( templateLanzador.replace(ejecutarKeyword, observadorUtileria));
+      observador=launch( templateLanzador.replace(ejecutarKeyword, observadorUtileria));
     } else {
-      launch( templateLanzador.replace(ejecutarKeyword, observadorUtileria));
+      observador=launch( templateLanzador.replace(ejecutarKeyword, observadorUtileria));
     }
   }
   void ejecutarCarrete() {
     if (modoUtileria) {
-      launch( templateLanzador.replace(ejecutarKeyword, carreteUtileria));
+      carrete=launch( templateLanzador.replace(ejecutarKeyword, carreteUtileria));
     } else {
-      launch( templateLanzador.replace(ejecutarKeyword, carreteReal));
+      carrete=launch( templateLanzador.replace(ejecutarKeyword, carreteReal));
     }
   }
 }
