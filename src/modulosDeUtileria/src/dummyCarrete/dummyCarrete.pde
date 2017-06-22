@@ -10,11 +10,20 @@ void setup() {
   size(600, 160);
 
   XML xml = null;
+  if (args != null){
+     for(String a:args){
+      int equals = a.indexOf('=');
+       String  param = a.substring(0, equals);
+       String  value = a.substring(equals + 1);
+       if (param.equals("xmlConfig")) xml = parseXML(value.replace('\\','/'));
+     }
+  }
+  if (xml == null){
   try {
     xml = loadXML(archivoConfigXML);
   }
   catch (Exception e) {
-  }
+  }}
   if (xml != null) {
     xml = xml.getChild(xmlTagEjecucion);
     if (xml != null) {

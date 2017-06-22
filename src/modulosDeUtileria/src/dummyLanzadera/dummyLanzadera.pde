@@ -2,17 +2,22 @@ import oscP5.*;
 import netP5.*;
 import java.io.InputStreamReader;
 
+ConfiguracionCOD05 config;
 OscP5 oscP5;
 int puerto = 14000;
 int sel = -1;
 float conectaTimer = 2000;
+boolean pausarOsc = false;
+
+String archivoConfigXML = "../configcod05.xml";
+String xmlTagPanel = "panel", xmlTagEjecucion = "ejecucion";
 
 int[] ultimoPing = {0,0,0};
 
 int conectandoStringRnd = 0;
 String[] conectandoString = {".",":","¨"," .","..",":.",".:"," :","::","¨.",".¨",":¨"};
 
-String dirUtileria = "..\\modulosDeUtileria\\lib\\*";
+String dirUtileria = "..\\..\\lib\\*";
 String javaPath = "";
 String[] opciones = {"Lienzo", "Observador", "Carrete"};
 String[] ejecucion = {"dummyLienzo", "dummyObservador", "dummyCarrete"};
@@ -22,10 +27,27 @@ void setup() {
   dirUtileria = sketchPath(dirUtileria);
   javaPath = System.getProperty("java.home");
   println(dirUtileria+"\n"+javaPath);
+  
+  if (config == null) config = new ConfiguracionCOD05();
+    XML xmlConfig = null;
+    if(new File(sketchPath(archivoConfigXML)).exists()) xmlConfig = loadXML( archivoConfigXML );
+    if (xmlConfig != null) xmlConfig = xmlConfig.getChild(xmlTagPanel);
+    
+    config.cargar(xmlConfig);
+    if(xmlConfig==null){
+      config.lienzo.puerto = floor(random(12015,13000));
+      config.observador.puerto = floor(random(12015,13000));
+      config.carrete.puerto = floor(random(12015,13000));
+    }
 }
 
 void mousePressed() {
-  if (mouseY < 80) {
+  if (mouseX > width-50 && mouseY < 50) {
+  java.awt.Point loc = ((java.awt.Canvas)surface.getNative()).getLocationOnScreen();
+    String[] args = {ARGS_LOCATION+"="+loc.x+","+(loc.y+height+30),"dummyLanzadera"};
+  PApplet.runSketch(args, new dummyLanzadera());
+  }
+  else if (mouseY < 80 && !pausarOsc) {
     if(oscP5 != null){
     oscP5.stop();
     oscP5 = null;
@@ -34,19 +56,26 @@ void mousePressed() {
     if (puerto > 14010) puerto = 14000;
     conectaTimer = millis()+2000;
   }
-  else if (sel != -1) {
+  else if (sel != -1 && !pausarOsc) {
     thread("ejecutarSel");
   }
 }
 
-void ejecutarSel() {  
-  File f = new File(sketchPath(ejecucion[sel]));
-  Process p = launch("\""+javaPath+"\\bin\\java\" -cp "+
-    dirUtileria+"  "+ejecucion[sel]);
+void ejecutarSel() {
+  XML xmlConfig = new XML("xml");
+  xmlConfig.addChild(config.guardar("ejecucion"));
+  String launchString = "\""+javaPath+"\\bin\\java\" -cp "+
+    dirUtileria+"  "+ejecucion[sel]+" xmlConfig=\""+xmlConfig.toString().replace('"','\'')+"\"";
+    println(launchString);
+  Process p = exec(launchString);
   try {
+    pausarOsc = true;
+    oscP5.stop();
+    oscP5 = null;
     p.waitFor();
     println("exitValue = "+p.exitValue());
     println(getStringFromInputStream(p.getErrorStream()));
+    pausarOsc = false;
   }
   catch(Exception e) {
     println(e);
@@ -84,7 +113,7 @@ String getStringFromInputStream(InputStream is) {
 }
 
 void abrirPuerto(){
-  if (conectaTimer < millis() && oscP5 == null){
+  if (conectaTimer < millis() && oscP5 == null && !pausarOsc){
     oscP5 = new OscP5(this,puerto);
     oscP5.plug(this,"devolverPing","/Lanzadera/ping");
   }
@@ -96,6 +125,9 @@ void devolverPing(String remitenteIp, int remitentePort, int id){
     OscMessage msj = new OscMessage("/Lanzadera/ping/resultado");
     msj.add(id);
     oscP5.send(msj,new NetAddress( remitenteIp,remitentePort));
+    
+    surface.setAlwaysOnTop(true);
+    surface.setAlwaysOnTop(false);
   }
 }
 
@@ -103,6 +135,22 @@ void draw() {
   abrirPuerto();
   sel = -1;
   background(0);
+  
+  pushMatrix();
+  boolean overCloner = mouseX > width-50 && mouseY < 50;
+  if(overCloner){
+  fill(255,0,255);
+  stroke(0);
+  }
+  else{
+  stroke(255,0,255);
+  fill(0);
+  }
+  translate(width-50,0);
+  rect(0,0,50,50);
+  ellipse(25,25,22,22);
+  popMatrix();
+  
   noStroke();
   for(int i=0; i<ultimoPing.length;i++){
     float diff = millis()-ultimoPing[i];
@@ -113,9 +161,9 @@ void draw() {
   }
   
   textSize(32);
-  if (mouseY < 80) fill(255,0,255);
+  if (mouseX < width-50 && mouseY < 80) fill(255,0,255);
   else fill(255);
-  text("Puerto = "+puerto+" "+
+  text("Puerto = "+(pausarOsc?"Ocupado":puerto)+" "+
   (oscP5==null?
   conectandoString[conectandoStringRnd=(frameCount%20!=0?conectandoStringRnd:floor(random(conectandoString.length)))]:""),100,40);
   translate(40, 120);
