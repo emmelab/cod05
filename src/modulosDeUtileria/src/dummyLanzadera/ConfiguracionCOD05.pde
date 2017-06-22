@@ -29,14 +29,14 @@ class ConfiguracionCOD05 {
       ip = xml.getString("ip", ip);
       puerto = xml.getInt("puerto", puerto);
       int estadoInt = xml.getInt("estado", -1);
-      if (estadoInt != -1) estado = EstadoModuloList[estadoInt];
+      if (estadoInt != -1) estado = new EstadoModulo[]{EstadoModulo.APAGADO, EstadoModulo.LOCAL, EstadoModulo.REMOTO}[estadoInt];
     }    
     XML generar() {
       XML xml = new XML("ConfigModulo");
       xml.setString("id", id);
       xml.setString("ip", ip);
       xml.setInt("puerto", puerto);
-      xml.setInt("estado", EstadoModuloToInt(estado));
+      xml.setInt("estado", estado==EstadoModulo.APAGADO?0:estado==EstadoModulo.LOCAL?1:2);
       return xml;
     }
   }

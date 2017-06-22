@@ -1,12 +1,7 @@
-//v 22/06/2017
-String archivoConfigXML = "../configcod05.xml";
-String xmlTagPanel = "panel", xmlTagEjecucion = "ejecucion";
-
+//v 14/06/2017
 enum EstadoModulo {
   APAGADO, LOCAL, REMOTO
 }
-final EstadoModulo[] EstadoModuloList = new EstadoModulo[]{EstadoModulo.APAGADO, EstadoModulo.LOCAL, EstadoModulo.REMOTO};
-int EstadoModuloToInt(EstadoModulo estado) {return estado==EstadoModulo.APAGADO?0:estado==EstadoModulo.LOCAL?1:2;};
 
 class ConfiguracionCOD05 {
   ConfigModulo lienzo, observador, carrete;
@@ -29,14 +24,14 @@ class ConfiguracionCOD05 {
       ip = xml.getString("ip", ip);
       puerto = xml.getInt("puerto", puerto);
       int estadoInt = xml.getInt("estado", -1);
-      if (estadoInt != -1) estado = EstadoModuloList[estadoInt];
+      if (estadoInt != -1) estado = new EstadoModulo[]{EstadoModulo.APAGADO, EstadoModulo.LOCAL, EstadoModulo.REMOTO}[estadoInt];
     }    
     XML generar() {
       XML xml = new XML("ConfigModulo");
       xml.setString("id", id);
       xml.setString("ip", ip);
       xml.setInt("puerto", puerto);
-      xml.setInt("estado", EstadoModuloToInt(estado));
+      xml.setInt("estado", estado==EstadoModulo.APAGADO?0:estado==EstadoModulo.LOCAL?1:2);
       return xml;
     }
   }

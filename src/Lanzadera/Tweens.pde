@@ -1,5 +1,5 @@
 //      10/5/2017
-class TweenerLineal {
+class Tweener {
   boolean limitado = true;
   float valorMenor = 0, valorMayor = 1;
   float duracion = 1;
@@ -23,33 +23,36 @@ class TweenerLineal {
     return lerp(valorMenor,valorMayor,estado/duracion);
   }
   
-  TweenerLineal(){
-  }  
-  TweenerLineal inicializar(float duracion){
+  Tweener(){
+  }
+  Tweener inicializar(Tweener otro){
+    return inicializar(otro.duracion,otro.valorMenor,otro.valorMayor,otro.estado,otro.limitado);
+  }
+  Tweener inicializar(float duracion){
     return inicializar(duracion,valorMenor,valorMayor,estado,limitado);
   }  
-  TweenerLineal inicializar(float duracion, float valorMenor, float valorMayor){
+  Tweener inicializar(float duracion, float valorMenor, float valorMayor){
     return inicializar(duracion,valorMenor,valorMayor,estado,limitado);
   }  
-  TweenerLineal inicializar(float duracion, float estado){
+  Tweener inicializar(float duracion, float estado){
     return inicializar(duracion,valorMenor,valorMayor,estado,limitado);
   }  
-  TweenerLineal inicializar(float duracion, float valorMenor, float valorMayor, float estado){
+  Tweener inicializar(float duracion, float valorMenor, float valorMayor, float estado){
     return inicializar(duracion,valorMenor,valorMayor,estado,limitado);
   }
-  TweenerLineal inicializar(boolean limitado){
+  Tweener inicializar(boolean limitado){
     return inicializar(duracion,valorMenor,valorMayor,estado,limitado);
   }  
-  TweenerLineal inicializar(float duracion,boolean limitado){
+  Tweener inicializar(float duracion,boolean limitado){
     return inicializar(duracion,valorMenor,valorMayor,estado,limitado);
   }  
-  TweenerLineal inicializar(float duracion, float valorMenor, float valorMayor,boolean limitado){
+  Tweener inicializar(float duracion, float valorMenor, float valorMayor,boolean limitado){
     return inicializar(duracion,valorMenor,valorMayor,estado,limitado);
   }  
-  TweenerLineal inicializar(float duracion, float estado,boolean limitado){
+  Tweener inicializar(float duracion, float estado,boolean limitado){
     return inicializar(duracion,valorMenor,valorMayor,estado,limitado);
   }  
-  TweenerLineal inicializar(float duracion, float valorMenor, float valorMayor, float estado, boolean limitado){
+  Tweener inicializar(float duracion, float valorMenor, float valorMayor, float estado, boolean limitado){
     this.duracion = duracion;
     this.valorMenor = valorMenor;
     this.valorMayor = valorMayor;
@@ -58,19 +61,19 @@ class TweenerLineal {
     return this;
   }
 }
-class TwOutQuad extends TweenerLineal {
+class TwOutQuad extends Tweener {
   float valor(){
     return lerp( valorMenor, valorMayor, pow(estado/duracion,2));
   }
 }
-class TwOutBack extends TweenerLineal {
+class TwOutBack extends Tweener {
     float s = 1.70158f;
   float valor(){
     float t = estado;
     return lerp(valorMenor, valorMayor, ((t=t/duracion-1)*t*((s+1)*t + s) + 1));
   }
 }
-class TwInOutBack extends TweenerLineal {
+class TwInOutBack extends Tweener {
     float s = 1.70158f;
   float valor(){
     float tempS = s;

@@ -15,6 +15,4 @@ interface AutoMouseReleased { void mouseReleased(); }
 Paleta paleta = new Paleta();
 DiccionarioIconos dicIcos = new DiccionarioIconos();
 Iconos iconos = new Iconos();
-{
-  Interfaz interfaz = new Interfaz();
-}
+Interfaz interfaz = new Interfaz();

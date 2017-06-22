@@ -3,6 +3,9 @@ class BotonBasico implements AutoDraw, AutoMousePressed {
   PImage icono;
   float escala = 1;
   
+  Tweener hoverEscala = new Tweener().inicializar(1,1,1,1);
+  Tweener toggleAlfa = new Tweener().inicializar(.5,200,255,0);
+  
   color col;
   
   boolean toggle,presionado;
@@ -16,14 +19,18 @@ class BotonBasico implements AutoDraw, AutoMousePressed {
   }
   
   void draw(){
+    boolean over = over(mouseX,mouseY);
+    hoverEscala.actualizar(over?dt:-dt);
+    toggleAlfa.actualizar(toggle?dt:-dt);
+    
     presionado = false;
     pushStyle();
     imageMode(CENTER);
     pushMatrix();
     translate(pos.x,pos.y);
     rotate(pos.z);
-    scale(escala);
-    tint(col);
+    scale(escala*hoverEscala.valor());
+    tint(col,toggleAlfa.valor());
     image(icono,0,0);
     popMatrix();
     popStyle();

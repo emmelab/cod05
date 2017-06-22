@@ -1,7 +1,7 @@
 //void reintentarConexion
 
 void oscStatus(OscStatus estado) {
-  println(estado);
+  println("OscStatus = "+estado);
   oscStatus(estado.id());
 }
 void oscStatus(int estado) {
@@ -11,11 +11,12 @@ void oscStatus(int estado) {
 }
 
 class InterfazYSensorConexion implements AutoDraw {
+  ConfiguracionCOD05 config;
   TwOutQuad animacion;
   TwInOutBack tweenPanel;
   PImage iconoConexion;
   //String iconoConexion;
-  boolean visible = false;// Esto debe ser true si al menos hay uno de los modulos desactivados
+  boolean visible = false;
 
   boolean reintantando;
   final String ipLocalHost = "127.0.0.1";
@@ -66,6 +67,14 @@ class InterfazYSensorConexion implements AutoDraw {
     carrete.col = (observador.ip .equals( carrete.ip) ) ? observador.col : (lienzo.ip .equals( carrete.ip) ) ? lienzo.col : paleta.ips[2];
   }
 
+  void setConfig(ConfiguracionCOD05 config) {
+    this.config = config;
+    lienzo.set(config.lienzo);
+    observador.set(config.observador);
+    carrete.set(config.carrete);
+    visible = config.panelConexiones;
+  }
+
   void panelInferior() {
     tweenPanel.actualizar(visible?dt:-dt);
 
@@ -75,6 +84,7 @@ class InterfazYSensorConexion implements AutoDraw {
     mas.pos.set(ejeMasMenos.x+ejeMasMenos.z*cos(mas.pos.z), ejeMasMenos.y+ejeMasMenos.z*sin(mas.pos.z));
     if (menos.presionado || mas.presionado) {
       visible = !visible;
+      config.panelConexiones = visible;
     }
 
     float offsetPanel = height-tweenPanel.valor()*tamPanelInferior;

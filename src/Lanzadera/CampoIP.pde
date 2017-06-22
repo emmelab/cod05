@@ -1,4 +1,5 @@
 class CampoIP implements AutoDraw, AutoKeyPressed, AutoMousePressed {
+  ConfiguracionCOD05.ConfigModulo config;
   boolean focus = false, focusPort = false, borrarTodo = true;
   PVector pos, tam, posInputPuerto,tamInputPuerto;
   String port = "12000", portInput = port;
@@ -16,6 +17,11 @@ class CampoIP implements AutoDraw, AutoKeyPressed, AutoMousePressed {
     autoDraw.add(this);
     autoMousePressed.add(this);
     autoKeyPressed.add(this);
+  }
+
+  void set(ConfiguracionCOD05.ConfigModulo config){
+    this.config = config;
+    set(config.ip,config.puerto);
   }
 
   boolean overIp(float x, float y) {
@@ -45,6 +51,13 @@ class CampoIP implements AutoDraw, AutoKeyPressed, AutoMousePressed {
     }
   }
 
+void set(String newIp, int newPort){
+  ipInput = newIp;
+  portInput = str(newPort);
+  digerirPort();
+  digerirIp();
+}
+
 void digerirPort(){
     focusPort = false;
     borrarTodo = true;
@@ -52,6 +65,7 @@ void digerirPort(){
   if (val < 1024) val = 1024;
   else if (val > 65534) val = 65534;
   port = portInput = str(val);
+  if(config != null)config.puerto = val;
 }
   void digerirIp(){
     focus = false;
@@ -68,6 +82,7 @@ void digerirPort(){
       else ipInput += "0";
     }
     ip = ipInput;
+  if(config != null)config.ip = ip;
   }
   
   void keyPressed(){
@@ -143,7 +158,7 @@ void digerirPort(){
     pushStyle();
     pushMatrix();
     if (focus) {
-      stroke(255);
+      stroke(paleta.play);
       noFill();
     } else {
       noStroke();
@@ -154,7 +169,7 @@ void digerirPort(){
     textSize(tam.y-5);
     textAlign(LEFT, CENTER);
     translate((tam.x-textWidth(tamRefText))/2, tam.y/2);
-    fill(focus?255:paleta.fondo);
+    fill(focus?paleta.play:paleta.fondo);
     text(text + (focus && frameCount%60<30?"|":""), 0, -textAscent()/6);
     popMatrix();
     popStyle();

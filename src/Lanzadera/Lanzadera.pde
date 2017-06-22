@@ -1,3 +1,6 @@
+boolean modoPDE = false;// poner en false cuando se haga una exportacion posta
+boolean modoDummies = true && modoPDE;// lo mismo
+
 import oscP5.*;
 import netP5.*;
 
@@ -7,19 +10,13 @@ float dt = 1f/60;
 PFont openSans_Semibold;
 PFont openSans_Light;
 
-int oscP5Port = 5000;
+int oscP5Port = 12000;
 OscP5 oscP5;
-//InterfazIPs g;
-//Conexiones IPs;
-//comments
+
 void setup() {
   size( 800, 600 );
-  
   inicializarTipografias(29);
   oscP5 = new OscP5(this,oscP5Port);
-  //IPs = new Conexiones("../lanzadera.xml");
-  //g = new InterfazIPs(IPs);
-  
   for(AutoSetup auto : autoSetup) auto.setup();
 }
 
@@ -32,19 +29,18 @@ void inicializarTipografias(float textSize){
 void draw() {
   dt = (millis()-lt)/1000f;
   lt = millis();
-  
     background(paleta.fondo);
   for(AutoDraw auto : autoDraw) auto.draw();
 }
 void keyPressed() {
-  for(AutoKeyPressed auto : autoKeyPressed) auto.keyPressed();
+  if(!interfaz.introActiva)for(AutoKeyPressed auto : autoKeyPressed) auto.keyPressed();
 }
 void keyReleased() {
-  for(AutoKeyReleased auto : autoKeyReleased) auto.keyReleased();
+  if(!interfaz.introActiva)for(AutoKeyReleased auto : autoKeyReleased) auto.keyReleased();
 }
 void mousePressed() {
-  for(AutoMousePressed auto : autoMousePressed) auto.mousePressed();
+  if(!interfaz.introActiva)for(AutoMousePressed auto : autoMousePressed) auto.mousePressed();
 }
 void mouseReleased() {
-  for(AutoMouseReleased auto : autoMouseReleased) auto.mouseReleased();
+  if(!interfaz.introActiva)for(AutoMouseReleased auto : autoMouseReleased) auto.mouseReleased();
 }
