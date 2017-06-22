@@ -3,8 +3,9 @@ class BotonModulo implements AutoDraw, AutoMousePressed {
   EstadoModulo estado = EstadoModulo.LOCAL;
   boolean mostrar = false, remotoEncontrado = false, panelIPsAbierto = false;
   float todoGris = 0;
-  TwOutBack animPos, animAro;
-  TwOutQuad animAlfa, animColor;
+  Tweener animPos, animAro, animAroConectado,animAlfa,animColor;
+  //TwOutBack animPos, animAro, animAroConectado;
+  //TwOutQuad animAlfa, animColor;
   PVector pos;
   PImage icono, aroCerrado, aroAbierto;
   color colEncendido, colApagado;
@@ -17,10 +18,11 @@ class BotonModulo implements AutoDraw, AutoMousePressed {
     if (this.icono == null) this.icono = iconos.iconoVacio();
     this.colEncendido = col;
     this.colApagado = color(red(col)*.299+green(col)*.587+blue(col)*.144);
-    animAlfa = (TwOutQuad)(new TwOutQuad()).inicializar(.5, 0, 255);
-    animAro = (TwOutBack)(new TwOutBack()).inicializar(.5, this.icono.width*.8, this.icono.width*1.2, .5);
-    animPos = (TwOutBack)(new TwOutBack()).inicializar(.3, pos.y-100, pos.y);
-    animColor = (TwOutQuad)(new TwOutQuad()).inicializar(.3);
+    animAlfa = (new TwOutQuad()).inicializar(.5, 0, 255);
+    animAro = (new TwOutBack()).inicializar(.5, this.icono.width*.8, this.icono.width*1.2, .5);
+    animAroConectado = (new TwOutBack()).inicializar(animAro);
+    animPos = (new TwOutBack()).inicializar(.3, pos.y-100, pos.y);
+    animColor = (new TwOutQuad()).inicializar(.3);
 
     autoDraw.add(this);
     autoMousePressed.add(this);
@@ -46,7 +48,8 @@ class BotonModulo implements AutoDraw, AutoMousePressed {
       animPos.actualizar(dt);
       if (animPos.estado >= animPos.duracion) {
         animColor.actualizar(estado==EstadoModulo.LOCAL?-dt:dt);
-        animAro.actualizar(remotoEncontrado?dt:-dt);
+        animAro.actualizar(estado!=EstadoModulo.APAGADO?dt:-dt);
+        animAroConectado.actualizar(estado!=EstadoModulo.APAGADO&&(remotoEncontrado||estado==EstadoModulo.LOCAL)?dt:-dt);
       }
     }
     pushStyle();
@@ -56,11 +59,13 @@ class BotonModulo implements AutoDraw, AutoMousePressed {
     translate(pos.x, animPos.valor());
     rotate(pos.z);
     pos.z += dt*.75;
-    if (animAro.estado>0) {
-      image(aroAbierto, 0, 0, animAro.valor(), animAro.valor());
+    if (animAroConectado.estado>0) {
+      image(aroAbierto, 0, 0, animAroConectado.valor(), animAroConectado.valor());
     }
+    if(animAro.estado > 0){
     rotate(HALF_PI);
-    image(aroAbierto, 0, 0, animAro.valorMayor, animAro.valorMayor);
+    image(aroAbierto, 0, 0, animAro.valor(), animAro.valor());
+    }
     popMatrix();
     tint( lerpColor( lerpColor(colEncendido, colApagado, animColor.valor()), colApagado, todoGris), animAlfa.valor());
     image(icono, pos.x, animPos.valor());    

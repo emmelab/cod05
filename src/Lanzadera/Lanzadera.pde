@@ -1,3 +1,5 @@
+boolean modoPDE = true;// poner en false cuando se haga una exportacion posta
+
 import oscP5.*;
 import netP5.*;
 
@@ -12,10 +14,6 @@ OscP5 oscP5;
 
 String archivoConfigXML = "../configcod05.xml";
 String xmlTagPanel = "panel", xmlTagEjecucion = "ejecucion";
-Paleta paleta = new Paleta();
-DiccionarioIconos dicIcos = new DiccionarioIconos();
-Iconos iconos = new Iconos();
-Interfaz interfaz = new Interfaz();
 
 void setup() {
   size( 800, 600 );
@@ -37,14 +35,14 @@ void draw() {
   for(AutoDraw auto : autoDraw) auto.draw();
 }
 void keyPressed() {
-  if(interfaz.introActiva)for(AutoKeyPressed auto : autoKeyPressed) auto.keyPressed();
+  if(!interfaz.introActiva)for(AutoKeyPressed auto : autoKeyPressed) auto.keyPressed();
 }
 void keyReleased() {
-  if(interfaz.introActiva)for(AutoKeyReleased auto : autoKeyReleased) auto.keyReleased();
+  if(!interfaz.introActiva)for(AutoKeyReleased auto : autoKeyReleased) auto.keyReleased();
 }
 void mousePressed() {
-  if(interfaz.introActiva)for(AutoMousePressed auto : autoMousePressed) auto.mousePressed();
+  if(!interfaz.introActiva)for(AutoMousePressed auto : autoMousePressed) auto.mousePressed();
 }
 void mouseReleased() {
-  if(interfaz.introActiva)for(AutoMouseReleased auto : autoMouseReleased) auto.mouseReleased();
+  if(!interfaz.introActiva)for(AutoMouseReleased auto : autoMouseReleased) auto.mouseReleased();
 }

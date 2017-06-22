@@ -11,3 +11,8 @@ interface AutoKeyPressed { void keyPressed(); }
 interface AutoKeyReleased { void keyReleased(); }
 interface AutoMousePressed { void mousePressed(); }
 interface AutoMouseReleased { void mouseReleased(); }
+
+Paleta paleta = new Paleta();
+DiccionarioIconos dicIcos = new DiccionarioIconos();
+Iconos iconos = new Iconos();
+Interfaz interfaz = new Interfaz();

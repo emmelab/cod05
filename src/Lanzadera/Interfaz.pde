@@ -5,6 +5,8 @@ class Interfaz implements AutoSetup, AutoDraw {
   BarraSuperior barraSuperior;
   TwOutQuad animTodoGris;
   boolean todoLocal = true;
+  int pingOff = 4000;
+  float pingTimer = 4, pingFrec = 1;
 
   Interfaz() {
     autoSetup.add(this);
@@ -12,7 +14,6 @@ class Interfaz implements AutoSetup, AutoDraw {
     animTodoGris = (TwOutQuad)(new TwOutQuad()).inicializar(.9,0,3);
   }
   void setup() {
-    interfazYSensorConexion = new InterfazYSensorConexion();
     {
       float verti = height/2;
       float sepHoriz = 160;
@@ -20,14 +21,17 @@ class Interfaz implements AutoSetup, AutoDraw {
       observador = new BotonModulo(new PVector(width/2, verti), dicIcos.observador, paleta.ips[1]);
       carrete = new BotonModulo(new PVector(width/2+sepHoriz, verti), dicIcos.carrete, paleta.ips[2]);
     }
+    cargarDatos();
+    interfazYSensorConexion = new InterfazYSensorConexion();
     barraSuperior = new BarraSuperior();
   }
   void draw() {
     if(introActiva)intro();
     else {
       //interfazYSensorConexion.visible = !lienzo.local || !observador.local || !carrete.local;
-      todoLocal = lienzo.estado != EstadoModulo.REMOTO && observador.estado != EstadoModulo.REMOTO && carrete.estado != EstadoModulo.REMOTO;
+      todoLocal = lienzo.estado == EstadoModulo.LOCAL && observador.estado == EstadoModulo.LOCAL && carrete.estado == EstadoModulo.LOCAL;
       grisPorTodoLocal();
+      pingTesting();
     }
     
     lienzo.colEncendido = interfazYSensorConexion.lienzo.col;
@@ -37,11 +41,15 @@ class Interfaz implements AutoSetup, AutoDraw {
   
   void cargarDatos(){
     if (config == null) config = new ConfiguracionCOD05();
-    XML xmlConfig = loadXML( archivoConfigXML );
-    if (xmlConfig != null) config.cargar(xmlConfig);
-      lienzo.estado = config.lienzo.estado;
-      observador.estado = config.observador.estado;
-      carrete.estado = config.carrete.estado;
+    XML xmlConfig = null;
+    if(new File(sketchPath(archivoConfigXML)).exists()) xmlConfig = loadXML( archivoConfigXML );
+    if (xmlConfig != null) xmlConfig = xmlConfig.getChild(xmlTagPanel);
+    
+    config.cargar(xmlConfig);
+      lienzo.set(config.lienzo);
+      observador.set(config.observador);
+      carrete.set(config.carrete);
+    
   }
   
   float introTime = 0;
@@ -60,9 +68,40 @@ class Interfaz implements AutoSetup, AutoDraw {
   }
   
   void grisPorTodoLocal(){
+    carrete.panelIPsAbierto = observador.panelIPsAbierto = lienzo.panelIPsAbierto = interfazYSensorConexion.visible;
+    todoLocal = todoLocal && !interfazYSensorConexion.visible;
     animTodoGris.actualizar(todoLocal?dt:-dt);
     carrete.todoGris = constrain(animTodoGris.valor()-2,0,1);
     observador.todoGris = constrain(animTodoGris.valor()-1,0,1);
     lienzo.todoGris = constrain(animTodoGris.valor(),0,1);
+  }
+  
+  void pingTesting(){
+      pingTimer -= dt;
+      if (pingTimer <= 0){
+        pingTimer = pingFrec;
+        if(config.lienzo.estado==EstadoModulo.REMOTO){
+          controlOsc.pingLienzo(config.lienzo.ip,config.lienzo.puerto);
+          if (!lienzo.remotoEncontrado) {
+            lienzo.animAro.actualizar(-.3);
+          }
+        }
+        if(config.observador.estado==EstadoModulo.REMOTO){
+          controlOsc.pingObservador(config.observador.ip,config.observador.puerto);
+          if (!observador.remotoEncontrado) {
+            observador.animAro.actualizar(-.3);
+          }
+        }
+        if(config.carrete.estado==EstadoModulo.REMOTO){
+          controlOsc.pingCarrete(config.carrete.ip,config.carrete.puerto);
+          if (!carrete.remotoEncontrado) {
+            carrete.animAro.actualizar(-.3);
+          }
+        }
+      }
+    
+    lienzo.remotoEncontrado = millis()-controlOsc.ultimoPingLienzo <= pingOff;
+    observador.remotoEncontrado = millis()-controlOsc.ultimoPingObservador <= pingOff;
+    carrete.remotoEncontrado = millis()-controlOsc.ultimoPingCarrete <= pingOff;
   }
 }

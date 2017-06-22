@@ -16,7 +16,7 @@ class InterfazYSensorConexion implements AutoDraw {
   TwInOutBack tweenPanel;
   PImage iconoConexion;
   //String iconoConexion;
-  boolean visible = false;// Esto debe ser true si al menos hay uno de los modulos desactivados
+  boolean visible = false;
 
   boolean reintantando;
   final String ipLocalHost = "127.0.0.1";
