@@ -1,7 +1,15 @@
+ConfiguracionCOD05 config;
 
 void initOSC() {
-  oscP5 = new OscP5(this, 13000);
-  sistema = new NetAddress("127.0.0.1", 12000);
+  if (config == null) config = new ConfiguracionCOD05();
+  XML xmlConfig = null;
+  if (new File(sketchPath(archivoConfigXML)).exists()) xmlConfig = loadXML( archivoConfigXML );
+  if (xmlConfig != null) xmlConfig = xmlConfig.getChild(xmlTagPanel);
+
+  config.cargar(xmlConfig);
+  
+  oscP5 = new OscP5(this, config.carrete.puerto);
+  sistema = new NetAddress(config.lienzo.ip, config.lienzo.puerto);
 
   //-----------------------------------------OSC sistema de particulas
 

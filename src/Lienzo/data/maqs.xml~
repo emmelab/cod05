@@ -1,7 +1,0 @@
-<?xml version="1.0"?>
-<maquinarias>
-	<maq id="0" nombre="Lumiere">Mover|Dibujar Circulo|Espacio Cerrado</maq>
-	<maq id="1" nombre="Cohl">Mover|Dibujar Circulo|Espacio Cerrado</maq>
-	<maq id="2" nombre="Melies">Mover|Dibujar Circulo|Espacio Cerrado</maq>
-	<maq id="3" nombre="Guy Blaché">Mover|Dibujar Circulo|Espacio Cerrado</maq>
-</maquinarias>
