@@ -1,5 +1,5 @@
 //v 22/06/2017
-String archivoConfigXML = "../configcod05.xml";
+String archivoConfigXML = "../../configcod05.xml";//Cambio momentaneo, que vaya a buscar el XML dos carpetas arriba
 String xmlTagPanel = "panel", xmlTagEjecucion = "ejecucion";
 
 final EstadoModulo[] EstadoModuloList = new EstadoModulo[]{EstadoModulo.APAGADO, EstadoModulo.LOCAL, EstadoModulo.REMOTO};
