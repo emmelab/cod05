@@ -7,8 +7,8 @@ void initOSC() {
 
   config.cargar(xmlConfig);
 
-  oscP5 = new OscP5(this, config.carrete.puerto);
-  sistema = new NetAddress(config.lienzo.ip, config.lienzo.puerto);
+  oscP5 = new OscP5(this, 14000);//config.carrete.puerto);
+  sistema = new NetAddress("127.0.0.1", 12010);//"config.lienzo.ip, config.lienzo.puerto);
 
   //-----------------------------------------OSC sistema de particulas
 

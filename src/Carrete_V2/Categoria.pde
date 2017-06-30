@@ -183,7 +183,7 @@ class Categoria extends Opcion {
    popStyle();
    }*/
 
-  void coneccionCanal(float px, float py, float x, float y,float ang) {   
+  void coneccionCanal(float px, float py, float x, float y, float ang) {   
 
     pushStyle();
     strokeWeight(2);
@@ -248,10 +248,9 @@ class Categoria extends Opcion {
       float cx = posCentro.x+(t/2)*cos(ang);
       float cy = posCentro.y+(t/2)*sin(ang);     
       float diam = dist(px, py, cx, cy);
-      //coneccionCanal(px, py, cx, cy,ang);
-      coneccionLinea( px, py, cx, cy);
+      coneccionCanal(px, py, cx, cy, ang);
+      //coneccionLinea( px, py, cx, cy);
       feedbackModificadores(px, py, diam, ang);
     }
   }
 }
-

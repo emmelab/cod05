@@ -118,6 +118,7 @@ void draw() {
     textAlign(CENTER, CENTER);
     text("conectando", width/2, height/2);
     popStyle();
+    consolaDebug();
   } else {
     pushStyle();
     fill(255);
@@ -138,10 +139,11 @@ void draw() {
   UI_paleta();
 }
 
-void revisarConectadoConSistema() {
+void revisarConectadoConSistema() {   
   if (!conectadoConSistema && totales && existentes) {
     botonesListo();
     println("..........listo.........");
+    consolaDebug.printlnAlerta("..........listo.........");
     conectadoConSistema = true;
     controlador.anadir();
   }
@@ -150,6 +152,7 @@ void revisarConectadoConSistema() {
 void estadoDesconectado() {
   if (frameCount%60==0) {
     println("pido");
+    consolaDebug.printlnAlerta("pido");
     //consola.mandarMensaje("/pedir/modificadores/total");
     consola.mandarMensaje("/pedir/opciones");
   }
@@ -261,18 +264,20 @@ void cantidadBotones(int cantidad_) {
   nombresMaquinarias = new ArrayList<String>();
   nombresOpciones = new ArrayList<String>();
   //estado = new ArrayList<Boolean>();
+  consolaDebug.printlnAlerta("cantidad botones: "+cantidad_);
 }
 
 void cantidadBotonesExistentes(int cantidad_) {
   cantidadExistentes=cantidad_;
   nombresModificadoresExistentes = new ArrayList<String>();
   // estadoExistentes = new ArrayList<Boolean>();
+  consolaDebug.printlnAlerta("cantidad existentes: "+cantidad_);
 }
 
 void modificadores(String nombre_, String categoria_, int estado_) {
   nombresModificadores.add(nombre_); 
   nombresCategorias.add(categoria_); 
-
+  consolaDebug.printlnAlerta("llega mod: "+nombre_ +" de "+categoria_);
   /* if (estado_ == 0) {
    estado.add(false);
    } else {
@@ -283,6 +288,7 @@ void modificadores(String nombre_, String categoria_, int estado_) {
 void modificadoresExistentes(String nombre, int estado_) {
   nombresModificadoresExistentes.add(nombre); 
 
+  consolaDebug.printlnAlerta("exite mod: "+nombre);
   /*if (estado_ == 0) {
    estado.add(true);
    } else {
@@ -292,7 +298,7 @@ void modificadoresExistentes(String nombre, int estado_) {
 
 void opciones(String nombre_, int estado_) {
   nombresOpciones.add(nombre_); 
-
+  consolaDebug.printlnAlerta("llega opcion: "+nombre_);
   /* if (estado_ == 0) {
    estado.add(true);
    } else {
@@ -302,7 +308,7 @@ void opciones(String nombre_, int estado_) {
 
 void maquinarias(String nombre_) {
   nombresMaquinarias.add(nombre_); 
-
+  consolaDebug.printlnAlerta("llega maquinaria: "+nombre_);
   /* if (estado_ == 0) {
    estado.add(true);
    } else {
@@ -325,6 +331,7 @@ void maquinarias(String nombre_) {
 void totalesListo() {
   totales =true;
   println("totales listo");
+  consolaDebug.printlnAlerta("totales listo", paleta[2][3]);
   if (!existentes) {
     consola.mandarMensaje("/pedir/modificadores/existentes");
   }
@@ -333,6 +340,7 @@ void totalesListo() {
 void  existentesListo() {
   existentes =true;
   println("existentes listo");
+  consolaDebug.printlnAlerta("existentes listo", paleta[2][3]);
   /*if (!maquinarias) {
    consola.mandarMensaje("/pedir/maquinarias");
    }*/
@@ -342,6 +350,7 @@ void  maquinariasListo() {
   maquinarias = true;
   consola.renovarDatosMaquinarias(nombresMaquinarias);
   println("maquinarias listo");
+  consolaDebug.printlnAlerta("maquinarias Listo", paleta[2][3]);
   if (!conectadoConSistema) {
     consola.mandarMensaje("/pedir/modificadores/total");
   }
@@ -368,6 +377,7 @@ void botonesListo() {
 void opcionesListo() {
   consola.renovarDatosOpciones(nombresOpciones);
   println("opciones listos");
+  consolaDebug.printlnAlerta("opciones Listo", paleta[2][3]);
   consola.mandarMensaje("/pedir/maquinarias");
   // consola.renovarDatos(cantidad, estado, nombresModificadores);
 }
