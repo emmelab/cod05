@@ -63,7 +63,7 @@ void setup() {
   println(Mod_FuerzasPorSemejanza.registrador);
   println(Mod_Gravedad.registrador);
   println(Mod_Mover.registrador);
-  println(Mod_ResetLluvia.registrador); 
+  //println(Mod_ResetLluvia.registrador); 
   println(Mod_RastroElastico.registrador);
   println(Mod_DibujarRastroCircular.registrador);
   println(Mod_DibujarRastroCuadrado.registrador);
