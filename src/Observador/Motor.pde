@@ -32,26 +32,29 @@ class Motor{
     
     if ( !kinect.isInit() ) {
       println("No se pudo iniciar SimpleOpenNI, quizas la camara esta desconectada!"); 
-      exit();
-      return;
-    }
+      //exit();
+      //return;
+    }else{
   
-    kinect.enableDepth();
-    kinect.enableUser();
+      kinect.enableDepth();
+      kinect.enableUser();
+      
+      tiposDeJoint = getTiposDeJoint();
+      paresDeJoints = getParesDeJoints();
+      nombreDeJoint = getNombreDeJoint();
+      
+      for( int i = 0; i < tiposDeJoint.length; i++ ){
+        println( "- " + nombreDeJoint[ i ] + " : " + tiposDeJoint[ i ] );
+      }
+      
+      loadDatosXML();
+      
+      guiP5 = new GuiP5( p5, NOMBRE_ESTADO );
+      
+      iniciarEspacio3D();
     
-    tiposDeJoint = getTiposDeJoint();
-    paresDeJoints = getParesDeJoints();
-    nombreDeJoint = getNombreDeJoint();
-    
-    for( int i = 0; i < tiposDeJoint.length; i++ ){
-      println( "- " + nombreDeJoint[ i ] + " : " + tiposDeJoint[ i ] );
     }
     
-    loadDatosXML();
-    
-    guiP5 = new GuiP5( p5, NOMBRE_ESTADO );
-    
-    iniciarEspacio3D();
   }
   
   //---------------------------------------- METODOS PUBLICOS
@@ -86,12 +89,19 @@ class Motor{
   }
   
   public void ejecutar(){
-    kinect.update();
-    background( #222222 );
-    if( dibujarEspacio3D ) actualizarEspacio3D();
-    actualizarUsuarios();
-    if( dibujarEspacio3D ) espacio3D.endDraw();
-    dibujarCamaraKinect();
+    if( kinect.isInit() ){
+      kinect.update();
+      background( #222222 );
+      if( dibujarEspacio3D ) actualizarEspacio3D();
+      actualizarUsuarios();
+      if( dibujarEspacio3D ) espacio3D.endDraw();
+      dibujarCamaraKinect();
+    }else{
+      background( #222222 );
+      fill( 255 );
+      textSize( height * 0.04 );
+      text( "Kinect no se pudo iniciar.\nAsegurase de que este conectada y reinicie el programa.", 20, height * 0.4 );
+    }
   }
   
   public void keyPressed(){

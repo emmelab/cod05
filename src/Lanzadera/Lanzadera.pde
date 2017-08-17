@@ -34,6 +34,7 @@ void draw() {
   lt = millis();
     background(paleta.fondo);
   for(AutoDraw auto : autoDraw) auto.draw();
+  consolaDebug();
 }
 void keyPressed() {
   if(!interfaz.introActiva)for(AutoKeyPressed auto : autoKeyPressed) auto.keyPressed();

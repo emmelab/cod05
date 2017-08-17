@@ -50,8 +50,8 @@ class ColeccionOpciones {
       //float anguloUnidad = radians(360*normUnidad);
       //float diametroSelector = width<height? width/4 : height/4;
       float diametroSelector = t*118/100;
-      float x = width/2+(diametroSelector*cos(angulo));
-      float y = height/1.7+(diametroSelector*sin(angulo));
+      float x = posCentro.x+(diametroSelector*cos(angulo));
+      float y = posCentro.y+(diametroSelector*sin(angulo));
       PVector pos = new PVector(x, y);
 
 
@@ -86,10 +86,17 @@ class ColeccionOpciones {
 
   String getSensible(int sensible) {
     String nombreSensible;
-    Opcion c = (Opcion)opciones.get(sensible);
+ Opcion c = (Opcion)opciones.get(sensible);
     nombreSensible = c.getNombre();
 
     return nombreSensible;
   }
-}
+  
+  color getColorSensible(int sensible) {
+    color colorSensible;
+    Opcion o = (Opcion)opciones.get(sensible);
+    colorSensible = o.col;
 
+    return colorSensible;
+  }
+}

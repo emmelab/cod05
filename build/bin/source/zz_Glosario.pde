@@ -1,9 +1,29 @@
+
+//------------  LA MARCA
+String COD05_2 = "cod05 2";
+String COD05_1 = "cod05 1";
+//---------- EL MONITOR
+String ABIERTO =  "abierto";
+String CERRADO = "cerrado";
+String N_MEDIO = "nivel medio";
+String N_ALTO = "nivel alto";
+String N_BAJO = "nivel bajo";
+String EJE_DERECHA = "inclinacion derecha";
+String EJE_IZQUIERDA = "inclinacion izquierda";
+String EJE_CENTRO = "sin inclinacion";
+String MONITOR_BASE = "base monitor";
+
+
+//------------MODOS
 String ESPERA = "espera";
 String AGREGAR = "agregar";
 String ELIMINAR = "eliminar";
-String ESTIMULOS = "estimulos";
+//String ESTIMULOS = "estimulos";
 String OPCIONES = "opciones";
+String MAQUINARIAS = "maquinarias";
 
+
+//-------------- DE AQUI  PARA ABAJO LOS NOMBRES YA NO SON NECESARIOS porque vamos asacarlos de los nombres de las iamgenes.
 //-modificadores
 String M_ALFA_SEGUN_VELOCIDAD = "Alfa Segun Velocidad"   ;
 String M_ATRACCION_AL_CENTRO = "Atraccion Al Centro"  ;  

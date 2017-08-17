@@ -54,6 +54,7 @@ public void draw() {
   lt = millis();
     background(paleta.fondo);
   for(AutoDraw auto : autoDraw) auto.draw();
+  consolaDebug();
 }
 public void keyPressed() {
   if(!interfaz.introActiva)for(AutoKeyPressed auto : autoKeyPressed) auto.keyPressed();
@@ -86,7 +87,7 @@ DiccionarioIconos dicIcos = new DiccionarioIconos();
 Iconos iconos = new Iconos();
 Interfaz interfaz = new Interfaz();
 class BarraSuperior implements AutoDraw {
-  float margen,alto;
+  float margen, alto;
   PImage marca, ayuda;
 
   BarraSuperior() {
@@ -97,67 +98,77 @@ class BarraSuperior implements AutoDraw {
     autoDraw.add(this);
   }
 
-  public void draw() {
-    pushStyle();
-    noStroke();
-    imageMode(CENTER);
-    fill(paleta.panelSuperior);
-    tint(paleta.inactivo);
+  public void draw() {  
+      pushStyle();
+      noStroke();
+      imageMode(CENTER);
+      fill(paleta.panelSuperior);
+      tint(paleta.inactivo);
       rect(0, 0, width, alto);
       image(marca, marca.width/2+ margen/2, margen);
       image(ayuda, width - ayuda.width/2 - margen/2, margen);
-    fill(paleta.ips[0]);
-    textSize(32);
-    text(oscP5.ip(),margen/2,alto+48);
-    popStyle();
+      //fill(paleta.ips[0]);
+      fill(paleta.marca);
+      textSize(27);
+      text(oscP5.ip(), margen, alto+48);
+      popStyle();   
   }
 }
 class BotonBasico implements AutoDraw, AutoMousePressed {
   PVector pos;
   PImage icono;
-  float escala = 1;
-  
-  Tweener hoverEscala = new Tweener().inicializar(1,1,1,1);
-  Tweener toggleAlfa = new Tweener().inicializar(.5f,200,255,0);
-  
+  float escala = 0.7f;
+
+  //--- este cambio seguramente no te agrade pero era el hardcode del momento.... xD
+  //--- lo comento asi e enteras... lo que hago es crear esta variable para que la interfaz y sensor de conexion
+  //--- solo dibuje el mas si algunas de las cosas no esta conectada como local...
+  //--- ara que que sean faciles de encontrar todo lo que hice que tenga uqe ver con esto que espero no sea mucho
+  //--- todo lo voy a comentar con un :D .... 
+  boolean dibujar = true;
+
+  Tweener hoverEscala = new Tweener().inicializar(1, 1, 1, 1);
+  Tweener toggleAlfa = new Tweener().inicializar(.5f, 200, 255, 0);
+
   int col;
-  
-  boolean toggle,presionado;
-  
+
+  boolean toggle, presionado;
+
   BotonBasico(float x, float y, float angulo, String icono, int col) {
-    pos = new PVector(x,y,angulo);
+    pos = new PVector(x, y, angulo);
     this.icono = iconos.get(icono);
     this.col = col;
     autoDraw.add(this);
     autoMousePressed.add(this);
   }
-  
-  public void draw(){
-    boolean over = over(mouseX,mouseY);
-    hoverEscala.actualizar(over?dt:-dt);
-    toggleAlfa.actualizar(toggle?dt:-dt);
-    
-    presionado = false;
-    pushStyle();
-    imageMode(CENTER);
-    pushMatrix();
-    translate(pos.x,pos.y);
-    rotate(pos.z);
-    scale(escala*hoverEscala.valor());
-    tint(col,toggleAlfa.valor());
-    image(icono,0,0);
-    popMatrix();
-    popStyle();
+
+  public void draw() {
+    if (dibujar) {
+      boolean over = over(mouseX, mouseY);
+      hoverEscala.actualizar(over?dt:-dt);
+      toggleAlfa.actualizar(toggle?dt:-dt);
+
+      presionado = false;
+      pushStyle();
+      imageMode(CENTER);
+      pushMatrix();
+      translate(pos.x, pos.y);
+      rotate(pos.z);
+      scale(escala*hoverEscala.valor());
+      tint(col, toggleAlfa.valor());
+      image(icono, 0, 0);
+      popMatrix();
+      popStyle();
+    }
   }
-  public void mousePressed(){
-    if (over(mouseX,mouseY)){
+  public void mousePressed() {
+    if (over(mouseX, mouseY)) {
       presionado = true;
       toggle = !toggle;
     }
   }
-  
+
   public boolean over(float x, float y) {
-    return dist(x,y,pos.x,pos.y) < icono.width*escala/2;
+    return dist(x, y, pos.x, pos.y) < icono.width*escala/2;
   }
 }
 class BotonModulo implements AutoDraw, AutoMousePressed {
@@ -165,13 +176,13 @@ class BotonModulo implements AutoDraw, AutoMousePressed {
   EstadoModulo estado = EstadoModulo.LOCAL;
   boolean mostrar = false, remotoEncontrado = false, panelIPsAbierto = false;
   float todoGris = 0;
-  Tweener animPos, animAro, animAroConectado,animAlfa,animColor;
+  Tweener animPos, animAro, animAroConectado, animAlfa, animColor;
   //TwOutBack animPos, animAro, animAroConectado;
   //TwOutQuad animAlfa, animColor;
   PVector pos;
   PImage icono, aroCerrado, aroAbierto;
   int colEncendido, colApagado;
-
+  float escala = 0.6f;
   BotonModulo(PVector pos, String icono, int col) {
     this.pos = pos;
     this.icono = iconos.get(icono);
@@ -185,14 +196,13 @@ class BotonModulo implements AutoDraw, AutoMousePressed {
     animAroConectado = (new TwOutBack()).inicializar(animAro);
     animPos = (new TwOutBack()).inicializar(.3f, pos.y-100, pos.y);
     animColor = (new TwOutQuad()).inicializar(.3f);
-
     autoDraw.add(this);
     autoMousePressed.add(this);
   }
 
-  public void set(ConfiguracionCOD05.ConfigModulo config){
-  this.config = config;
-  estado = config.estado;
+  public void set(ConfiguracionCOD05.ConfigModulo config) {
+    this.config = config;
+    estado = config.estado;
   }
 
   public void mousePressed() {
@@ -200,7 +210,7 @@ class BotonModulo implements AutoDraw, AutoMousePressed {
       if (estado == EstadoModulo.APAGADO) estado = EstadoModulo.LOCAL;
       else if (estado == EstadoModulo.LOCAL) estado = panelIPsAbierto ? EstadoModulo.REMOTO : EstadoModulo.APAGADO;
       else if (estado == EstadoModulo.REMOTO) estado = EstadoModulo.APAGADO;
-      if(config!=null)config.estado = estado;
+      if (config!=null)config.estado = estado;
     }
   }
 
@@ -214,23 +224,30 @@ class BotonModulo implements AutoDraw, AutoMousePressed {
         animAroConectado.actualizar(estado!=EstadoModulo.APAGADO&&(remotoEncontrado||estado==EstadoModulo.LOCAL)?dt:-dt);
       }
     }
+
+
     pushStyle();
     imageMode(CENTER);
     tint( lerpColor( colEncendido, colApagado, todoGris), animAlfa.valor());
     pushMatrix();
     translate(pos.x, animPos.valor());
     rotate(pos.z);
+    scale(escala);
     pos.z += dt*.75f;
     if (animAroConectado.estado>0) {
       image(aroAbierto, 0, 0, animAroConectado.valor(), animAroConectado.valor());
     }
-    if(animAro.estado > 0){
-    rotate(HALF_PI);
-    image(aroAbierto, 0, 0, animAro.valor(), animAro.valor());
+    if (animAro.estado > 0) {
+      rotate(HALF_PI);
+      image(aroAbierto, 0, 0, animAro.valor(), animAro.valor());
     }
     popMatrix();
+    pushMatrix();
     tint( lerpColor( lerpColor(colEncendido, colApagado, animColor.valor()), colApagado, todoGris), animAlfa.valor());
-    image(icono, pos.x, animPos.valor());    
+    translate(pos.x, animPos.valor());
+    scale(escala);
+    image(icono, 0, 0);  
+    popMatrix();
     popStyle();
   }
 
@@ -432,17 +449,19 @@ enum EstadoModulo {
   APAGADO, LOCAL, REMOTO
 }
 final EstadoModulo[] EstadoModuloList = new EstadoModulo[]{EstadoModulo.APAGADO, EstadoModulo.LOCAL, EstadoModulo.REMOTO};
-public int EstadoModuloToInt(EstadoModulo estado) {return estado==EstadoModulo.APAGADO?0:estado==EstadoModulo.LOCAL?1:2;};
+public int EstadoModuloToInt(EstadoModulo estado) {
+  return estado==EstadoModulo.APAGADO?0:estado==EstadoModulo.LOCAL?1:2;
+};
 
 class ConfiguracionCOD05 {
   ConfigModulo lienzo, observador, carrete;
   boolean panelConexiones = false;
 
-ConfiguracionCOD05(){
+  ConfiguracionCOD05() {
     lienzo = new ConfigModulo().Iniciar("lienzo", 12010);
     observador = new ConfigModulo().Iniciar("observador", 12020);
     carrete = new ConfigModulo().Iniciar("carrete", 12030);
-}
+  }
   class ConfigModulo {
     String id = "indefinido";
     String ip = "127.0.0.1";
@@ -472,9 +491,9 @@ ConfiguracionCOD05(){
     }
   }
   public void cargar(XML xml) {
-    if(lienzo==null)lienzo = new ConfigModulo().Iniciar("lienzo", 12010);
-    if(observador==null)observador = new ConfigModulo().Iniciar("observador", 12020);
-    if(carrete==null)carrete = new ConfigModulo().Iniciar("carrete", 12030);
+    if (lienzo==null)lienzo = new ConfigModulo().Iniciar("lienzo", 12010);
+    if (observador==null)observador = new ConfigModulo().Iniciar("observador", 12020);
+    if (carrete==null)carrete = new ConfigModulo().Iniciar("carrete", 12030);
     if (xml != null) {
       panelConexiones = xml.getInt("panelConexiones", panelConexiones?1:0)==1;
       XML[] configs = xml.getChildren("ConfigModulo");
@@ -485,6 +504,11 @@ ConfiguracionCOD05(){
       }
     }
   }
+  public void cargar_local() {
+    if (lienzo==null)lienzo = new ConfigModulo().Iniciar("lienzo", 12010);
+    if (observador==null)observador = new ConfigModulo().Iniciar("observador", 12020);
+    if (carrete==null)carrete = new ConfigModulo().Iniciar("carrete", 12030);
+  }
   public XML guardar(String nombre) {
     XML xml = new XML(nombre);
     xml.setInt("panelConexiones", panelConexiones?1:0);
@@ -494,23 +518,286 @@ ConfiguracionCOD05(){
     return xml;
   }
 }
+Reloj reloj = new Reloj();
+ConsolaDebug consolaDebug = new ConsolaDebug( false );
+
+public void consolaDebug() {
+  reloj.actualizar();
+  consolaDebug.ejecutar();
+}
+
+public final class ConsolaDebug {
+
+  private String texto;
+  private ArrayList<Alerta> alertas = new ArrayList<Alerta>();
+  private int colorTexto, colorAlerta, colorSuperAlerta;
+  private int tamanoTexto, tamanoAlerta;
+  private boolean debug;
+
+  private boolean verFps, verDatos, verAlertas;
+
+  private static final float LEADIN = 1.5f; //--- NUEVO!
+
+  public ConsolaDebug() {
+    texto = "";
+    colorTexto = color( 0xff000000 );//color( 255 );
+    colorAlerta = color(175, 194, 43);//#FF0000
+    tamanoTexto = PApplet.parseInt( height * 0.12f ); //int( height * 0.023 ); //tamanoTexto = 20;
+    tamanoAlerta = PApplet.parseInt( height * 0.12f ); //int( height * 0.023 ); //tamanoAlerta = 20;
+
+    debug = verFps = verDatos = verAlertas = true;
+  }
+  
+  public ConsolaDebug( boolean verFps ) {
+    texto = "";
+    colorTexto = color( 0xff000000 );//color( 255 );
+    colorAlerta = color(175, 194, 43);//#FF0000
+    tamanoTexto = PApplet.parseInt( height * 0.12f ); //int( height * 0.023 ); //tamanoTexto = 20;
+    tamanoAlerta = PApplet.parseInt( height * 0.12f ); //int( height * 0.023 ); //tamanoAlerta = 20;
+    
+    debug = verDatos = verAlertas = true;
+    this.verFps = verFps;
+  }
+
+  //--------------------------------------- METODOS PUBLICOS
+
+  //GETERS AND SETERS
+  public void setDebug( boolean debug ) {
+    this.debug = debug;
+  }
+
+  public void setVerFps( boolean verFps ) {
+    this.verFps = verFps;
+  }
+
+  public void setVerDatos( boolean verDatos ) {
+    this.verDatos = verDatos;
+  }
+
+  public void setVerAlertas( boolean verAlertas ) {
+    this.verAlertas = verAlertas;
+  }
+
+  public boolean getDebug() {
+    return debug;
+  }
+
+  public boolean getVerFps() {
+    return verFps;
+  }
+
+  public boolean getVerDatos() {
+    return verDatos;
+  }
+
+  public boolean getVerAlertas() {
+    return verAlertas;
+  }
+  //--------
+
+  public void println( String texto ) {
+    this.texto += texto + "\n";
+  }
+
+  public void printlnAlerta( String alerta ) {
+    alertas.add( new Alerta( alerta ) );
+    System.out.println( alerta );
+  }
+
+  public void printlnAlerta( String alerta, int c ) {
+    alertas.add( new Alerta( alerta, c ) );
+    System.out.println( alerta );
+  }
+
+  public void ejecutar() {
+
+    if ( !verDatos ) texto = "";
+    if ( verFps ) texto = "fps: " + nf( frameRate, 0, 2 ) + "\n" + texto;
+
+    if ( debug ) ejecutarDebug();
+    else ejecutarNoDebug();
+    texto = "";
+  }
+
+  //--------------------------------------- METODOS PRIVADOS
+
+  private void ejecutarDebug() {
+    pushStyle();
+
+    textAlign( LEFT, TOP );
+    textSize( tamanoTexto );
+    textLeading( tamanoTexto * LEADIN ); 
+
+    noStroke();
+
+    //NUEVO rectangulo negro de fondo
+
+    fill( 255 );
+    int desde = 0, hasta = 0, iteracion = 0;
+    while ( texto.indexOf( "\n", desde ) > 0 ) {
+
+      hasta = texto.indexOf( "\n", desde );
+      String aux = texto.substring( desde, hasta );
+
+      rect( 0, iteracion * (tamanoTexto * LEADIN), textWidth( aux ) + 3, tamanoTexto * ( LEADIN * 1.1666666f ) );
+
+      desde = hasta + 1;
+      iteracion++;
+    }
+
+    //
+
+    fill( colorTexto );
+    text( texto, 0, 3 );
+    if ( !texto.equals("") ) System.out.println( texto );
+
+    textAlign( RIGHT, BOTTOM );
+    textSize( tamanoAlerta );
+    imprimirAlertas( verAlertas );
+
+    popStyle();
+  }
+
+  private void ejecutarNoDebug() {
+    if ( !texto.equals("") ) System.out.println( texto );
+    imprimirAlertas( false );
+  }
+
+  private void imprimirAlertas( boolean debug ) {
+
+    float posY = tamanoAlerta + tamanoAlerta * (LEADIN * 0.16666666f) ;//0.25
+
+    for ( int i = alertas.size() - 1; i >= 0; i-- ) {
+
+      Alerta a = alertas.get( i );
+      a.ejecutar();
+
+      if ( a.getEstado() == Alerta.ESTADO_ELIMINAR ) {
+        alertas.remove( i );
+      } else if ( debug ) {
+
+        //------ NUEVO rectangulo negro de fondo
+
+        if ( a.getEstado() == Alerta.ESTADO_MOSTRAR )
+          fill( 0 );
+        else
+          fill( 0, map( a.getTiempo(), 0, Alerta.TIEMPO_DESAPARECER, 255, 0 ) );
+
+        rect( width - textWidth( a.getAlerta() ) - 5, posY- tamanoAlerta * ( LEADIN * 0.875f ), textWidth( a.getAlerta() ) + 5, tamanoAlerta * LEADIN );
+
+        //------
+        int colorTexto = a.tengoColor?a.m_color:colorAlerta;
+        if ( a.getEstado() == Alerta.ESTADO_MOSTRAR ) {
+          fill( colorTexto );
+        } else {
+          fill( colorTexto, map( a.getTiempo(), 0, Alerta.TIEMPO_DESAPARECER, 255, 0 ) );
+        }
+        text( a.getAlerta(), width, posY );
+        posY += tamanoAlerta * LEADIN;
+
+        if ( posY > height && i - 1 >= 0 ) {
+          removerAlertasFueraDePantalla( i - 1 );
+          return;
+        }
+      }
+    }//end for
+  }
+
+  private void removerAlertasFueraDePantalla( int desde ) {
+    for ( int i = desde; i >= 0; i-- )
+      alertas.remove( i );
+  }
+
+  //clase interna y miembro
+  public class Alerta {
+
+    private String alerta;
+    int m_color;
+    boolean tengoColor;
+    private int estado;
+    public static final int
+      ESTADO_MOSTRAR = 0, 
+      ESTADO_DESAPARECER = 1, 
+      ESTADO_ELIMINAR = 2;
+
+    private int tiempo;
+    public static final int
+      TIEMPO_MOSTRAR = 5000, //3000
+      TIEMPO_DESAPARECER = 2000;
+
+    public Alerta( String alerta ) {
+      this.alerta = alerta;
+      estado = ESTADO_MOSTRAR;
+      tengoColor = false;
+    }
+
+    public Alerta( String alerta, int c ) {
+      this.alerta = alerta;
+      m_color = c;
+      estado = ESTADO_MOSTRAR;
+      tengoColor = true;
+    }
+
+    //------------------------------ METODOS PUBLICOS
+
+    public String getAlerta() {
+      return alerta;
+    }
+
+    public int getEstado() {
+      return estado;
+    }
+
+    public int getTiempo() {
+      return tiempo;
+    }
+
+    public void ejecutar() {
+      tiempo += reloj.getDeltaMillis();
+      if ( estado == ESTADO_MOSTRAR && tiempo > TIEMPO_MOSTRAR ) {
+        estado = ESTADO_DESAPARECER;
+        tiempo = 0;
+      } else if ( estado == ESTADO_DESAPARECER && tiempo > TIEMPO_DESAPARECER ) {
+        estado = ESTADO_ELIMINAR;
+      }
+    }
+  }
+}
+
+public class Reloj {
+
+  private int millisActual, millisAnterior, deltaMillis;
+
+  public Reloj() {
+  }
+
+  public int getDeltaMillis() {
+    return deltaMillis;
+  }
+
+  public void actualizar() {
+    millisAnterior = millisActual;
+    millisActual = millis();
+    deltaMillis = millisActual - millisAnterior;
+  }
+}
 class Ejecutador {
   ConfiguracionCOD05 config;
   boolean modoUtileria;
   int nacimiento;
-  
-  Process lienzo,observador,carrete;
+
+  Process lienzo, observador, carrete;
 
   String javaPath = System.getProperty("java.home");
 
   String dirReal = sketchPath(""), //sketchPath("..\\lib\\*"),
-    lienzoReal = "Lienzo", 
-    observadorReal = "Observador", 
-    carreteReal = "Carrete";
+    lienzoReal = "./Lienzo", 
+    observadorReal = "./Observador", 
+    carreteReal = "./Carrete";
 
-  String dirUtileria = sketchPath("..\\modulosDeUtileria\\lib\\*"), 
+  String dirUtileria = sketchPath("Observador\\*"), 
     lienzoUtileria = "dummyLienzo", 
-    observadorUtileria = "dummyObservador", 
+    observadorUtileria = "Observador",//"dummyObservador", 
     carreteUtileria = "dummyCarrete";
 
   String ejecutarKeyword = "%ejec";
@@ -529,105 +816,112 @@ class Ejecutador {
       this.config = config;
     }
     this.modoUtileria = modoUtileria;
-    if(modoUtileria)templateLanzador = "\""+javaPath+"\\bin\\java\" -cp "+dirUtileria+" "+ejecutarKeyword ;
+    if (modoUtileria)templateLanzador = "\""+javaPath+"\\bin\\java\" -cp "+dirUtileria+" "+ejecutarKeyword ;
     else templateLanzador = dirReal+ejecutarKeyword;
+    println("alksjdlkasjdlkajslkdasd-------------"+templateLanzador);
   }
-  
+
   public boolean enEjecucion() {
     if (lienzo == null && observador == null && carrete == null) return false;
     else {
       if (lienzo != null) {
-        if(!lienzo.isAlive()) lienzo = null;
+        if (!lienzo.isAlive()) lienzo = null;
       }
       if (observador != null) {
-        if(!observador.isAlive()) observador = null;
+        if (!observador.isAlive()) observador = null;
       }
       if (carrete != null) {
-        if(!carrete.isAlive()) carrete = null;
+        if (!carrete.isAlive()) carrete = null;
       }
-    return true;
+      return true;
     }
   }
-  
+
   public void ejecutarLocales() {
     if (modoUtileria) {
       if (config.lienzo.estado == EstadoModulo.LOCAL) {
-        lienzo=launch( templateLanzador.replace(ejecutarKeyword, lienzoUtileria));
-      /*  PAppConsola cons = new PAppConsola();
-      PApplet.runSketch(new String[]{"PAppConsola"},cons);
-      cons.pasarStream(lienzo);*/
+        lienzo=exec( templateLanzador.replace(ejecutarKeyword, lienzoUtileria));
+        /*  PAppConsola cons = new PAppConsola();
+         PApplet.runSketch(new String[]{"PAppConsola"},cons);
+         cons.pasarStream(lienzo);*/
       }
       if (config.observador.estado == EstadoModulo.LOCAL) {
-        observador=launch( templateLanzador.replace(ejecutarKeyword, observadorUtileria));
-       /* PAppConsola cons = new PAppConsola();
-      PApplet.runSketch(new String[]{"PAppConsola"},cons);
-      cons.pasarStream(observador);*/
+        observador=exec( templateLanzador.replace(ejecutarKeyword, observadorUtileria));
+        /* PAppConsola cons = new PAppConsola();
+         PApplet.runSketch(new String[]{"PAppConsola"},cons);
+         cons.pasarStream(observador);*/
       }
       if (config.carrete.estado == EstadoModulo.LOCAL) {
-        carrete=launch( templateLanzador.replace(ejecutarKeyword, carreteUtileria));
-       /* PAppConsola cons = new PAppConsola();
-      PApplet.runSketch(new String[]{"PAppConsola"},cons);
-      cons.pasarStream(carrete);*/
+        carrete=exec( templateLanzador.replace(ejecutarKeyword, carreteUtileria));
+        /* PAppConsola cons = new PAppConsola();
+         PApplet.runSketch(new String[]{"PAppConsola"},cons);
+         cons.pasarStream(carrete);*/
       }
     } else {
       if (config.lienzo.estado == EstadoModulo.LOCAL) {
-        lienzo=launch( templateLanzador.replace(ejecutarKeyword, lienzoReal));
-    /*PAppConsola cons = new PAppConsola();
-      PApplet.runSketch(new String[]{"PAppConsola"},cons);
-      cons.pasarStream(lienzo);  */
-    }
+        lienzo=exec( templateLanzador.replace(ejecutarKeyword, lienzoReal));
+
+        /*PAppConsola cons = new PAppConsola();
+         PApplet.runSketch(new String[]{"PAppConsola"},cons);
+         cons.pasarStream(lienzo);  */
+      }
       if (config.observador.estado == EstadoModulo.LOCAL) {
-        observador=launch( templateLanzador.replace(ejecutarKeyword, observadorReal));
-    /*PAppConsola cons = new PAppConsola();
-      PApplet.runSketch(new String[]{"PAppConsola"},cons);
-      cons.pasarStream(observador); */ 
-    }
+        //observador=exec( templateLanzador.replace(ejecutarKeyword, observadorReal));
+        consolaDebug.printlnAlerta( ejecutarKeyword );
+        observador=exec( templateLanzador.replace(ejecutarKeyword, observadorUtileria));
+
+        PAppConsola cons = new PAppConsola();
+        PApplet.runSketch(new String[]{"PAppConsola"},cons);
+        cons.pasarStream(observador); 
+      }
       if (config.carrete.estado == EstadoModulo.LOCAL) {
-        carrete=launch( templateLanzador.replace(ejecutarKeyword, carreteReal));
-    /*PAppConsola cons = new PAppConsola();
-      PApplet.runSketch(new String[]{"PAppConsola"},cons);
-      cons.pasarStream(carrete);  */
-    }
+        carrete=exec( templateLanzador.replace(ejecutarKeyword, carreteReal));
+
+
+        /*PAppConsola cons = new PAppConsola();
+         PApplet.runSketch(new String[]{"PAppConsola"},cons);
+         cons.pasarStream(carrete);  */
+      }
     }
   }
 
   public void ejecutarLienzo() {
     if (modoUtileria) {
-      lienzo=launch( templateLanzador.replace(ejecutarKeyword, lienzoUtileria));
+      lienzo=exec( templateLanzador.replace(ejecutarKeyword, lienzoUtileria));
       /*PAppConsola cons = new PAppConsola();
-      PApplet.runSketch(new String[]{"PAppConsola"},cons);
-      cons.pasarStream(lienzo);*/
+       PApplet.runSketch(new String[]{"PAppConsola"},cons);
+       cons.pasarStream(lienzo);*/
     } else {
-      lienzo=launch( templateLanzador.replace(ejecutarKeyword, lienzoReal));
+      lienzo=exec( templateLanzador.replace(ejecutarKeyword, lienzoReal));
       /*PAppConsola cons = new PAppConsola();
-      PApplet.runSketch(new String[]{"PAppConsola"},cons);
-      cons.pasarStream(lienzo);*/
+       PApplet.runSketch(new String[]{"PAppConsola"},cons);
+       cons.pasarStream(lienzo);*/
     }
   }
   public void ejecutarObservador() {
     if (modoUtileria) {
-      observador=launch( templateLanzador.replace(ejecutarKeyword, observadorUtileria));
+      observador=exec( templateLanzador.replace(ejecutarKeyword, observadorUtileria));
       /*PAppConsola cons = new PAppConsola();
-      PApplet.runSketch(new String[]{"PAppConsola"},cons);
-      cons.pasarStream(observador);*/
+       PApplet.runSketch(new String[]{"PAppConsola"},cons);
+       cons.pasarStream(observador);*/
     } else {
-      observador=launch( templateLanzador.replace(ejecutarKeyword, observadorUtileria));
+      observador=exec( templateLanzador.replace(ejecutarKeyword, observadorUtileria));
       /*PAppConsola cons = new PAppConsola();
-      PApplet.runSketch(new String[]{"PAppConsola"},cons);
-      cons.pasarStream(observador);*/
+       PApplet.runSketch(new String[]{"PAppConsola"},cons);
+       cons.pasarStream(observador);*/
     }
   }
   public void ejecutarCarrete() {
     if (modoUtileria) {
-      carrete=launch( templateLanzador.replace(ejecutarKeyword, carreteUtileria));
+      carrete=exec( templateLanzador.replace(ejecutarKeyword, carreteUtileria));
       /*PAppConsola cons = new PAppConsola();
-      PApplet.runSketch(new String[]{"PAppConsola"},cons);
-      cons.pasarStream(carrete);*/
+       PApplet.runSketch(new String[]{"PAppConsola"},cons);
+       cons.pasarStream(carrete);*/
     } else {
-      carrete=launch( templateLanzador.replace(ejecutarKeyword, carreteReal));
+      carrete=exec( templateLanzador.replace(ejecutarKeyword, carreteReal));
       /*PAppConsola cons = new PAppConsola();
-      PApplet.runSketch(new String[]{"PAppConsola"},cons);
-      cons.pasarStream(carrete);*/
+       PApplet.runSketch(new String[]{"PAppConsola"},cons);
+       cons.pasarStream(carrete);*/
     }
   }
 }
@@ -746,7 +1040,7 @@ class Interfaz implements AutoSetup, AutoDraw {
   public void setup() {
     {
       float verti = height/2;
-      float sepHoriz = 160;
+      float sepHoriz = 110;
       lienzo = new BotonModulo(new PVector(width/2-sepHoriz, verti), dicIcos.lienzo, paleta.ips[0]);
       observador = new BotonModulo(new PVector(width/2, verti), dicIcos.observador, paleta.ips[1]);
       carrete = new BotonModulo(new PVector(width/2+sepHoriz, verti), dicIcos.carrete, paleta.ips[2]);
@@ -796,12 +1090,18 @@ class Interfaz implements AutoSetup, AutoDraw {
     if (new File(sketchPath(archivoConfigXML)).exists()) xmlConfig = loadXML( archivoConfigXML );
     if (xmlConfig != null) xmlConfig = xmlConfig.getChild(xmlTagPanel);
 
-    config.cargar(xmlConfig);
+    //config.cargar(xmlConfig);
+    //-------- para cargar local
+    //--- :D esto no tien que ver con le cambio feo de el boton basico peor igual lo comento
+    //---- para que siempre empiece en localhost y se vea como en la documentacion
+    //---- comente el cargar con el xml y cree en metodo que crea los campos pero con info de local host
+    config.cargar_local();
     lienzo.set(config.lienzo);
     observador.set(config.observador);
     carrete.set(config.carrete);
     interfazYSensorConexion.setConfig(config);
   }
+
   public void guardarDatos() {
     if (config != null) {
       XML xmlArchivo = null;
@@ -879,8 +1179,8 @@ public void oscStatus(int estado) {
   }
 }
 /*void oscEvent(OscMessage msj) {
-  println(msj);
-}*/
+ println(msj);
+ }*/
 
 class InterfazYSensorConexion implements AutoDraw {
   ConfiguracionCOD05 config;
@@ -898,7 +1198,7 @@ class InterfazYSensorConexion implements AutoDraw {
   float tamPanelInferior = 180;
   CampoIP lienzo, observador, carrete;
   float[] posYBase;
-  float anchoCampoIP = 400, altoCampoIP = 30;
+  float anchoCampoIP = 350, altoCampoIP = 20;
 
   BotonBasico mas, menos;
   PVector ejeMasMenos;
@@ -924,7 +1224,7 @@ class InterfazYSensorConexion implements AutoDraw {
   public void draw() {
     boolean sinConexion = oscP5.ip().equals(ipLocalHost);
     pushStyle();
-    //if (sinConexion)
+    if (sinConexion)
     {
 
       fill(255, 0, 0);
@@ -954,6 +1254,14 @@ class InterfazYSensorConexion implements AutoDraw {
     mas.pos.z = menos.pos.z+HALF_PI;
     menos.pos.set(ejeMasMenos.x+ejeMasMenos.z*cos(menos.pos.z), ejeMasMenos.y+ejeMasMenos.z*sin(menos.pos.z));
     mas.pos.set(ejeMasMenos.x+ejeMasMenos.z*cos(mas.pos.z), ejeMasMenos.y+ejeMasMenos.z*sin(mas.pos.z));
+
+    //----- :D
+    if (interfaz.todoLocal) {
+      mas.dibujar = false;
+    } else {
+      mas.dibujar = true;
+    }
+
     if (menos.presionado || mas.presionado) {
       visible = !visible;
       config.panelConexiones = visible;
@@ -981,15 +1289,15 @@ class ControlOsc implements AutoSetup {
   OscP5 osc;
   ConfiguracionCOD05 configRemota;
   Ejecutador ejecutador;//6 seg de vida
-  
-  int ultimoPingLienzo,ultimoPingObservador,ultimoPingCarrete;
+
+  int ultimoPingLienzo, ultimoPingObservador, ultimoPingCarrete;
   //String 
-  
+
   String resultado = "/resultado";
-  
+
   String lanzar = "/Lanzadera/lanzar";
   String responderLanzar = "responderLanzar";
-  
+
   String establecerIPs = "/Lanzadera/establecerIPs";
   String responderEstablecerIPs = "responderEstablecerIPs";
   String callbackEstablecerIPs = "callbackEstablecerIPs";
@@ -1003,134 +1311,140 @@ class ControlOsc implements AutoSetup {
   String ping = "/Lanzadera/ping";
   String responderPing = "responderPing";
   String callbackPing = "callbackPing";
-  
-  OscMessage msjPingLienzo,msjPingObservador,msjPingCarrete;
-  
-  ControlOsc(){
+
+  OscMessage msjPingLienzo, msjPingObservador, msjPingCarrete;
+
+  ControlOsc() {
     autoSetup.add(this);
   }
-             
+
   public void setup() {
     osc = oscP5;
-    osc.plug(this,responderLanzar,lanzar);
-    
-    osc.plug(this,responderEstablecerIPs,establecerIPs);
-    osc.plug(this,callbackEstablecerIPs,establecerIPs+resultado);
-    osc.plug(this,callbackPedirIPs,pedirIPs+resultado);
-    
-    osc.plug(this,responderEstablecerEstados,establecerEstados);
-    osc.plug(this,callbackEstablecerEstados,establecerEstados+resultado);
-    osc.plug(this,callbackPedirEstados,pedirEstados+resultado);
-    
-    osc.plug(this,callbackPing,ping+resultado);
-    osc.plug(this,responderPing,ping);
-    
+    osc.plug(this, responderLanzar, lanzar);
+
+    osc.plug(this, responderEstablecerIPs, establecerIPs);
+    osc.plug(this, callbackEstablecerIPs, establecerIPs+resultado);
+    osc.plug(this, callbackPedirIPs, pedirIPs+resultado);
+
+    osc.plug(this, responderEstablecerEstados, establecerEstados);
+    osc.plug(this, callbackEstablecerEstados, establecerEstados+resultado);
+    osc.plug(this, callbackPedirEstados, pedirEstados+resultado);
+
+    osc.plug(this, callbackPing, ping+resultado);
+    osc.plug(this, responderPing, ping);
+
     msjPingLienzo = new OscMessage("/Lanzadera/ping").add(osc.ip()).add(oscP5Port).add(0);
     msjPingObservador = new OscMessage("/Lanzadera/ping").add(osc.ip()).add(oscP5Port).add(1);
     msjPingCarrete = new OscMessage("/Lanzadera/ping").add(osc.ip()).add(oscP5Port).add(2);
   }
-  
-  public void responderEstablecerIPs(String lienzoIp, int lienzoPort,
-                              String observadorIp, int observadorPort,
-                              String carreteIp, int carretePort) {
-     if (configRemota == null) configRemota = new ConfiguracionCOD05();
-     configRemota.lienzo.ip = lienzoIp;
-     configRemota.lienzo.puerto = lienzoPort;
-     configRemota.observador.ip = observadorIp;
-     configRemota.observador.puerto = observadorPort;
-     configRemota.carrete.ip = carreteIp;
-     configRemota.carrete.puerto = carretePort;
-     
-     if (configRemota.lienzo.estado != EstadoModulo.APAGADO) {
-       if (osc.ip().equals(lienzoIp)) configRemota.lienzo.estado = EstadoModulo.LOCAL;
-       else configRemota.lienzo.estado = EstadoModulo.REMOTO;
-     }
-     if (configRemota.observador.estado != EstadoModulo.APAGADO) {
-       if (osc.ip().equals(observadorIp)) configRemota.observador.estado = EstadoModulo.LOCAL;
-       else configRemota.observador.estado = EstadoModulo.REMOTO;
-     }
-     if (configRemota.carrete.estado != EstadoModulo.APAGADO) {
-       if (osc.ip().equals(carreteIp)) configRemota.carrete.estado = EstadoModulo.LOCAL;
-       else configRemota.carrete.estado = EstadoModulo.REMOTO;
-     }
+
+  public void responderEstablecerIPs(String lienzoIp, int lienzoPort, 
+    String observadorIp, int observadorPort, 
+    String carreteIp, int carretePort) {
+    if (configRemota == null) configRemota = new ConfiguracionCOD05();
+    configRemota.lienzo.ip = lienzoIp;
+    configRemota.lienzo.puerto = lienzoPort;
+    configRemota.observador.ip = observadorIp;
+    configRemota.observador.puerto = observadorPort;
+    configRemota.carrete.ip = carreteIp;
+    configRemota.carrete.puerto = carretePort;
+
+    if (configRemota.lienzo.estado != EstadoModulo.APAGADO) {
+      if (osc.ip().equals(lienzoIp)) configRemota.lienzo.estado = EstadoModulo.LOCAL;
+      else configRemota.lienzo.estado = EstadoModulo.REMOTO;
+    }
+    if (configRemota.observador.estado != EstadoModulo.APAGADO) {
+      if (osc.ip().equals(observadorIp)) configRemota.observador.estado = EstadoModulo.LOCAL;
+      else configRemota.observador.estado = EstadoModulo.REMOTO;
+    }
+    if (configRemota.carrete.estado != EstadoModulo.APAGADO) {
+      if (osc.ip().equals(carreteIp)) configRemota.carrete.estado = EstadoModulo.LOCAL;
+      else configRemota.carrete.estado = EstadoModulo.REMOTO;
+    }
   }
   public void responderEstablecerEstados(int lienzo, int observador, int carrete) {
-     if (configRemota == null) configRemota = new ConfiguracionCOD05();
-     configRemota.lienzo.estado = EstadoModuloList[lienzo];
-     configRemota.observador.estado = EstadoModuloList[observador];
-     configRemota.carrete.estado = EstadoModuloList[carrete];
+    if (configRemota == null) configRemota = new ConfiguracionCOD05();
+    configRemota.lienzo.estado = EstadoModuloList[lienzo];
+    configRemota.observador.estado = EstadoModuloList[observador];
+    configRemota.carrete.estado = EstadoModuloList[carrete];
   }
-  
-  public void ejecutarRemotos(ConfiguracionCOD05 config){
-    ejecutarRemotos(config,config.lienzo,0);
-    ejecutarRemotos(config,config.observador,1);
-    ejecutarRemotos(config,config.carrete,2);
+
+  public void ejecutarRemotos(ConfiguracionCOD05 config) {
+    ejecutarRemotos(config, config.lienzo, 0);
+    ejecutarRemotos(config, config.observador, 1);
+    ejecutarRemotos(config, config.carrete, 2);
   }
-  public void ejecutarRemotos(ConfiguracionCOD05 config, ConfiguracionCOD05.ConfigModulo modulo, int moduloID){
+  public void ejecutarRemotos(ConfiguracionCOD05 config, ConfiguracionCOD05.ConfigModulo modulo, int moduloID) {
     if (modulo.estado == EstadoModulo.REMOTO) {
       if (modulo.ip.equals(osc.ip()) && !modoDummies) modulo.estado = EstadoModulo.LOCAL;
       else {
-        NetAddress destino = new NetAddress(modulo.ip,(modoDummies?modulo.puerto:oscP5Port));
+        NetAddress destino = new NetAddress(modulo.ip, (modoDummies?modulo.puerto:oscP5Port));
         OscMessage msj = new OscMessage(establecerEstados)
-                          .add(EstadoModuloToInt(config.lienzo.estado))
-                          .add(EstadoModuloToInt(config.observador.estado))
-                          .add(EstadoModuloToInt(config.carrete.estado));
-        osc.send(msj,destino);
+          .add(EstadoModuloToInt(config.lienzo.estado))
+          .add(EstadoModuloToInt(config.observador.estado))
+          .add(EstadoModuloToInt(config.carrete.estado));
+        osc.send( msj, destino);
+        println(establecerEstados, msj, destino);
         msj = new OscMessage(establecerIPs)
-                          .add(config.lienzo.ip).add(config.lienzo.puerto)
-                          .add(config.observador.ip).add(config.observador.puerto)
-                          .add(config.carrete.ip).add(config.carrete.puerto);
-        osc.send(msj,destino);
-        osc.send(new OscMessage(lanzar).add(moduloID),destino);
+          .add(config.lienzo.ip).add(config.lienzo.puerto)
+          .add(config.observador.ip).add(config.observador.puerto)
+          .add(config.carrete.ip).add(config.carrete.puerto);
+        osc.send( msj, destino);
+        println(establecerIPs, msj, destino);
+        osc.send(new OscMessage(lanzar).add(moduloID), destino);
       }
     }
   }
-  
-  public void responderLanzar(int moduloID){
+
+  public void responderLanzar(int moduloID) {
     println("responderLanzar("+moduloID+")");
-  if (configRemota == null) configRemota = new ConfiguracionCOD05();
-  if(ejecutador == null) ejecutador = new Ejecutador(configRemota,modoPDE);
-  else if(millis()-ejecutador.nacimiento>6000) ejecutador = new Ejecutador(configRemota,modoPDE);
-  if (moduloID == 0) ejecutador.ejecutarLienzo();
-  if (moduloID == 1) ejecutador.ejecutarObservador();
-  if (moduloID == 2) ejecutador.ejecutarCarrete();
+    if (configRemota == null) configRemota = new ConfiguracionCOD05();
+    if (ejecutador == null) ejecutador = new Ejecutador(configRemota, modoPDE);
+    else if (millis()-ejecutador.nacimiento>6000) ejecutador = new Ejecutador(configRemota, modoPDE);
+    if (moduloID == 0) ejecutador.ejecutarLienzo();
+    if (moduloID == 1) ejecutador.ejecutarObservador();
+    if (moduloID == 2) ejecutador.ejecutarCarrete();
   }
-  
-public void responderPing(String remitenteIp, int remitentePort, int id){
-  if (osc != null){
-    OscMessage msj = new OscMessage(controlOsc.ping+controlOsc.resultado);
-    msj.add(id);
-    osc.send(msj,new NetAddress( remitenteIp,remitentePort));
+
+  public void responderPing(String remitenteIp, int remitentePort, int id) {
+    if (osc != null) {
+      OscMessage msj = new OscMessage(controlOsc.ping+controlOsc.resultado);
+      msj.add(id);
+      osc.send(msj, new NetAddress( remitenteIp, remitentePort));
+    }
   }
-}
-public void callbackPing(int id) {
-  if(id==0) controlOsc.ultimoPingLienzo = millis();
-  else if(id==1) controlOsc.ultimoPingObservador = millis();
-  else if(id==2) controlOsc.ultimoPingCarrete = millis();
-}
-public void callbackEstablecerIPs(){}
-public void callbackPedirIPs(){}
-public void callbackEstablecerEstados(){}
-public void callbackPedirEstados(){}
-  
+  public void callbackPing(int id) {
+    if (id==0) controlOsc.ultimoPingLienzo = millis();
+    else if (id==1) controlOsc.ultimoPingObservador = millis();
+    else if (id==2) controlOsc.ultimoPingCarrete = millis();
+  }
+  public void callbackEstablecerIPs() {
+  }
+  public void callbackPedirIPs() {
+  }
+  public void callbackEstablecerEstados() {
+  }
+  public void callbackPedirEstados() {
+  }
+
   public void pingLienzo(String ip, int puerto) {
-    if (osc != null) osc.send(msjPingLienzo,new NetAddress(ip,modoDummies?puerto:oscP5Port));
+    if (osc != null) osc.send(msjPingLienzo, new NetAddress(ip, modoDummies?puerto:oscP5Port));
   }
   public void pingObservador(String ip, int puerto) {
     if (osc != null) {
-      osc.send(msjPingObservador,new NetAddress(ip,modoDummies?puerto:oscP5Port));
+      osc.send(msjPingObservador, new NetAddress(ip, modoDummies?puerto:oscP5Port));
     }
   }
   public void pingCarrete(String ip, int puerto) {
-    if (osc != null) osc.send(msjPingCarrete,new NetAddress(ip,modoDummies?puerto:oscP5Port));
+    if (osc != null) osc.send(msjPingCarrete, new NetAddress(ip, modoDummies?puerto:oscP5Port));
   }
 }
 
 
 class PAppConsola extends PApplet {
 
-    String que = "nada";
-    
+  String que = "nada";
+
   public void settings() {
     size(400, 600);
   }
@@ -1143,12 +1457,12 @@ class PAppConsola extends PApplet {
   }
 
   public void pasarStream(Process process) {
-    try{
-    process.waitFor();
-    println(process.exitValue());
-    que = getStringFromInputStream(process.getErrorStream());
+    try {
+      process.waitFor();
+      println(process.exitValue());
+      que = getStringFromInputStream(process.getErrorStream());
     }
-    catch(Exception e){
+    catch(Exception e) {
       que = e.getMessage();
     }
   }

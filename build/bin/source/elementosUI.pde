@@ -113,6 +113,7 @@ class SelectorDeColor extends ElementoUI {
     colorMode(RGB);    
     pushStyle();
     imageMode(CENTER);
+    noTint();
     image(imagenSelectorT, posT.x, posT.y);
     image(imagenSelectorByS, posByS.x, posByS.y);
     stroke(255, 255, 255);

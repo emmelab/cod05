@@ -49,4 +49,3 @@ class UIcontrol {
     escondido = !escondido;
   }
 }
-

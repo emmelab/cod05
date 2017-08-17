@@ -1,5 +1,4 @@
 ConfiguracionCOD05 config;
-
 void initOSC() {
   if (config == null) config = new ConfiguracionCOD05();
   XML xmlConfig = null;
@@ -7,28 +6,38 @@ void initOSC() {
   if (xmlConfig != null) xmlConfig = xmlConfig.getChild(xmlTagEjecucion);
 
   config.cargar(xmlConfig);
-  
+
+  /* oscP5 = new OscP5(this, 14000);//config.carrete.puerto);
+   sistema = new NetAddress("127.0.0.1", 12010);//"config.lienzo.ip, config.lienzo.puerto);
+   */
   oscP5 = new OscP5(this, config.carrete.puerto);
   sistema = new NetAddress(config.lienzo.ip, config.lienzo.puerto);
 
   //-----------------------------------------OSC sistema de particulas
 
   oscP5.plug(this, "cantidadBotones", "/modificadores/totales");
-  oscP5.plug(this, "cantidadBotonesExistentes", "/modificadores/existentes");
-  oscP5.plug(this, "cantidadBotones", "/opciones");
-  oscP5.plug(this, "cantidadBotones", "/estimulos/totales");
   oscP5.plug(this, "modificadores", "/modificadores/totales");
-  oscP5.plug(this, "modificadoresExistentes", "/modificadores/existentes");
-  oscP5.plug(this, "estimulos", "/estimulos/totales");
-  oscP5.plug(this, "opciones", "/opciones");
-  oscP5.plug(this, "opcionesListo", "/opciones/listo");
-  oscP5.plug(this, "existentesListo", "/modificadores/existentes/listo");
   oscP5.plug(this, "totalesListo", "/modificadores/totales/listo");
+
+  oscP5.plug(this, "cantidadBotonesExistentes", "/modificadores/existentes");
+  oscP5.plug(this, "modificadoresExistentes", "/modificadores/existentes");
+  oscP5.plug(this, "existentesListo", "/modificadores/existentes/listo");
+
+  oscP5.plug(this, "cantidadBotones", "/maquinarias");
+  oscP5.plug(this, "maquinarias", "/maquinarias");
+  oscP5.plug(this, "maquinariasListo", "/maquinarias/listo");
+
+  oscP5.plug(this, "cantidadBotones", "/estimulos/totales"); 
+  oscP5.plug(this, "estimulos", "/estimulos/totales");
   oscP5.plug(this, "estimulosListo", "/estimulos/listo");
- 
-   oscP5.plug(this, "agregarMod", "/agregarMod");
+
+  oscP5.plug(this, "cantidadBotones", "/opciones");
+  oscP5.plug(this, "opciones", "/opciones");
+  oscP5.plug(this, "opcionesListo", "/opciones/listo");  
+
+  oscP5.plug(this, "agregarMod", "/agregarMod");
   oscP5.plug(this, "quitarMod", "/quitarMod");
-  
+
   //----------------------------------------OSC captura de movimiento
 
 
@@ -40,6 +49,8 @@ void initOSC() {
 
   oscP5.plug(this, "cancelar", "/Cancelar");
   oscP5.plug(this, "aceptar", "/Aceptar");
+  oscP5.plug(this, "quitarListaMod", "/quitarListaMod");
+  oscP5.plug(this, "agregarListaMod", "/agregarListaMod");
 
   oscP5.plug(this, "actualizarMovimiento", "/actualizarMovimiento");
   oscP5.plug(this, "cerrado", "/cerrado");
@@ -51,22 +62,22 @@ void initOSC() {
 
 //---------------------------------------------IP MANAGER----EVENTOS-----------------------
 
-public void Conectar() { 
-
-  String unaIp = cp5.get(Textfield.class, "IP").getText();
-  String unPuertoEnvio = cp5.get(Textfield.class, "Puerto Envio").getText();
-  String unPuertoRecivo = cp5.get(Textfield.class, "Puerto Recivo").getText();
-
-  if (!unaIp.equals(""))ip = cp5.get(Textfield.class, "IP").getText();
-  if (!unPuertoEnvio.equals(""))puertoEnvio = cp5.get(Textfield.class, "Puerto Envio").getText();
-  if (!unPuertoRecivo.equals(""))puertoRecivo = cp5.get(Textfield.class, "Puerto Recivo").getText();
-
-  conectarOSC();
-
-  cp5.get(Textfield.class, "IP").clear();
-  cp5.get(Textfield.class, "Puerto Envio").clear();
-  cp5.get(Textfield.class, "Puerto Recivo").clear();
-}
+/*public void Conectar() { 
+ 
+ String unaIp = cp5.get(Textfield.class, "IP").getText();
+ String unPuertoEnvio = cp5.get(Textfield.class, "Puerto Envio").getText();
+ String unPuertoRecivo = cp5.get(Textfield.class, "Puerto Recivo").getText();
+ 
+ if (!unaIp.equals(""))ip = cp5.get(Textfield.class, "IP").getText();
+ if (!unPuertoEnvio.equals(""))puertoEnvio = cp5.get(Textfield.class, "Puerto Envio").getText();
+ if (!unPuertoRecivo.equals(""))puertoRecivo = cp5.get(Textfield.class, "Puerto Recivo").getText();
+ 
+ conectarOSC();
+ 
+ cp5.get(Textfield.class, "IP").clear();
+ cp5.get(Textfield.class, "Puerto Envio").clear();
+ cp5.get(Textfield.class, "Puerto Recivo").clear();
+ }*/
 
 void conectarOSC() {
   int pe = int(puertoEnvio);
@@ -79,19 +90,28 @@ void conectarOSC() {
   //-----------------------------------------OSC sistema de particulas
 
   oscP5.plug(this, "cantidadBotones", "/modificadores/totales");
-  oscP5.plug(this, "cantidadBotonesExistentes", "/modificadores/existentes");
-  oscP5.plug(this, "cantidadBotones", "/opciones");
   oscP5.plug(this, "modificadores", "/modificadores/totales");
+  oscP5.plug(this, "totalesListo", "/modificadores/totales/listo");
+  oscP5.plug(this, "cantidadBotonesExistentes", "/modificadores/existentes");
   oscP5.plug(this, "modificadoresExistentes", "/modificadores/existentes");
+  oscP5.plug(this, "existentesListo", "/modificadores/existentes/listo");
+
+  oscP5.plug(this, "cantidadBotones", "/estimulos/totales"); 
   oscP5.plug(this, "estimulos", "/estimulos/totales");
+  oscP5.plug(this, "estimulosListo", "/estimulos/listo");
+
+  oscP5.plug(this, "cantidadBotones", "/opciones");
   oscP5.plug(this, "opciones", "/opciones");
   oscP5.plug(this, "opcionesListo", "/opciones/listo");
-  oscP5.plug(this, "existentesListo", "/modificadores/existentes/listo");
-  oscP5.plug(this, "totalesListo", "/modificadores/totales/listo");
-  oscP5.plug(this, "estimulosListo", "/estimulos/listo");
-  
-   oscP5.plug(this, "agregarMod", "/agregarMod");
+
+  oscP5.plug(this, "cantidadBotones", "/maquinarias");
+  oscP5.plug(this, "maquinarias", "/maquinarias");
+  oscP5.plug(this, "maquinarias", "/maquinarias/listo");
+
+  oscP5.plug(this, "agregarMod", "/agregarMod");
   oscP5.plug(this, "quitarMod", "/quitarMod");
+
+
 
 
   //----------------------------------------OSC captura de movimiento

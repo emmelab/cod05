@@ -73,7 +73,6 @@ public void onVisibleUser(SimpleOpenNI curContext, int userId)
 
 public class ComunicacionOSC{
   
-  private ConfiguracionCOD05 config;
   private OscP5 oscP5;
   private NetAddress direccionAPI;
   private NetAddress direccionSistema;
@@ -82,16 +81,9 @@ public class ComunicacionOSC{
   
   public ComunicacionOSC( PApplet p5 ){
     
-    if (config == null) config = new ConfiguracionCOD05();
-    XML xmlConfig = null;
-    if (new File(sketchPath(archivoConfigXML)).exists()) xmlConfig = loadXML( archivoConfigXML );
-    if (xmlConfig != null) xmlConfig = xmlConfig.getChild(xmlTagEjecucion);
-  
-    config.cargar(xmlConfig);
-    
-    oscP5 = new OscP5( p5, config.observador.puerto ); 
-    direccionAPI = new NetAddress( config.carrete.ip, config.carrete.puerto );
-    direccionSistema = new NetAddress( config.lienzo.ip, config.lienzo.puerto );
+    oscP5 = new OscP5( p5, 12300); 
+    direccionAPI = new NetAddress("127.0.0.1", 13000 );
+    direccionSistema = new NetAddress( "127.0.0.1", 12000 );
     
     invertidoEjeX = true;
     
@@ -266,68 +258,6 @@ public class ComunicacionOSC{
     oscP5.send( mensaje, direccionSistema );
   }
 
-}
-//v 22/06/2017
-String archivoConfigXML = "../../configcod05.xml";//Cambio momentaneo, que vaya a buscar el XML dos carpetas arriba
-String xmlTagPanel = "panel", xmlTagEjecucion = "ejecucion";
-
-final EstadoModulo[] EstadoModuloList = new EstadoModulo[]{EstadoModulo.APAGADO, EstadoModulo.LOCAL, EstadoModulo.REMOTO};
-public int EstadoModuloToInt(EstadoModulo estado) {return estado==EstadoModulo.APAGADO?0:estado==EstadoModulo.LOCAL?1:2;};
-
-class ConfiguracionCOD05 {
-  ConfigModulo lienzo, observador, carrete;
-  boolean panelConexiones = false;
-
-  class ConfigModulo {
-    String id = "indefinido";
-    String ip = "127.0.0.1";
-    int puerto = 12000;
-    EstadoModulo estado = EstadoModulo.LOCAL;
-
-    public ConfigModulo Iniciar(String id, int puerto) {
-      this.id = id;
-      this.puerto = puerto;
-      return this;
-    }
-
-    public void cargar(XML xml) {
-      id = xml.getString("id", id);
-      ip = xml.getString("ip", ip);
-      puerto = xml.getInt("puerto", puerto);
-      int estadoInt = xml.getInt("estado", -1);
-      if (estadoInt != -1) estado = EstadoModuloList[estadoInt];
-    }    
-    public XML generar() {
-      XML xml = new XML("ConfigModulo");
-      xml.setString("id", id);
-      xml.setString("ip", ip);
-      xml.setInt("puerto", puerto);
-      xml.setInt("estado", EstadoModuloToInt(estado));
-      return xml;
-    }
-  }
-  public void cargar(XML xml) {
-    lienzo = new ConfigModulo().Iniciar("lienzo", 12010);
-    observador = new ConfigModulo().Iniciar("observador", 12020);
-    carrete = new ConfigModulo().Iniciar("carrete", 12030);
-    if (xml != null) {
-      panelConexiones = xml.getInt("panelConexiones", panelConexiones?1:0)==1;
-      XML[] configs = xml.getChildren("ConfigModulo");
-      for (ConfigModulo cm : new ConfigModulo[]{lienzo, observador, carrete}) {
-        for (XML cxml : configs) {
-          if (cm.id.equals(cxml.getString("id", ""))) cm.cargar(cxml);
-        }
-      }
-    }
-  }
-  public XML guardar(String nombre) {
-    XML xml = new XML(nombre);
-    xml.setInt("panelConexiones", panelConexiones?1:0);
-    for (ConfigModulo cm : new ConfigModulo[]{lienzo, observador, carrete}) {
-      xml.addChild(cm.generar());
-    }
-    return xml;
-  }
 }
 class GuiCerrado{
   
@@ -538,26 +468,29 @@ class Motor{
     
     if ( !kinect.isInit() ) {
       println("No se pudo iniciar SimpleOpenNI, quizas la camara esta desconectada!"); 
-      exit();
-      return;
-    }
+      //exit();
+      //return;
+    }else{
   
-    kinect.enableDepth();
-    kinect.enableUser();
+      kinect.enableDepth();
+      kinect.enableUser();
+      
+      tiposDeJoint = getTiposDeJoint();
+      paresDeJoints = getParesDeJoints();
+      nombreDeJoint = getNombreDeJoint();
+      
+      for( int i = 0; i < tiposDeJoint.length; i++ ){
+        println( "- " + nombreDeJoint[ i ] + " : " + tiposDeJoint[ i ] );
+      }
+      
+      loadDatosXML();
+      
+      guiP5 = new GuiP5( p5, NOMBRE_ESTADO );
+      
+      iniciarEspacio3D();
     
-    tiposDeJoint = getTiposDeJoint();
-    paresDeJoints = getParesDeJoints();
-    nombreDeJoint = getNombreDeJoint();
-    
-    for( int i = 0; i < tiposDeJoint.length; i++ ){
-      println( "- " + nombreDeJoint[ i ] + " : " + tiposDeJoint[ i ] );
     }
     
-    loadDatosXML();
-    
-    guiP5 = new GuiP5( p5, NOMBRE_ESTADO );
-    
-    iniciarEspacio3D();
   }
   
   //---------------------------------------- METODOS PUBLICOS
@@ -592,12 +525,19 @@ class Motor{
   }
   
   public void ejecutar(){
-    kinect.update();
-    background( 0xff222222 );
-    if( dibujarEspacio3D ) actualizarEspacio3D();
-    actualizarUsuarios();
-    if( dibujarEspacio3D ) espacio3D.endDraw();
-    dibujarCamaraKinect();
+    if( kinect.isInit() ){
+      kinect.update();
+      background( 0xff222222 );
+      if( dibujarEspacio3D ) actualizarEspacio3D();
+      actualizarUsuarios();
+      if( dibujarEspacio3D ) espacio3D.endDraw();
+      dibujarCamaraKinect();
+    }else{
+      background( 0xff222222 );
+      fill( 255 );
+      textSize( height * 0.04f );
+      text( "Kinect no se pudo iniciar.\nAsegurase de que este conectada y reinicie el programa.", 20, height * 0.4f );
+    }
   }
   
   public void keyPressed(){

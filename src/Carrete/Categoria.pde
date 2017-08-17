@@ -1,11 +1,13 @@
 class Categoria extends Opcion {
-
   ArrayList modificadores;
   int mods = 0;
-
-
+  boolean esUnaOpcionDeNavegacion;
+  boolean hover;
+  String hoverMod;
+  Modificador hoverMod_modificador;
   Categoria(String nombre_) {
     nombre = nombre_;
+    esUnaOpcionDeNavegacion = false;
     modificadores = new ArrayList();
     col = color(255);
     t = 50;
@@ -33,14 +35,19 @@ class Categoria extends Opcion {
     posCentro = new PVector();
     conIcono = true;
   }
-  /*void inicializar( float t_, color col_, int cant_, PVector pos_, PVector posCentro_) {
-   col = col_;
-   cant = cant_;    
-   pos = pos_;
-   posCentro = posCentro_;
-   t = t_;
-   }
-   
+
+  void inicializar( color col_, int cant_, PVector pos_, PVector posCentro_, float t_, boolean esUnaOpcionDeNavegacion_) {
+    col = col_;
+    cant = cant_;    
+    pos = pos_;
+    posCentro = posCentro_;
+    t = t_;//width>height?height/4:width/4;
+    tamFigura = t*26/100;
+    iconos = new Iconos(int(tamFigura));
+    esUnaOpcionDeNavegacion = esUnaOpcionDeNavegacion_;
+  }
+
+  /* 
    String getNombre() {
    String n = "no tengo";
    
@@ -53,7 +60,6 @@ class Categoria extends Opcion {
     mods++;
   }
   void removerMod() {
-
     if (mods>0)
       mods--;
   }
@@ -71,6 +77,31 @@ class Categoria extends Opcion {
   void aniadir(String nombre) {
     Modificador m = new Modificador(nombre, this);
     modificadores.add(m);
+  }
+
+  void setHover() {
+    setSensible(false);
+    hover = false;
+    hoverMod = null;
+    hoverMod_modificador = null;
+    for (int i=0; i<modificadores.size (); i++) {
+      Modificador m = (Modificador) modificadores.get(i);
+      if (m.hoverExtendido) {       
+        setSensible(true);
+        if (m.hover) {
+          hover = true;
+          hoverMod = m.nombre;
+          hoverMod_modificador = m;
+        }
+      }
+    }
+  }
+  String getHover() {
+    return hoverMod;
+  }
+
+  Modificador getHover_modificador() {
+    return hoverMod_modificador;
   }
 
 
@@ -111,10 +142,15 @@ class Categoria extends Opcion {
   }
 
   void dibujarCategoria() {
-    dibujar();
-    dibujarMods();
-    displayModificadoresExistentes();
+    if (!esUnaOpcionDeNavegacion) {      
+      dibujar();
+      dibujarMods();
+      displayModificadoresExistentes();
+    } else {
+      dibujar();
+    }
   }
+
 
   //  void setSensible(boolean sensible_/*, boolean estado_*/) {
   /*   sensible = sensible_;
@@ -147,66 +183,74 @@ class Categoria extends Opcion {
    popStyle();
    }*/
 
-  void displayModificadoresExistentes() {
-    if (mods>0) {
-      /*  if (coneccion == null) {
-       coneccion = loadImage("coneccion.png");
-       coneccion.resize(t*135/100, t*135/100);
-       }*/
+  void coneccionCanal(float px, float py, float x, float y, float ang) {   
 
-      float ang = atan2(pos.y-posCentro.y, pos.x-posCentro.x);
-      float px = pos.x-(t*13/100/2)*cos(ang);
-      float py = pos.y-(t*13/100/2)*sin(ang);
-      float x = posCentro.x+(t/2-t*13/100/2)*cos(ang);
-      float y = posCentro.y+(t/2-t*13/100/2)*sin(ang);
+    pushStyle();
+    strokeWeight(2);
+    stroke(paleta[1][3]);
+    noFill();
+    float xar1 = pos.x+t*16/100*cos(ang+radians(90));
+    float yar1 = pos.y+t*16/100*sin(ang+radians(90));
+    float xab1 = posCentro.x+t*16/100*cos(ang+radians(90));
+    float yab1 = posCentro.y+t*16/100*sin(ang+radians(90));
+    float xar2 = pos.x+t*16/100*cos(ang-radians(90));
+    float yar2 = pos.y+t*16/100*sin(ang-radians(90));
+    float xab2 = posCentro.x+t*16/100*cos(ang-radians(90));
+    float yab2 = posCentro.y+t*16/100*sin(ang-radians(90));
+    line(xar1, yar1, xab1, yab1);
+    line(xar2, yar2, xab2, yab2);
+    arc(pos.x, pos.y, t*32/100, t*32/100, ang+radians(270), ang+radians(270)+radians(180));
+    popStyle();
+  }
 
-      float diam = dist(x, y, px, py);
+  void coneccionLinea(float px, float py, float cx, float cy) {
+    pushStyle();
+    strokeWeight(1);
+    stroke(paleta[1][3]);
+    noFill();     
+    line(px, py, cx, cy);    
+    ellipse(pos.x, pos.y, t*32/100, t*32/100);
+    popStyle();
+  }
 
-      pushStyle();
-      strokeWeight(2);
-      stroke(150, 150, 220);
-      noFill();
-      float xar1 = pos.x+t*16/100*cos(ang+radians(90));
-      float yar1 = pos.y+t*16/100*sin(ang+radians(90));
-      float xab1 = posCentro.x+t*16/100*cos(ang+radians(90));
-      float yab1 = posCentro.y+t*16/100*sin(ang+radians(90));
-      float xar2 = pos.x+t*16/100*cos(ang-radians(90));
-      float yar2 = pos.y+t*16/100*sin(ang-radians(90));
-      float xab2 = posCentro.x+t*16/100*cos(ang-radians(90));
-      float yab2 = posCentro.y+t*16/100*sin(ang-radians(90));
-      line(xar1, yar1, xab1, yab1);
-      line(xar2, yar2, xab2, yab2);
-      arc(pos.x, pos.y, t*32/100, t*32/100, ang+radians(270), ang+radians(270)+radians(180));
-      popStyle();
-      /*  popMatrix();
-       rotate(ang);
-       translate(cx,cy);
-       image(coneccion, 0, 0);
-       pushMatrix();*/
-      if (mods<4) {        
-        for (int i=0; i<mods; i++) {
-          x = px-diam/(mods+1)*(i+1)*cos(ang);
-          y = py-diam/(mods+1)*(i+1)*sin(ang);
-          pushStyle();
-          fill(paleta[2][3]);
-          ellipse(x, y, t*13/100, t*13/100);
-          /*textAlign(CENTER, CENTER);
-           fill(255);
-           textSize(15);
-           text(mods, x, y);*/
-          popStyle();
-        }
-      } else {
-        for (int i=0; i<3; i++) {
-          x = px-diam/(4)*(i+1)*cos(ang);
-          y = py-diam/(4)*(i+1)*sin(ang);
-          pushStyle();
-          fill(paleta[2][3]);
-          ellipse(x, y, t*13/100, t*13/100);
-          popStyle();
-        }
+  void feedbackModificadores(float px, float py, float diam, float ang) {
+    float x = 0;
+    float y = 0;
+    if (mods<4) {        
+      for (int i=0; i<mods; i++) {
+        x = px-diam/(mods+1)*(i+1)*cos(ang);
+        y = py-diam/(mods+1)*(i+1)*sin(ang);
+        pushStyle();
+        fill(paleta[2][3]);
+        ellipse(x, y, t*9/100, t*9/100);
+        /*textAlign(CENTER, CENTER);
+         fill(255);
+         textSize(15);
+         text(mods, x, y);*/
+        popStyle();
+      }
+    } else {
+      for (int i=0; i<3; i++) {
+        x = px-diam/(4)*(i+1)*cos(ang);
+        y = py-diam/(4)*(i+1)*sin(ang);
+        pushStyle();
+        fill(paleta[2][3]);
+        ellipse(x, y, t*9/100, t*9/100);
+        popStyle();
       }
     }
   }
+  void displayModificadoresExistentes() {
+    if (mods>0) {
+      float ang = atan2(pos.y-posCentro.y, pos.x-posCentro.x);
+      float px = pos.x-(t*32/100/2)*cos(ang);
+      float py = pos.y-(t*32/100/2)*sin(ang);
+      float cx = posCentro.x+(t/2)*cos(ang);
+      float cy = posCentro.y+(t/2)*sin(ang);     
+      float diam = dist(px, py, cx, cy);
+      coneccionCanal(px, py, cx, cy, ang);
+      //coneccionLinea( px, py, cx, cy);
+      feedbackModificadores(px, py, diam, ang);
+    }
+  }
 }
-

@@ -1,5 +1,4 @@
 class Opcion {
-
   color col;
   int cant;
   boolean sensible;
@@ -27,7 +26,7 @@ class Opcion {
     paleta = new color[4][12];
     for (int i=0; i<5; i++) {
       for (int j=0; j<12; j++) {
-      paleta[i][j] = color(random(255), random(255), random(255));
+        paleta[i][j] = color(random(255), random(255), random(255));
       }
     }
     iconos = new Iconos(int(t));
@@ -35,7 +34,7 @@ class Opcion {
     posCentro = new PVector();
   }
 
-  Opcion(String nombre_,color[][] paleta_) {
+  Opcion(String nombre_, color[][] paleta_) {
     nombre = nombre_;
     //modificadores = new ArrayList();
     col = color(255);
@@ -84,6 +83,12 @@ class Opcion {
   void dibujarIcono() {
     tint(col);
     iconos.dibujar(nombre, pos.x, pos.y);
+
+    //-- dibujar FLecha Maquinarias.....
+    if (nombre.equals(MAQUINARIAS)) {
+      fill(paleta[2][0]);
+      triangle(pos.x, pos.y+tamFigura*1.3, pos.x-7, pos.y+tamFigura*1.3-10, pos.x+7, pos.y+tamFigura*1.3-10);
+    }
   }
 
   void dibujarElipse() {
@@ -95,7 +100,6 @@ class Opcion {
     text(nombre, pos.x, pos.y);
   }
 
-
   void enSensible() {
     pushStyle();
     stroke(paleta[2][4]);
@@ -105,21 +109,27 @@ class Opcion {
     float angulo = atan2(pos.y-posCentro.y, pos.x-posCentro.x);
     float d = t*59/100;
 
-    for (int j =0; j< 5; j++) {
-      float cX = posCentro.x+t/3*cos(angulo);
-      float cY = posCentro.y+t/3*sin(angulo);
-      float x1 = (cX)+((d/4)*j)*cos(angulo);
-      float y1 = (cY)+((d/4)*j)*sin(angulo);
-      float x2 = x1+(d/10)*cos(angulo);
-      float y2 = y1+(d/10)*sin(angulo);
-      float x3 = x1+(d/5.75)*cos(angulo);
-      float y3 = y1+(d/5.75)*sin(angulo);
-      strokeWeight(3);
-      line(x1, y1, x2, y2);          
-
-      strokeWeight(5);
-      point(x3, y3);
-    }
+    /*for (int j =0; j< 2; j++) {
+     float cX = posCentro.x+t/3*cos(angulo);
+     float cY = posCentro.y+t/3*sin(angulo);
+     float x1 = (cX)+((d/4)*j)*cos(angulo);
+     float y1 = (cY)+((d/4)*j)*sin(angulo);
+     float x2 = x1+(d/10)*cos(angulo);
+     float y2 = y1+(d/10)*sin(angulo);
+     float x3 = x1+(d/5.75)*cos(angulo);
+     float y3 = y1+(d/5.75)*sin(angulo);
+     strokeWeight(10);
+     line(x1, y1, x2, y2);          
+     
+     strokeWeight(10);
+     point(x3, y3);
+     }*/
+    float cX = posCentro.x+t/2*cos(angulo);
+    float cY = posCentro.y+t/2*sin(angulo);
+    float x1 = cX+(dist(pos.x, pos.y, cX, cY)-tamFigura/2)*cos(angulo);
+    float y1 = cY+(dist(pos.x, pos.y, cX, cY)-tamFigura/2)*sin(angulo);
+    strokeWeight(10);
+    line(cX, cY, x1, y1);         
     popStyle();
   }
 }

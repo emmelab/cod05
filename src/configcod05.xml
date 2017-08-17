@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <COD05>
   <panel panelConexiones="1">
-    <ConfigModulo estado="1" id="lienzo" ip="127.0.0.1" puerto="12010"/>
+    <ConfigModulo estado="2" id="lienzo" ip="192.168.43.177" puerto="12010"/>
     <ConfigModulo estado="0" id="observador" ip="127.0.0.1" puerto="12020"/>
-    <ConfigModulo estado="1" id="carrete" ip="192.168.0.223" puerto="14000"/>
+    <ConfigModulo estado="1" id="carrete" ip="192.168.43.243" puerto="12030"/>
   </panel>
-  <ejecucion panelConexiones="0">
-    <ConfigModulo estado="1" id="lienzo" ip="172.16.29.44" puerto="12010"/>
+  <ejecucion panelConexiones="1">
+    <ConfigModulo estado="2" id="lienzo" ip="192.168.43.177" puerto="12010"/>
     <ConfigModulo estado="0" id="observador" ip="127.0.0.1" puerto="12020"/>
-    <ConfigModulo estado="2" id="carrete" ip="192.168.0.223" puerto="12030"/>
+    <ConfigModulo estado="1" id="carrete" ip="192.168.43.243" puerto="12030"/>
   </ejecucion>
 </COD05>

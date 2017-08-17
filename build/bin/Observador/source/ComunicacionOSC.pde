@@ -3,7 +3,6 @@ import netP5.*;
 
 public class ComunicacionOSC{
   
-  private ConfiguracionCOD05 config;
   private OscP5 oscP5;
   private NetAddress direccionAPI;
   private NetAddress direccionSistema;
@@ -12,16 +11,9 @@ public class ComunicacionOSC{
   
   public ComunicacionOSC( PApplet p5 ){
     
-    if (config == null) config = new ConfiguracionCOD05();
-    XML xmlConfig = null;
-    if (new File(sketchPath(archivoConfigXML)).exists()) xmlConfig = loadXML( archivoConfigXML );
-    if (xmlConfig != null) xmlConfig = xmlConfig.getChild(xmlTagEjecucion);
-  
-    config.cargar(xmlConfig);
-    
-    oscP5 = new OscP5( p5, config.observador.puerto ); 
-    direccionAPI = new NetAddress( config.carrete.ip, config.carrete.puerto );
-    direccionSistema = new NetAddress( config.lienzo.ip, config.lienzo.puerto );
+    oscP5 = new OscP5( p5, 12300); 
+    direccionAPI = new NetAddress("127.0.0.1", 13000 );
+    direccionSistema = new NetAddress( "127.0.0.1", 12000 );
     
     invertidoEjeX = true;
     

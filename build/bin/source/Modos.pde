@@ -1,16 +1,20 @@
 class Modos {
 
   String modo;
-  float tElipse;
-  float tLineas;
-  float tCuerpo;
   float tam;
+  float diametroIconoCentral;
   color[][] paleta;
   float centroX ;
   float centroY ;
-  float strokeW = 5;
   boolean usarTexto = false;
+
+  Iconos iconos;
+  Iconos iconosGrandes;
+  IconoCentral iconoCentral;
+
+
   Modos() {
+    iconoCentral = new IconoCentral();
     paleta = new color[4][12];
     for (int i=0; i<5; i++) {
       for (int j=0; j<12; j++) {
@@ -18,12 +22,20 @@ class Modos {
       }
     }
     modo = ESPERA;
+    iconos = new Iconos(int(tam*70/100));
+    iconosGrandes = new Iconos((int)tam);
+    setIconoCentral(COD05_2, paleta[2][3]);
   }
 
-  Modos(color[][] paleta_, PVector posCentral_, float tam_) {
+  Modos(color[][] paleta_, PVector posCentral_, float tam_) {    
+    iconoCentral = new IconoCentral();
     paleta = paleta_;
     modo = ESPERA;
     inicializar(posCentral_, tam_);
+    iconos = new Iconos(int(tam*70/100));
+    iconosGrandes = new Iconos((int)tam);
+    if (iconoCentral.nombre==null)
+      setIconoCentral(COD05_2, paleta[2][3]);
   }
 
   void inicializar(PVector posCentral, float tam_) {
@@ -32,129 +44,95 @@ class Modos {
     tam = tam_;
   }
 
-  void base(float cX, float cY, float t) {
-    tElipse = t/11*2;
-    tLineas = t/5*2;
-    tCuerpo = t/2*2;
-    noStroke();
-    fill(paleta[2][3]);      
+  void baseGris(float cX, float cY, float t) {
+    fill(paleta[1][1]);     
     ellipse(cX, cY, t, t);
   }
-   
-  void espera(float cX, float cY, float t) {
-    pushMatrix();
-    fill(paleta[2][1]);
-    stroke(paleta[2][3]); 
-    strokeWeight(strokeW);
-    translate(cX, cY);      
-    ellipse( 0, 0, t, t);
-    ellipse( 0-t*1.3, 0, t, t);
-    ellipse( 0+t*1.3, 0, t, t);
-    popMatrix();
+
+  void espera(float cX, float cY) {
+    tint(paleta[2][3]);
+    iconosGrandes.dibujar(ESPERA, cX, cY);
   }
-  void agregar(String nombre, float cX, float cY, float t) {
-    //fill(paleta[2][4][3]);      
-    //ellipse(centroX, centroY, ancho/2, ancho/2);
-    pushStyle();
-    stroke(paleta[2][1]);
-    strokeWeight(strokeW);
-    pushMatrix();
-    translate(cX, cY);      
-    line( t, 0, -t, 0);
-    line( 0, t, 0, -t);
-    popMatrix();
-    popStyle();
-
-    if (usarTexto) {
-      fill(paleta[2][2]);
-      text(nombre, cX, cY);
-    }
+  void agregar(float cX, float cY) {
+    tint(paleta[2][3]);
+    iconosGrandes.dibujar(AGREGAR, cX, cY);
   }
-  void eliminar(String nombre, float cX, float cY, float t) {
-    //fill(paleta[2][4][3]);
-    //ellipse(centroX, centroY, ancho/2, ancho/2);      
-    pushStyle();
-    stroke(paleta[2][1]);
-    strokeWeight(strokeW);
-    pushMatrix();
-    translate(cX, cY);
-    rotate(QUARTER_PI);      
-    line( -t, 0, t, 0);
-    line( 0, t, 0, -t);
-    popMatrix();
-    popStyle();
-
-    if (usarTexto) {       
-      fill(paleta[2][2]);
-      text(nombre, cX, cY);
-    }
+  void eliminar(float cX, float cY) {
+    tint(paleta[2][3]);
+    iconosGrandes.dibujar(ELIMINAR, cX, cY);
   }
-  void estimulos(String nombre, float cX, float cY, float t) {
-    pushStyle();
-    stroke(paleta[2][1]);
-    strokeWeight(strokeW);
-    pushMatrix();
-    translate(cX, cY);
-
-    line( 0, (t/3)/3.5, 0, -(t/3)/2);
-    line( 0, (t/3)/3.5, (t/3)/1.2, t/3);
-    line( 0, (t/3)/3.5, -(t/3)/1.2, t/3);
-    line( -(t/3), -(t/4)/20, (t/3), -(t/4)/20);
-    ellipse( 0, -(t/3)/1.5, t/5, t/5 );
-    popMatrix();
-    popStyle();
-
-    if (usarTexto) {       
-      fill(paleta[2][2]);
-      text(nombre, cX, cY);
-    }
+  void maquinarias(float cX, float cY) {
+    tint(paleta[2][3]);
+    iconosGrandes.dibujar(MAQUINARIAS, cX, cY);
   }
-  void opciones(String nombre, float cX, float cY, float t) {
-    //fill(paleta[2][4][3]);
-    //ellipse(centroX, centroY, ancho/2, ancho/2);
-    pushMatrix();    
-    pushStyle();
-    noStroke();
-    rectMode(CENTER);
-
-    fill(paleta[2][1]);
-    translate(cX, cY);   
-    ellipse(0, 0, t*4, t*4);
-
-    for (int i=0; i<8; i++) {
-      rect(0, t*2, t, t) ;
-      rotate(radians(360/8));
-    }
-    fill(paleta[2][3]);
-    ellipse(0, 0, t*2, t*2);
-
-    popStyle();
-    popMatrix();
-
-    if (usarTexto) {       
-      fill(paleta[2][2]);
-      text(nombre, cX, cY);
-    }
+  void opciones( float cX, float cY) {
+    tint(paleta[2][3]);
+    iconosGrandes.dibujar(OPCIONES, cX, cY);
   }
 
-  void ejecutar(String nombre) {
-    base(centroX, centroY, tam);
+  void ejecutar() {
     fill(paleta[2][1]);
     textAlign(CENTER, CENTER);
     textSize(30);
     if (modo.equals(ESPERA)) {
-      espera(centroX, centroY, tElipse) ;
+      baseGris(centroX, centroY, tam);
+      espera(centroX, centroY) ;
     } else if (modo.equals(AGREGAR)) {
-      agregar( nombre, centroX, centroY, tLineas) ;
+      baseGris(centroX, centroY, tam);
+      agregar(centroX, centroY) ;
     } else if (modo.equals(ELIMINAR)) {
-      eliminar( nombre, centroX, centroY, tLineas) ;
-    } else if (modo.equals(ESTIMULOS)) {
-      estimulos( nombre, centroX, centroY, tCuerpo) ;
+      baseGris(centroX, centroY, tam);
+      eliminar(centroX, centroY) ;
     } else if (modo.equals(OPCIONES)) {
-      opciones( nombre, centroX, centroY, tElipse*0.9) ;
+      baseGris(centroX, centroY, tam);
+      opciones(centroX, centroY) ;
+    } else if (modo.equals(MAQUINARIAS)) {
+      baseGris(centroX, centroY, tam);
+      maquinarias(centroX, centroY) ;
     } else {
-      text(nombre, centroX, centroY);
+      text(modo, centroX, centroY);
     }
+
+    if (!(getModo().equals(OPCIONES)) && !(getModo().equals(ESPERA)) && !(getModo().equals(MAQUINARIAS))) {
+      if (iconos == null)
+        iconos = new Iconos(int(tam*70/100));
+      tint(iconoCentral.col);    
+      iconos.dibujar(iconoCentral.nombre, centroX, centroY);
+      //dibujoDeEstadoDelIconoCentral(centroX, centroY, int(tam*70/100), iconoCentral.mods);
+    }
+  }
+
+  void dibujoDeEstadoDelIconoCentral(float x, float y, float t, boolean mods) {
+    if (mods) {
+      pushStyle();
+      stroke(paleta[1][1]);
+      strokeWeight(6);
+      fill(paleta[2][3]);  
+      float tamDivisor = 4;  
+      float px = x+(t/2-t/(tamDivisor*2))*cos(radians(-45));
+      float py = y+(t/2-t/(tamDivisor*2))*sin(radians(-45));
+      ellipse(px, py, t/tamDivisor, t/tamDivisor);
+      popStyle();
+    }
+  }
+
+  void setIconoCentral(Modificador mod, color c) {
+    if (mod!=null) {
+      iconoCentral.setNombre(mod.nombre);
+      iconoCentral.setColor(c);
+
+      if (mod.mods>0) {
+        iconoCentral.setMods(true);
+      } else {
+        iconoCentral.setMods(false);
+      }
+    }
+  }
+
+  void setIconoCentral(String nombre, color c) {
+    iconoCentral.setNombre(nombre);
+    iconoCentral.setColor(c);
+    iconoCentral.setMods(false);
   }
 
   void setModo(String modo_) {
@@ -163,5 +141,22 @@ class Modos {
 
   String getModo() {
     return modo;
+  }
+}
+
+class IconoCentral {
+  String nombre;
+  color col;
+  boolean mods = false;
+  IconoCentral() {
+  }
+  void setNombre(String n) {
+    nombre = n;
+  }
+  void setColor(color c) {
+    col = c;
+  }  
+  void setMods(boolean m) {
+    mods = m;
   }
 }

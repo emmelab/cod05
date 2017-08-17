@@ -10,8 +10,8 @@ void oscStatus(int estado) {
   }
 }
 /*void oscEvent(OscMessage msj) {
-  println(msj);
-}*/
+ println(msj);
+ }*/
 
 class InterfazYSensorConexion implements AutoDraw {
   ConfiguracionCOD05 config;
@@ -29,7 +29,7 @@ class InterfazYSensorConexion implements AutoDraw {
   float tamPanelInferior = 180;
   CampoIP lienzo, observador, carrete;
   float[] posYBase;
-  float anchoCampoIP = 400, altoCampoIP = 30;
+  float anchoCampoIP = 350, altoCampoIP = 20;
 
   BotonBasico mas, menos;
   PVector ejeMasMenos;
@@ -55,7 +55,7 @@ class InterfazYSensorConexion implements AutoDraw {
   void draw() {
     boolean sinConexion = oscP5.ip().equals(ipLocalHost);
     pushStyle();
-    //if (sinConexion)
+    if (sinConexion)
     {
 
       fill(255, 0, 0);
@@ -85,6 +85,14 @@ class InterfazYSensorConexion implements AutoDraw {
     mas.pos.z = menos.pos.z+HALF_PI;
     menos.pos.set(ejeMasMenos.x+ejeMasMenos.z*cos(menos.pos.z), ejeMasMenos.y+ejeMasMenos.z*sin(menos.pos.z));
     mas.pos.set(ejeMasMenos.x+ejeMasMenos.z*cos(mas.pos.z), ejeMasMenos.y+ejeMasMenos.z*sin(mas.pos.z));
+
+    //----- :D
+    if (interfaz.todoLocal) {
+      mas.dibujar = false;
+    } else {
+      mas.dibujar = true;
+    }
+
     if (menos.presionado || mas.presionado) {
       visible = !visible;
       config.panelConexiones = visible;

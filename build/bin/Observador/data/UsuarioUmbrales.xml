@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <UsuarioUmbrales>
   <UsuarioCerrado factorUmbral="2.20339"/>
-  <UsuarioNivel factorUmbralAlto="0.71428573" factorUmbralBajo="0.5714286"/>
-  <UsuarioDesequilibrio factorUmbralAlto="40.357143" factorUmbralBajo="15.000001"/>
+  <UsuarioNivel factorUmbralAlto="0.70357144" factorUmbralBajo="0.55"/>
+  <UsuarioDesequilibrio factorUmbralAlto="59.285713" factorUmbralBajo="35.0"/>
   <Espejo espejoX="1" espejoY="0"/>
 </UsuarioUmbrales>

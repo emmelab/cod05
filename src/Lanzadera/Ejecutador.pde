@@ -2,8 +2,8 @@ class Ejecutador {
   ConfiguracionCOD05 config;
   boolean modoUtileria;
   int nacimiento;
-  
-  Process lienzo,observador,carrete;
+
+  Process lienzo, observador, carrete;
 
   String javaPath = System.getProperty("java.home");
 
@@ -12,9 +12,9 @@ class Ejecutador {
     observadorReal = "./Observador", 
     carreteReal = "./Carrete";
 
-  String dirUtileria = sketchPath("..\\modulosDeUtileria\\lib\\*"), 
+  String dirUtileria = sketchPath("\\Observador\\*"), 
     lienzoUtileria = "dummyLienzo", 
-    observadorUtileria = "dummyObservador", 
+    observadorUtileria = "Observador",//"dummyObservador", 
     carreteUtileria = "dummyCarrete";
 
   String ejecutarKeyword = "%ejec";
@@ -33,65 +33,72 @@ class Ejecutador {
       this.config = config;
     }
     this.modoUtileria = modoUtileria;
-    if(modoUtileria)templateLanzador = "\""+javaPath+"\\bin\\java\" -cp "+dirUtileria+" "+ejecutarKeyword ;
+    if (modoUtileria)templateLanzador = "\""+javaPath+"\\bin\\java\" -cp "+dirUtileria+" "+ejecutarKeyword ;
     else templateLanzador = dirReal+ejecutarKeyword;
+    println("alksjdlkasjdlkajslkdasd-------------"+templateLanzador);
   }
-  
+
   boolean enEjecucion() {
     if (lienzo == null && observador == null && carrete == null) return false;
     else {
       if (lienzo != null) {
-        if(!lienzo.isAlive()) lienzo = null;
+        if (!lienzo.isAlive()) lienzo = null;
       }
       if (observador != null) {
-        if(!observador.isAlive()) observador = null;
+        if (!observador.isAlive()) observador = null;
       }
       if (carrete != null) {
-        if(!carrete.isAlive()) carrete = null;
+        if (!carrete.isAlive()) carrete = null;
       }
-    return true;
+      return true;
     }
   }
-  
+
   void ejecutarLocales() {
     if (modoUtileria) {
       if (config.lienzo.estado == EstadoModulo.LOCAL) {
         lienzo=exec( templateLanzador.replace(ejecutarKeyword, lienzoUtileria));
-      /*  PAppConsola cons = new PAppConsola();
-      PApplet.runSketch(new String[]{"PAppConsola"},cons);
-      cons.pasarStream(lienzo);*/
+        /*  PAppConsola cons = new PAppConsola();
+         PApplet.runSketch(new String[]{"PAppConsola"},cons);
+         cons.pasarStream(lienzo);*/
       }
       if (config.observador.estado == EstadoModulo.LOCAL) {
         observador=exec( templateLanzador.replace(ejecutarKeyword, observadorUtileria));
-       /* PAppConsola cons = new PAppConsola();
-      PApplet.runSketch(new String[]{"PAppConsola"},cons);
-      cons.pasarStream(observador);*/
+        /* PAppConsola cons = new PAppConsola();
+         PApplet.runSketch(new String[]{"PAppConsola"},cons);
+         cons.pasarStream(observador);*/
       }
       if (config.carrete.estado == EstadoModulo.LOCAL) {
         carrete=exec( templateLanzador.replace(ejecutarKeyword, carreteUtileria));
-       /* PAppConsola cons = new PAppConsola();
-      PApplet.runSketch(new String[]{"PAppConsola"},cons);
-      cons.pasarStream(carrete);*/
+        /* PAppConsola cons = new PAppConsola();
+         PApplet.runSketch(new String[]{"PAppConsola"},cons);
+         cons.pasarStream(carrete);*/
       }
     } else {
       if (config.lienzo.estado == EstadoModulo.LOCAL) {
         lienzo=exec( templateLanzador.replace(ejecutarKeyword, lienzoReal));
-    /*PAppConsola cons = new PAppConsola();
-      PApplet.runSketch(new String[]{"PAppConsola"},cons);
-      cons.pasarStream(lienzo);  */
-    }
+
+        /*PAppConsola cons = new PAppConsola();
+         PApplet.runSketch(new String[]{"PAppConsola"},cons);
+         cons.pasarStream(lienzo);  */
+      }
       if (config.observador.estado == EstadoModulo.LOCAL) {
-        observador=exec( templateLanzador.replace(ejecutarKeyword, observadorReal));
-    /*PAppConsola cons = new PAppConsola();
-      PApplet.runSketch(new String[]{"PAppConsola"},cons);
-      cons.pasarStream(observador); */ 
-    }
+        //observador=exec( templateLanzador.replace(ejecutarKeyword, observadorReal));
+        consolaDebug.printlnAlerta( ejecutarKeyword );
+        observador=exec( templateLanzador.replace(ejecutarKeyword, observadorUtileria));
+
+        PAppConsola cons = new PAppConsola();
+        PApplet.runSketch(new String[]{"PAppConsola"},cons);
+        cons.pasarStream(observador); 
+      }
       if (config.carrete.estado == EstadoModulo.LOCAL) {
         carrete=exec( templateLanzador.replace(ejecutarKeyword, carreteReal));
-    /*PAppConsola cons = new PAppConsola();
-      PApplet.runSketch(new String[]{"PAppConsola"},cons);
-      cons.pasarStream(carrete);  */
-    }
+
+
+        /*PAppConsola cons = new PAppConsola();
+         PApplet.runSketch(new String[]{"PAppConsola"},cons);
+         cons.pasarStream(carrete);  */
+      }
     }
   }
 
@@ -99,39 +106,39 @@ class Ejecutador {
     if (modoUtileria) {
       lienzo=exec( templateLanzador.replace(ejecutarKeyword, lienzoUtileria));
       /*PAppConsola cons = new PAppConsola();
-      PApplet.runSketch(new String[]{"PAppConsola"},cons);
-      cons.pasarStream(lienzo);*/
+       PApplet.runSketch(new String[]{"PAppConsola"},cons);
+       cons.pasarStream(lienzo);*/
     } else {
       lienzo=exec( templateLanzador.replace(ejecutarKeyword, lienzoReal));
       /*PAppConsola cons = new PAppConsola();
-      PApplet.runSketch(new String[]{"PAppConsola"},cons);
-      cons.pasarStream(lienzo);*/
+       PApplet.runSketch(new String[]{"PAppConsola"},cons);
+       cons.pasarStream(lienzo);*/
     }
   }
   void ejecutarObservador() {
     if (modoUtileria) {
       observador=exec( templateLanzador.replace(ejecutarKeyword, observadorUtileria));
       /*PAppConsola cons = new PAppConsola();
-      PApplet.runSketch(new String[]{"PAppConsola"},cons);
-      cons.pasarStream(observador);*/
+       PApplet.runSketch(new String[]{"PAppConsola"},cons);
+       cons.pasarStream(observador);*/
     } else {
       observador=exec( templateLanzador.replace(ejecutarKeyword, observadorUtileria));
       /*PAppConsola cons = new PAppConsola();
-      PApplet.runSketch(new String[]{"PAppConsola"},cons);
-      cons.pasarStream(observador);*/
+       PApplet.runSketch(new String[]{"PAppConsola"},cons);
+       cons.pasarStream(observador);*/
     }
   }
   void ejecutarCarrete() {
     if (modoUtileria) {
       carrete=exec( templateLanzador.replace(ejecutarKeyword, carreteUtileria));
       /*PAppConsola cons = new PAppConsola();
-      PApplet.runSketch(new String[]{"PAppConsola"},cons);
-      cons.pasarStream(carrete);*/
+       PApplet.runSketch(new String[]{"PAppConsola"},cons);
+       cons.pasarStream(carrete);*/
     } else {
       carrete=exec( templateLanzador.replace(ejecutarKeyword, carreteReal));
       /*PAppConsola cons = new PAppConsola();
-      PApplet.runSketch(new String[]{"PAppConsola"},cons);
-      cons.pasarStream(carrete);*/
+       PApplet.runSketch(new String[]{"PAppConsola"},cons);
+       cons.pasarStream(carrete);*/
     }
   }
 }
