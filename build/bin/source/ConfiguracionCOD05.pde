@@ -14,11 +14,6 @@ class ConfiguracionCOD05 {
   ConfigModulo lienzo, observador, carrete;
   boolean panelConexiones = false;
 
-  ConfiguracionCOD05() {
-    lienzo = new ConfigModulo().Iniciar("lienzo", 12010);
-    observador = new ConfigModulo().Iniciar("observador", 12020);
-    carrete = new ConfigModulo().Iniciar("carrete", 12030);
-  }
   class ConfigModulo {
     String id = "indefinido";
     String ip = "127.0.0.1";
@@ -48,9 +43,9 @@ class ConfiguracionCOD05 {
     }
   }
   void cargar(XML xml) {
-    if (lienzo==null)lienzo = new ConfigModulo().Iniciar("lienzo", 12010);
-    if (observador==null)observador = new ConfigModulo().Iniciar("observador", 12020);
-    if (carrete==null)carrete = new ConfigModulo().Iniciar("carrete", 12030);
+    lienzo = new ConfigModulo().Iniciar("lienzo", 12010);
+    observador = new ConfigModulo().Iniciar("observador", 12020);
+    carrete = new ConfigModulo().Iniciar("carrete", 12030);
     if (xml != null) {
       panelConexiones = xml.getInt("panelConexiones", panelConexiones?1:0)==1;
       XML[] configs = xml.getChildren("ConfigModulo");
@@ -60,11 +55,6 @@ class ConfiguracionCOD05 {
         }
       }
     }
-  }
-  void cargar_local() {
-    if (lienzo==null)lienzo = new ConfigModulo().Iniciar("lienzo", 12010);
-    if (observador==null)observador = new ConfigModulo().Iniciar("observador", 12020);
-    if (carrete==null)carrete = new ConfigModulo().Iniciar("carrete", 12030);
   }
   XML guardar(String nombre) {
     XML xml = new XML(nombre);

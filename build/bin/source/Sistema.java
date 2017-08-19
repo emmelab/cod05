@@ -10,7 +10,7 @@ class Sistema {
     registroModificadores.put(regist.key(), regist);
   }
 
-  boolean debug = true;
+  boolean debug = false;
   final ArrayList<Modificador> modificadores = new ArrayList();
   final HashMap<String, Modificador> directorioModificadores = new HashMap();
 

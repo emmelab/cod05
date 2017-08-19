@@ -149,8 +149,8 @@ public void ciclo() {
   if ( sistema.debug ) {
     text( "DEBUG", 5, 30 );
     managerUsuarios.debug( this );    
-    consolaDebug();
   }
+  consolaDebug();
 }
 
 /*
@@ -544,7 +544,8 @@ public final class ConsolaDebug {
     tamanoTexto = PApplet.parseInt( height * 0.12f ); //int( height * 0.023 ); //tamanoTexto = 20;
     tamanoAlerta = PApplet.parseInt( height * 0.12f ); //int( height * 0.023 ); //tamanoAlerta = 20;
 
-    debug = verFps = verDatos = verAlertas = true;
+    verFps = false;
+    debug = verDatos = verAlertas = true;
   }
 
   //--------------------------------------- METODOS PUBLICOS
