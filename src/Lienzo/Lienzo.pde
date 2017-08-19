@@ -129,8 +129,8 @@ void ciclo() {
   if ( sistema.debug ) {
     text( "DEBUG", 5, 30 );
     managerUsuarios.debug( this );    
-    consolaDebug();
   }
+  consolaDebug();
 }
 
 /*

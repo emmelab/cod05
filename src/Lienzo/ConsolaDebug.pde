@@ -25,7 +25,8 @@ public final class ConsolaDebug {
     tamanoTexto = int( height * 0.12 ); //int( height * 0.023 ); //tamanoTexto = 20;
     tamanoAlerta = int( height * 0.12 ); //int( height * 0.023 ); //tamanoAlerta = 20;
 
-    debug = verFps = verDatos = verAlertas = true;
+    verFps = false;
+    debug = verDatos = verAlertas = true;
   }
 
   //--------------------------------------- METODOS PUBLICOS
