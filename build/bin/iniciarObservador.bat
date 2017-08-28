@@ -1,2 +1,2 @@
 cd %~dp0/Observador
-Observador.exe
+start Observador.exe

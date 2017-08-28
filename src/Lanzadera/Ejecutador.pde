@@ -9,7 +9,7 @@ class Ejecutador {
 
   String dirReal = sketchPath(""), //sketchPath("..\\lib\\*"),
     lienzoReal = "./Lienzo", 
-    observadorReal = "Observador/./Observador", 
+    observadorReal = "Observador/Observador.exe", 
     carreteReal = "./Carrete";
 
   String dirUtileria = sketchPath("..\\modulosDeUtileria\\lib\\*"), 
@@ -54,7 +54,7 @@ class Ejecutador {
   }
   
   void ejecutarLocales() {
-    consolaDebug.printlnAlerta( "" + templateLanzador.replace(ejecutarKeyword, observadorReal) );
+    //consolaDebug.printlnAlerta( "" + templateLanzador.replace(ejecutarKeyword, observadorReal) );
     if (modoUtileria) {
       if (config.lienzo.estado == EstadoModulo.LOCAL) {
         lienzo=launch( templateLanzador.replace(ejecutarKeyword, lienzoUtileria));
@@ -82,7 +82,13 @@ class Ejecutador {
       cons.pasarStream(lienzo);  */
     }
       if (config.observador.estado == EstadoModulo.LOCAL) {
-        observador=launch( templateLanzador.replace(ejecutarKeyword, observadorReal));
+        //observador=launch( templateLanzador.replace(ejecutarKeyword, observadorReal));
+        consolaDebug.printlnAlerta("Ejecutando version literal");
+        //observador = exec( "start cmd /c /k /D:/EmmeLab 2016/Repositorio Cod05 GitKraken/cod05/build/bin/Observador" );
+        //observador = exec( "start", "Hola", "\"D:/EmmeLab 2016/Repositorio Cod05 GitKraken/cod05/build/bin/Observador/Observador.exe\"" );
+        //observador = launch( "start cmd /d /D:/Program Files (x86)/Rockstar Games/Bully Scholarship Edition/Bully.exe" );
+        //observador = launch( "start cmd /d \"D:/EmmeLab 2016/Repositorio Cod05 GitKraken/cod05/build/bin/Observador\" Observador.exe" );
+        observador = launch( "start \"D:/EmmeLab 2016/Repositorio Cod05 GitKraken/cod05/build/bin/iniciarObservador.bat\"" );
     /*PAppConsola cons = new PAppConsola();
       PApplet.runSketch(new String[]{"PAppConsola"},cons);
       cons.pasarStream(observador); */ 

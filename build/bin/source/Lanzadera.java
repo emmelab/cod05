@@ -792,7 +792,7 @@ class Ejecutador {
 
   String dirReal = sketchPath(""), //sketchPath("..\\lib\\*"),
     lienzoReal = "./Lienzo", 
-    observadorReal = "Observador/./Observador", 
+    observadorReal = "Observador/Observador.exe", 
     carreteReal = "./Carrete";
 
   String dirUtileria = sketchPath("..\\modulosDeUtileria\\lib\\*"), 
