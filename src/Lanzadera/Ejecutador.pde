@@ -9,7 +9,7 @@ class Ejecutador {
 
   String dirReal = sketchPath(""), //sketchPath("..\\lib\\*"),
     lienzoReal = "./Lienzo", 
-    observadorReal = "iniciarObservador.bat", 
+    observadorReal = "Observador/./Observador", 
     carreteReal = "./Carrete";
 
   String dirUtileria = sketchPath("..\\modulosDeUtileria\\lib\\*"), 
@@ -34,7 +34,7 @@ class Ejecutador {
     }
     this.modoUtileria = modoUtileria;
     if(modoUtileria)templateLanzador = "\""+javaPath+"\\bin\\java\" -cp "+dirUtileria+" "+ejecutarKeyword ;
-    else templateLanzador = dirReal+ejecutarKeyword;
+    else templateLanzador = "start cmd /c /k \"" + dirReal+ejecutarKeyword + "\"";
   }
   
   boolean enEjecucion() {
@@ -54,6 +54,7 @@ class Ejecutador {
   }
   
   void ejecutarLocales() {
+    consolaDebug.printlnAlerta( "" + templateLanzador.replace(ejecutarKeyword, observadorReal) );
     if (modoUtileria) {
       if (config.lienzo.estado == EstadoModulo.LOCAL) {
         lienzo=launch( templateLanzador.replace(ejecutarKeyword, lienzoUtileria));
@@ -109,6 +110,7 @@ class Ejecutador {
     }
   }
   void ejecutarObservador() {
+    consolaDebug.printlnAlerta( "Vamos que intento correr el observadorr!!" );
     if (modoUtileria) {
       observador=launch( templateLanzador.replace(ejecutarKeyword, observadorUtileria));
       /*PAppConsola cons = new PAppConsola();

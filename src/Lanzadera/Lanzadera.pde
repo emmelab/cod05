@@ -1,5 +1,5 @@
 boolean modoPDE = false;// poner en false cuando se haga una exportacion posta
-boolean modoDummies = true && modoPDE;// lo mismo
+boolean modoDummies = false && modoPDE;// lo mismo
 
 import oscP5.*;
 import netP5.*;

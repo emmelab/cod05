@@ -1,3 +1,2 @@
-@echo off
-cd %~dp0
-start /d "Observador" Observador.exe
+cd %~dp0/Observador
+Observador.exe

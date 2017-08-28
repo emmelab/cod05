@@ -19,7 +19,7 @@ import java.io.IOException;
 public class Lanzadera extends PApplet {
 
 boolean modoPDE = false;// poner en false cuando se haga una exportacion posta
-boolean modoDummies = true && modoPDE;// lo mismo
+boolean modoDummies = false && modoPDE;// lo mismo
 
 
 
@@ -792,7 +792,7 @@ class Ejecutador {
 
   String dirReal = sketchPath(""), //sketchPath("..\\lib\\*"),
     lienzoReal = "./Lienzo", 
-    observadorReal = "iniciarObservador.bat", 
+    observadorReal = "Observador/./Observador", 
     carreteReal = "./Carrete";
 
   String dirUtileria = sketchPath("..\\modulosDeUtileria\\lib\\*"), 
@@ -817,7 +817,7 @@ class Ejecutador {
     }
     this.modoUtileria = modoUtileria;
     if(modoUtileria)templateLanzador = "\""+javaPath+"\\bin\\java\" -cp "+dirUtileria+" "+ejecutarKeyword ;
-    else templateLanzador = dirReal+ejecutarKeyword;
+    else templateLanzador = "start cmd /c /k \"" + dirReal+ejecutarKeyword + "\"";
   }
   
   public boolean enEjecucion() {
@@ -837,6 +837,7 @@ class Ejecutador {
   }
   
   public void ejecutarLocales() {
+    consolaDebug.printlnAlerta( "" + templateLanzador.replace(ejecutarKeyword, observadorReal) );
     if (modoUtileria) {
       if (config.lienzo.estado == EstadoModulo.LOCAL) {
         lienzo=launch( templateLanzador.replace(ejecutarKeyword, lienzoUtileria));
@@ -892,6 +893,7 @@ class Ejecutador {
     }
   }
   public void ejecutarObservador() {
+    consolaDebug.printlnAlerta( "Vamos que intento correr el observadorr!!" );
     if (modoUtileria) {
       observador=launch( templateLanzador.replace(ejecutarKeyword, observadorUtileria));
       /*PAppConsola cons = new PAppConsola();
