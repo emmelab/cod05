@@ -83,15 +83,13 @@ class Ejecutador {
     }
       if (config.observador.estado == EstadoModulo.LOCAL) {
         //observador=launch( templateLanzador.replace(ejecutarKeyword, observadorReal));
-        consolaDebug.printlnAlerta("Ejecutando version literal");
-        //observador = exec( "start cmd /c /k /D:/EmmeLab 2016/Repositorio Cod05 GitKraken/cod05/build/bin/Observador" );
-        //observador = exec( "start", "Hola", "\"D:/EmmeLab 2016/Repositorio Cod05 GitKraken/cod05/build/bin/Observador/Observador.exe\"" );
-        //observador = launch( "start cmd /d /D:/Program Files (x86)/Rockstar Games/Bully Scholarship Edition/Bully.exe" );
-        //observador = launch( "start cmd /d \"D:/EmmeLab 2016/Repositorio Cod05 GitKraken/cod05/build/bin/Observador\" Observador.exe" );
-        observador = launch( "start \"D:/EmmeLab 2016/Repositorio Cod05 GitKraken/cod05/build/bin/iniciarObservador.bat\"" );
-    /*PAppConsola cons = new PAppConsola();
-      PApplet.runSketch(new String[]{"PAppConsola"},cons);
-      cons.pasarStream(observador); */ 
+        
+        consolaDebug.printlnAlerta("Ejecutando version literal y funca :D");
+        observador = launch( "start cmd /k d: ^& cd \"D:/EmmeLab 2016/Repositorio Cod05 GitKraken/cod05/build/bin/Observador/\" ^& Observador");
+        
+        PAppConsola cons = new PAppConsola();
+        PApplet.runSketch(new String[]{"PAppConsola"},cons);
+        cons.pasarStream(observador);
     }
       if (config.carrete.estado == EstadoModulo.LOCAL) {
         carrete=launch( templateLanzador.replace(ejecutarKeyword, carreteReal));
