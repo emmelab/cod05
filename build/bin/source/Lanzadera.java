@@ -836,48 +836,35 @@ class Ejecutador {
     }
   }
 
-  public void ejecutarLocales() {
+public void ejecutarLocales() {
+  if (config.lienzo.estado == EstadoModulo.LOCAL) ejecutarLienzo();
+  if (config.observador.estado == EstadoModulo.LOCAL) ejecutarObservador();
+  if (config.carrete.estado == EstadoModulo.LOCAL) ejecutarCarrete();
+}
+  /*void ejecutarLocales() {
     //consolaDebug.printlnAlerta( "" + templateLanzador.replace(ejecutarKeyword, observadorReal) );
     if (modoUtileria) {
       if (config.lienzo.estado == EstadoModulo.LOCAL) {
         lienzo=launch( templateLanzador.replace(ejecutarKeyword, lienzoUtileria));
-        /*  PAppConsola cons = new PAppConsola();
-         PApplet.runSketch(new String[]{"PAppConsola"},cons);
-         cons.pasarStream(lienzo);*/
       }
       if (config.observador.estado == EstadoModulo.LOCAL) {
         observador=launch( templateLanzador.replace(ejecutarKeyword, observadorUtileria));
-        /* PAppConsola cons = new PAppConsola();
-         PApplet.runSketch(new String[]{"PAppConsola"},cons);
-         cons.pasarStream(observador);*/
       }
       if (config.carrete.estado == EstadoModulo.LOCAL) {
         carrete=launch( templateLanzador.replace(ejecutarKeyword, carreteUtileria));
-        /* PAppConsola cons = new PAppConsola();
-         PApplet.runSketch(new String[]{"PAppConsola"},cons);
-         cons.pasarStream(carrete);*/
       }
     } else {
       if (config.lienzo.estado == EstadoModulo.LOCAL) {
         lienzo=launch( templateLanzador.replace(ejecutarKeyword, lienzoReal));
-        /*PAppConsola cons = new PAppConsola();
-         PApplet.runSketch(new String[]{"PAppConsola"},cons);
-         cons.pasarStream(lienzo);  */
       }
       if (config.observador.estado == EstadoModulo.LOCAL) {
         observador = launch( templateLanzador.replace(ejecutarKeyword, observadorReal));
-        /*PAppConsola cons = new PAppConsola();
-         PApplet.runSketch(new String[]{"PAppConsola"},cons);
-         cons.pasarStream(observador);*/
       }
       if (config.carrete.estado == EstadoModulo.LOCAL) {
         carrete=launch( templateLanzador.replace(ejecutarKeyword, carreteReal));
-        /*PAppConsola cons = new PAppConsola();
-         PApplet.runSketch(new String[]{"PAppConsola"},cons);
-         cons.pasarStream(carrete);  */
       }
     }
-  }
+  }*/
 
   public void ejecutarLienzo() {
     if (modoUtileria) {
@@ -900,7 +887,7 @@ class Ejecutador {
        PApplet.runSketch(new String[]{"PAppConsola"},cons);
        cons.pasarStream(observador);*/
     } else {
-      observador=launch( templateLanzador.replace(ejecutarKeyword, observadorUtileria));
+      observador=launch( templateLanzador.replace(ejecutarKeyword, observadorReal));
       /*PAppConsola cons = new PAppConsola();
        PApplet.runSketch(new String[]{"PAppConsola"},cons);
        cons.pasarStream(observador);*/
