@@ -45,24 +45,24 @@ Maquinarias maquinarias;
 XML xmlMaquinarias;
 
 public void setup() {
+
   
-  
-  
+
   //size(displayWidth, displayHeight);
   //size(displayWidth/2, displayHeight/2);
   //size( 800, 600 );
-  
+
   //sketchFullScreen();
-  
+
   noCursor();
- 
+
   xmlMaquinarias  = loadXML("maqs.xml"); 
   maquinarias = new Maquinarias(xmlMaquinarias);
-  
+
   managerUsuarios = new ManagerUsuarios();
-  
+
   sistema = new Sistema(this, raizDeCantidad*raizDeCantidad, managerUsuarios);
-  
+
   //if (sistema.registroModificadores==null)sistema.registroModificadores = new HashMap();
   //println(sistema.registroModificadores);
   println(Mod_AlfaSegunVelocidad.registrador);
@@ -83,7 +83,7 @@ public void setup() {
   println(Mod_FuerzasPorSemejanza.registrador);
   println(Mod_Gravedad.registrador);
   println(Mod_Mover.registrador);
-  println(Mod_ResetLluvia.registrador); 
+  //println(Mod_ResetLluvia.registrador); 
   println(Mod_RastroElastico.registrador);
   println(Mod_DibujarRastroCircular.registrador);
   println(Mod_DibujarRastroCuadrado.registrador);
@@ -115,14 +115,13 @@ public void setup() {
   //---------------------------------------------------------------------------MODIFICADORES TOTAL----------------------------------------------------------------------------
 
   initOSC();
-  modificadoresExistentes();
+  //modificadoresExistentes();
 
   //modificadoresTotal();
   for (String n : sistema.registroModificadores.keySet ()) {
     String categoria = sistema.registroModificadores.get(n).categoria();
     // println(categoria);
   }
-  
 }
 
 public void draw() {
@@ -146,19 +145,19 @@ public void ciclo() {
 
   fill(255);
   text(frameRate, 5, 10);
-  
-  if( sistema.debug ){
+
+  if ( sistema.debug ) {
     text( "DEBUG", 5, 30 );
-    managerUsuarios.debug( this );
+    managerUsuarios.debug( this );    
   }
-  
+  consolaDebug();
 }
 
 /*
 boolean sketchFullScreen() {
-  return true;
-}
-*/
+ return true;
+ }
+ */
 
 public void keyPressed() {
 
@@ -187,7 +186,8 @@ public void initOSC() {
 
   noSmooth();
   noStroke();
-
+  /* oscP5 = new OscP5(this, 12010);
+   consola = new NetAddress("127.0.0.1", 14000);*/
   oscP5 = new OscP5(this, config.lienzo.puerto);
   consola = new NetAddress(config.carrete.ip, config.carrete.puerto);
 
@@ -204,7 +204,7 @@ public void initOSC() {
 
   oscP5.plug(this, "recibirUsuarioJoint", "/enviar/usuario/joint");
   oscP5.plug(this, "removerUsuario", "/remover/usuario" );
-  //oscP5.plug(this, "enviarEstimulos", "/pedir/estimulos");
+  oscP5.plug(this, "enviarEstimulos", "/pedir/estimulos");
 }
 
 public void accionOpciones(String cual) {
@@ -330,6 +330,7 @@ public void mensaje(String mensaje) {
   OscMessage mensajeModificadores ;
   mensajeModificadores = new OscMessage(mensaje);
   oscP5.send(mensajeModificadores, consola);
+  consolaDebug.printlnAlerta(mensaje);
 }
 
 public void mensaje_CANTIDAD(String mensaje, int cantidad) {
@@ -337,6 +338,7 @@ public void mensaje_CANTIDAD(String mensaje, int cantidad) {
   mensajeModificadores = new OscMessage(mensaje);
   mensajeModificadores.add(cantidad);
   oscP5.send(mensajeModificadores, consola);
+  consolaDebug.printlnAlerta(mensaje);
 }
 
 public void mensaje_NOMBRE(String mensaje, String nombre) {
@@ -344,6 +346,7 @@ public void mensaje_NOMBRE(String mensaje, String nombre) {
   mensajeModificadores = new OscMessage(mensaje);
   mensajeModificadores.add(nombre);
   oscP5.send(mensajeModificadores, consola);
+  consolaDebug.printlnAlerta(mensaje+"/"+nombre);
 }
 
 public void mensaje_NOMBRE_ESTADO(String mensaje, String nombre, int estado) {
@@ -352,6 +355,7 @@ public void mensaje_NOMBRE_ESTADO(String mensaje, String nombre, int estado) {
   mensajeModificadores.add(nombre);
   mensajeModificadores.add(estado); // 0 para false   --- 1 para true // para evitar usar otra funcion agrego un dato de estado de las opciones luego peude serviar para revisar el estado dle alfa y al pausa por ejemplo
   oscP5.send(mensajeModificadores, consola);
+  consolaDebug.printlnAlerta(mensaje+"/"+nombre);
 }
 
 public void mensaje_NOMBRE_CATEGORIA_ESTADO(String mensaje, String nombre, String categoria, int estado) {
@@ -361,6 +365,7 @@ public void mensaje_NOMBRE_CATEGORIA_ESTADO(String mensaje, String nombre, Strin
   mensajeModificadores.add(categoria);
   mensajeModificadores.add(estado); // 0 para false   --- 1 para true // para evitar usar otra funcion agrego un dato de estado de las opciones luego peude serviar para revisar el estado dle alfa y al pausa por ejemplo
   oscP5.send(mensajeModificadores, consola);
+  consolaDebug.printlnAlerta(mensaje+"/"+nombre+" de "+categoria+"");
 }
 
 
@@ -370,6 +375,7 @@ public void mensaje_POSICION_ESTADO(String mensaje, int posicion, int estado) {
   mensajeModificadores.add(posicion);
   mensajeModificadores.add(estado); // 0 para false   --- 1 para true // para evitar usar otra funcion agrego un dato de estado de las opciones luego peude serviar para revisar el estado dle alfa y al pausa por ejemplo
   oscP5.send(mensajeModificadores, consola);
+  consolaDebug.printlnAlerta(mensaje);
 }
 // The following short XML file called "mammals.xml" is parsed 
 // in the code below. It must be in the project's "data" folder.
@@ -452,7 +458,9 @@ enum EstadoModulo {
   APAGADO, LOCAL, REMOTO
 }
 final EstadoModulo[] EstadoModuloList = new EstadoModulo[]{EstadoModulo.APAGADO, EstadoModulo.LOCAL, EstadoModulo.REMOTO};
-public int EstadoModuloToInt(EstadoModulo estado) {return estado==EstadoModulo.APAGADO?0:estado==EstadoModulo.LOCAL?1:2;};
+public int EstadoModuloToInt(EstadoModulo estado) {
+  return estado==EstadoModulo.APAGADO?0:estado==EstadoModulo.LOCAL?1:2;
+};
 
 class ConfiguracionCOD05 {
   ConfigModulo lienzo, observador, carrete;
@@ -509,6 +517,259 @@ class ConfiguracionCOD05 {
     return xml;
   }
 }
+Reloj reloj = new Reloj();
+ConsolaDebug consolaDebug = new ConsolaDebug();
+
+public void consolaDebug() {
+  reloj.actualizar();
+  consolaDebug.ejecutar();
+}
+
+public final class ConsolaDebug {
+
+  private String texto;
+  private ArrayList<Alerta> alertas = new ArrayList<Alerta>();
+  private int colorTexto, colorAlerta, colorSuperAlerta;
+  private int tamanoTexto, tamanoAlerta;
+  private boolean debug;
+
+  private boolean verFps, verDatos, verAlertas;
+
+  private static final float LEADIN = 1.5f; //--- NUEVO!
+
+  public ConsolaDebug() {
+    texto = "";
+    colorTexto = color( 0xff000000 );//color( 255 );
+    colorAlerta = color(175, 194, 43);//#FF0000
+    tamanoTexto = PApplet.parseInt( height * 0.12f ); //int( height * 0.023 ); //tamanoTexto = 20;
+    tamanoAlerta = PApplet.parseInt( height * 0.12f ); //int( height * 0.023 ); //tamanoAlerta = 20;
+
+    verFps = false;
+    debug = verDatos = verAlertas = true;
+  }
+
+  //--------------------------------------- METODOS PUBLICOS
+
+  //GETERS AND SETERS
+  public void setDebug( boolean debug ) {
+    this.debug = debug;
+  }
+
+  public void setVerFps( boolean verFps ) {
+    this.verFps = verFps;
+  }
+
+  public void setVerDatos( boolean verDatos ) {
+    this.verDatos = verDatos;
+  }
+
+  public void setVerAlertas( boolean verAlertas ) {
+    this.verAlertas = verAlertas;
+  }
+
+  public boolean getDebug() {
+    return debug;
+  }
+
+  public boolean getVerFps() {
+    return verFps;
+  }
+
+  public boolean getVerDatos() {
+    return verDatos;
+  }
+
+  public boolean getVerAlertas() {
+    return verAlertas;
+  }
+  //--------
+
+  public void println( String texto ) {
+    this.texto += texto + "\n";
+  }
+
+  public void printlnAlerta( String alerta ) {
+    alertas.add( new Alerta( alerta ) );
+    System.out.println( alerta );
+  }
+
+  public void printlnAlerta( String alerta, int c ) {
+    alertas.add( new Alerta( alerta, c ) );
+    System.out.println( alerta );
+  }
+
+  public void ejecutar() {
+
+    if ( !verDatos ) texto = "";
+    if ( verFps ) texto = "fps: " + nf( frameRate, 0, 2 ) + "\n" + texto;
+
+    if ( debug ) ejecutarDebug();
+    else ejecutarNoDebug();
+    texto = "";
+  }
+
+  //--------------------------------------- METODOS PRIVADOS
+
+  private void ejecutarDebug() {
+    pushStyle();
+
+    textAlign( LEFT, TOP );
+    textSize( tamanoTexto );
+    textLeading( tamanoTexto * LEADIN ); 
+
+    noStroke();
+
+    //NUEVO rectangulo negro de fondo
+
+    fill( 255 );
+    int desde = 0, hasta = 0, iteracion = 0;
+    while ( texto.indexOf( "\n", desde ) > 0 ) {
+
+      hasta = texto.indexOf( "\n", desde );
+      String aux = texto.substring( desde, hasta );
+
+      rect( 0, iteracion * (tamanoTexto * LEADIN), textWidth( aux ) + 3, tamanoTexto * ( LEADIN * 1.1666666f ) );
+
+      desde = hasta + 1;
+      iteracion++;
+    }
+
+    //
+
+    fill( colorTexto );
+    text( texto, 0, 3 );
+    if ( !texto.equals("") ) System.out.println( texto );
+
+    textAlign( RIGHT, BOTTOM );
+    textSize( tamanoAlerta );
+    imprimirAlertas( verAlertas );
+
+    popStyle();
+  }
+
+  private void ejecutarNoDebug() {
+    if ( !texto.equals("") ) System.out.println( texto );
+    imprimirAlertas( false );
+  }
+
+  private void imprimirAlertas( boolean debug ) {
+
+    float posY = tamanoAlerta + tamanoAlerta * (LEADIN * 0.16666666f) ;//0.25
+
+    for ( int i = alertas.size() - 1; i >= 0; i-- ) {
+
+      Alerta a = alertas.get( i );
+      a.ejecutar();
+
+      if ( a.getEstado() == Alerta.ESTADO_ELIMINAR ) {
+        alertas.remove( i );
+      } else if ( debug ) {
+
+        //------ NUEVO rectangulo negro de fondo
+
+        if ( a.getEstado() == Alerta.ESTADO_MOSTRAR )
+          fill( 0 );
+        else
+          fill( 0, map( a.getTiempo(), 0, Alerta.TIEMPO_DESAPARECER, 255, 0 ) );
+
+        rect( width - textWidth( a.getAlerta() ) - 5, posY- tamanoAlerta * ( LEADIN * 0.875f ), textWidth( a.getAlerta() ) + 5, tamanoAlerta * LEADIN );
+
+        //------
+        int colorTexto = a.tengoColor?a.m_color:colorAlerta;
+        if ( a.getEstado() == Alerta.ESTADO_MOSTRAR ) {
+          fill( colorTexto );
+        } else {
+          fill( colorTexto, map( a.getTiempo(), 0, Alerta.TIEMPO_DESAPARECER, 255, 0 ) );
+        }
+        text( a.getAlerta(), width, posY );
+        posY += tamanoAlerta * LEADIN;
+
+        if ( posY > height && i - 1 >= 0 ) {
+          removerAlertasFueraDePantalla( i - 1 );
+          return;
+        }
+      }
+    }//end for
+  }
+
+  private void removerAlertasFueraDePantalla( int desde ) {
+    for ( int i = desde; i >= 0; i-- )
+      alertas.remove( i );
+  }
+
+  //clase interna y miembro
+  public class Alerta {
+
+    private String alerta;
+    int m_color;
+    boolean tengoColor;
+    private int estado;
+    public static final int
+      ESTADO_MOSTRAR = 0, 
+      ESTADO_DESAPARECER = 1, 
+      ESTADO_ELIMINAR = 2;
+
+    private int tiempo;
+    public static final int
+      TIEMPO_MOSTRAR = 5000, //3000
+      TIEMPO_DESAPARECER = 2000;
+
+    public Alerta( String alerta ) {
+      this.alerta = alerta;
+      estado = ESTADO_MOSTRAR;
+      tengoColor = false;
+    }
+
+    public Alerta( String alerta, int c ) {
+      this.alerta = alerta;
+      m_color = c;
+      estado = ESTADO_MOSTRAR;
+      tengoColor = true;
+    }
+
+    //------------------------------ METODOS PUBLICOS
+
+    public String getAlerta() {
+      return alerta;
+    }
+
+    public int getEstado() {
+      return estado;
+    }
+
+    public int getTiempo() {
+      return tiempo;
+    }
+
+    public void ejecutar() {
+      tiempo += reloj.getDeltaMillis();
+      if ( estado == ESTADO_MOSTRAR && tiempo > TIEMPO_MOSTRAR ) {
+        estado = ESTADO_DESAPARECER;
+        tiempo = 0;
+      } else if ( estado == ESTADO_DESAPARECER && tiempo > TIEMPO_DESAPARECER ) {
+        estado = ESTADO_ELIMINAR;
+      }
+    }
+  }
+}
+
+public class Reloj {
+
+  private int millisActual, millisAnterior, deltaMillis;
+
+  public Reloj() {
+  }
+
+  public int getDeltaMillis() {
+    return deltaMillis;
+  }
+
+  public void actualizar() {
+    millisAnterior = millisActual;
+    millisActual = millis();
+    deltaMillis = millisActual - millisAnterior;
+  }
+}
 
    Registrador<Mod_FriccionGlobal> regFriccionGlobal = new Registrador(){
     public String key() {return "Friccion Global";}
@@ -535,7 +796,7 @@ class Mod_FriccionGlobal extends Modificador {
 }
   public void settings() {  fullScreen( 2 ); }
   static public void main(String[] passedArgs) {
-    String[] appletArgs = new String[] { "Lienzo" };
+    String[] appletArgs = new String[] { "--present", "--window-color=#FFFFFF", "--hide-stop", "Lienzo" };
     if (passedArgs != null) {
       PApplet.main(concat(appletArgs, passedArgs));
     } else {

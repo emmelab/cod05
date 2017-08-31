@@ -11,17 +11,17 @@ class Controlador {
   void aceptar() {
     //consola.activar();
     consola.botonesAccionesN2();
-   /* if (consola.modos.getModo().equals(ESPERA)) {
-      consola.mandarMensaje("/holi...ten un buen dia");
-    } else if (consola.modos.getModo().equals(AGREGAR)) {
-      consola.mandarMensaje("/pedir/modificadores/existentes");
-    } else if (consola.modos.getModo().equals(ELIMINAR)) {
-      consola.mandarMensaje("/pedir/modificadores/existentes");
-    } else if (consola.modos.getModo().equals(ESTIMULOS)) {
-      consola.mandarMensaje("/pedir/estimulos/totales");
-    } else if (consola.modos.getModo().equals(OPCIONES)) {
-      consola.mandarMensaje("/pedir/opciones");
-    }*/
+    /* if (consola.modos.getModo().equals(ESPERA)) {
+     consola.mandarMensaje("/holi...ten un buen dia");
+     } else if (consola.modos.getModo().equals(AGREGAR)) {
+     consola.mandarMensaje("/pedir/modificadores/existentes");
+     } else if (consola.modos.getModo().equals(ELIMINAR)) {
+     consola.mandarMensaje("/pedir/modificadores/existentes");
+     } else if (consola.modos.getModo().equals(ESTIMULOS)) {
+     consola.mandarMensaje("/pedir/estimulos/totales");
+     } else if (consola.modos.getModo().equals(OPCIONES)) {
+     consola.mandarMensaje("/pedir/opciones");
+     }*/
   }
 
   void izquierda() {
@@ -33,7 +33,9 @@ class Controlador {
   }
 
   void anadir() {
-    consola.activarAnadir();
+    if (!(consola.modos.getModo().equals(MAQUINARIAS))) {
+      consola.activarAnadir();
+    }
   }
   void quitar() {
     consola.activarQuitar();
@@ -41,18 +43,16 @@ class Controlador {
   void opciones() {
     consola.activarOpciones();
   }
-  void estimulos() {
+  /*void estimulos() {
     consola.activarEstimulos();
-  }
+  }*/
 
   void cancelar() {    
 
     //consola.cancelar();
   }
 
-  void actualizarIconos(int cerrado, int nivel, int eje) {    
-
+  void actualizarIconos(int cerrado, int nivel, int eje) {   
     consola.actualizarIconos(cerrado, nivel, eje);
   }
 }
-

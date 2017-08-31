@@ -1,0 +1,4 @@
+Movi el Observador una carpeta mas hacia adentro
+para que a la hora de levantar configcod05.xml
+se deba subir dos carpetas ../../
+asi queda tal cual como se va a usar en el ejecutable

@@ -3,13 +3,13 @@ class BotonModulo implements AutoDraw, AutoMousePressed {
   EstadoModulo estado = EstadoModulo.LOCAL;
   boolean mostrar = false, remotoEncontrado = false, panelIPsAbierto = false;
   float todoGris = 0;
-  Tweener animPos, animAro, animAroConectado,animAlfa,animColor;
+  Tweener animPos, animAro, animAroConectado, animAlfa, animColor;
   //TwOutBack animPos, animAro, animAroConectado;
   //TwOutQuad animAlfa, animColor;
   PVector pos;
   PImage icono, aroCerrado, aroAbierto;
   color colEncendido, colApagado;
-
+  float escala = 0.6f;
   BotonModulo(PVector pos, String icono, color col) {
     this.pos = pos;
     this.icono = iconos.get(icono);
@@ -23,14 +23,13 @@ class BotonModulo implements AutoDraw, AutoMousePressed {
     animAroConectado = (new TwOutBack()).inicializar(animAro);
     animPos = (new TwOutBack()).inicializar(.3, pos.y-100, pos.y);
     animColor = (new TwOutQuad()).inicializar(.3);
-
     autoDraw.add(this);
     autoMousePressed.add(this);
   }
 
-  void set(ConfiguracionCOD05.ConfigModulo config){
-  this.config = config;
-  estado = config.estado;
+  void set(ConfiguracionCOD05.ConfigModulo config) {
+    this.config = config;
+    estado = config.estado;
   }
 
   void mousePressed() {
@@ -38,7 +37,7 @@ class BotonModulo implements AutoDraw, AutoMousePressed {
       if (estado == EstadoModulo.APAGADO) estado = EstadoModulo.LOCAL;
       else if (estado == EstadoModulo.LOCAL) estado = panelIPsAbierto ? EstadoModulo.REMOTO : EstadoModulo.APAGADO;
       else if (estado == EstadoModulo.REMOTO) estado = EstadoModulo.APAGADO;
-      if(config!=null)config.estado = estado;
+      if (config!=null)config.estado = estado;
     }
   }
 
@@ -52,23 +51,30 @@ class BotonModulo implements AutoDraw, AutoMousePressed {
         animAroConectado.actualizar(estado!=EstadoModulo.APAGADO&&(remotoEncontrado||estado==EstadoModulo.LOCAL)?dt:-dt);
       }
     }
+
+
     pushStyle();
     imageMode(CENTER);
     tint( lerpColor( colEncendido, colApagado, todoGris), animAlfa.valor());
     pushMatrix();
     translate(pos.x, animPos.valor());
     rotate(pos.z);
+    scale(escala);
     pos.z += dt*.75;
     if (animAroConectado.estado>0) {
       image(aroAbierto, 0, 0, animAroConectado.valor(), animAroConectado.valor());
     }
-    if(animAro.estado > 0){
-    rotate(HALF_PI);
-    image(aroAbierto, 0, 0, animAro.valor(), animAro.valor());
+    if (animAro.estado > 0) {
+      rotate(HALF_PI);
+      image(aroAbierto, 0, 0, animAro.valor(), animAro.valor());
     }
     popMatrix();
+    pushMatrix();
     tint( lerpColor( lerpColor(colEncendido, colApagado, animColor.valor()), colApagado, todoGris), animAlfa.valor());
-    image(icono, pos.x, animPos.valor());    
+    translate(pos.x, animPos.valor());
+    scale(escala);
+    image(icono, 0, 0);  
+    popMatrix();
     popStyle();
   }
 

@@ -16,7 +16,7 @@ int[] ultimoPing = {0, 0, 0};
 int conectandoStringRnd = 0;
 String[] conectandoString = {".", ":", "¨", " .", "..", ":.", ".:", " :", "::", "¨.", ".¨", ":¨"};
 
-String dirUtileria = export?"*":"..\\..\\lib\\*";
+String dirUtileria = export?"*":"../../lib/*";
 String javaPath = "";
 String[] opciones = {"Lienzo", "Observador", "Carrete"};
 String[] ejecucion = {"dummyLienzo", "dummyObservador", "dummyCarrete"};
@@ -43,7 +43,7 @@ void setup() {
 void mousePressed() {
   if (mouseX > width-50 && mouseY < 50) {
     java.awt.Point loc = ((java.awt.Canvas)surface.getNative()).getLocationOnScreen();
-    String[] args = {ARGS_SKETCH_FOLDER+"="+sketchPath("."),ARGS_LOCATION+"="+loc.x+","+(loc.y+height+30), "dummyLanzadera"};
+    String[] args = {ARGS_SKETCH_FOLDER+"="+sketchPath("."), ARGS_LOCATION+"="+loc.x+","+(loc.y+height+30), "dummyLanzadera"};
     PApplet.runSketch(args, new dummyLanzadera());
   } else if (mouseY < 80 && !pausarOsc) {
     if (oscP5 != null) {
@@ -63,10 +63,10 @@ void ejecutarSel() {
   if (sel == -1) return;
   XML xmlConfig = new XML("xml");
   xmlConfig.addChild(config.guardar("ejecucion"));
-  String launchString = "\""+javaPath+"\\bin\\java\" -cp "+
-    dirUtileria+"  "+ejecucion[sel]+" xmlConfig=\""+xmlConfig.toString().replace('"', '\'')+"\"";
+  String launchString = "\""+javaPath+"/bin/java\" -cp \""+
+    dirUtileria+"\"  "+ejecucion[sel]+" xmlConfig=\""+xmlConfig.toString().replace('"', '\'')+"\"";
   println("launchString = "+launchString);
-  Process p = exec(launchString);
+  Process p = launch(launchString);
   try {
     pausarOsc = true;
     oscP5.stop();
@@ -143,20 +143,20 @@ void responderEstablecerIPs(String lienzoIp, int lienzoPort,
   config.observador.puerto = observadorPort;
   config.carrete.ip = carreteIp;
   config.carrete.puerto = carretePort;
-  
-     if (config.lienzo.estado != EstadoModulo.APAGADO) {
-       if (oscP5.ip().equals(lienzoIp)) config.lienzo.estado = EstadoModulo.LOCAL;
-       else config.lienzo.estado = EstadoModulo.REMOTO;
-     }
-     if (config.observador.estado != EstadoModulo.APAGADO) {
-       if (oscP5.ip().equals(observadorIp)) config.observador.estado = EstadoModulo.LOCAL;
-       else config.observador.estado = EstadoModulo.REMOTO;
-     }
-     if (config.carrete.estado != EstadoModulo.APAGADO) {
-       if (oscP5.ip().equals(carreteIp)) config.carrete.estado = EstadoModulo.LOCAL;
-       else config.carrete.estado = EstadoModulo.REMOTO;
-     }
-     
+
+  if (config.lienzo.estado != EstadoModulo.APAGADO) {
+    if (oscP5.ip().equals(lienzoIp)) config.lienzo.estado = EstadoModulo.LOCAL;
+    else config.lienzo.estado = EstadoModulo.REMOTO;
+  }
+  if (config.observador.estado != EstadoModulo.APAGADO) {
+    if (oscP5.ip().equals(observadorIp)) config.observador.estado = EstadoModulo.LOCAL;
+    else config.observador.estado = EstadoModulo.REMOTO;
+  }
+  if (config.carrete.estado != EstadoModulo.APAGADO) {
+    if (oscP5.ip().equals(carreteIp)) config.carrete.estado = EstadoModulo.LOCAL;
+    else config.carrete.estado = EstadoModulo.REMOTO;
+  }
+
   println("config.lienzo.estado = "+config.lienzo.estado);
   println("config.observador.estado = "+config.observador.estado);
   println("config.carrete.estado = "+config.carrete.estado);

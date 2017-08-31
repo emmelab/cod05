@@ -3,7 +3,6 @@ import processing.data.*;
 import processing.event.*; 
 import processing.opengl.*; 
 
-import controlP5.*; 
 import oscP5.*; 
 import netP5.*; 
 
@@ -18,21 +17,30 @@ import java.io.IOException;
 
 public class Carrete extends PApplet {
 
+// Soy un triangulooo....
+// No soy un cuadradoooo...
+//No soy un circulo....
+// Tengo Arriba....
+//Soy 2D
+
 ///////////////////////CONTROLES TECLADO
 //--- flechas izquierda y derecha: para navegacion
 //--- enter:  ingresar en un submenu o activar un modificador
-//--- barra espaciadora: desplagar ipManager
 //--- 'a' o 'A' : agregarModificador
 //--- 's' o 'S' : quitarModificador
-//--- 'd' o 'D' : cancelar
 
-/*---- mi favorita hasta ahora---- ir a opciones para quitar 
- ------ el fondo agregar movimiento, y cohesion(2), esperar 
- ------ unos segundos, agregar fuerzaPorSemejanza y alfa 
- ------ segun velocidad, agregar dibujar lineas, quitar los 
- ------ dos cohesion y agregar un sepracion inmediatamente xD*/
+//--- 'r' o 'R' : reiniciarCarrete
+//--- 'm' o 'M' : prederApagarControlesDeMouse
+//--- 'q' o 'Q' : opciones
+//--- 'i' o 'I' : imprimir los modificadores como una linea para el xml de las maquinarias
+//--- ALT : cancelar
 
- 
+///////////////////////CONTROLES MOUSE
+//--- navegar por los modificadores 
+//--- dar click para agregar o quitar
+
+
+//import controlP5.*; 
 
 
 
@@ -41,10 +49,10 @@ int contadorCapturas = 0;
 OscP5 oscP5;
 NetAddress sistema;
 
-ControlP5 cp5;
+//ControlP5 cp5;
 int[][] paleta; 
 
-IpManager ipManager;
+//IpManager ipManager;
 
 String ip = "127.0.0.1";
 String puertoEnvio = "12100";
@@ -53,9 +61,11 @@ String puertoRecivo = "12000";
 
 Consola consola;
 Controlador controlador;
-ArrayList<String> nombresBotones;
-ArrayList<String> nombresBotonesExistentes;
+ArrayList<String> nombresModificadores;
+ArrayList<String> nombresModificadoresExistentes;
 ArrayList<String> nombresCategorias;
+ArrayList<String> nombresMaquinarias;
+ArrayList<String> nombresOpciones;
 int cantidad;
 int cantidadExistentes;
 
@@ -75,44 +85,40 @@ boolean alto = false;// variables de control para los niveles
 boolean abierto = false;// variables de control para los abierto/cerrado
 boolean cerrado = false;// variables de control para los abirto/cerrado
 
-int cerradoValor = 0;
-int desequilibrioValor = 0;
-int nivelValor = 0;
+int cerradoValor = 1;
+int desequilibrioValor = 2;
+int nivelValor = 1;
 
 boolean totales;
 boolean existentes;
+boolean maquinarias;
 
 boolean conectadoConSistema = false;
-
+boolean existeSistema = false;
 UIcontrol uiControl;
 
-Iconos iconos;
+BDD bdd;
 public void setup() {
   
-  surface.setAlwaysOnTop(true);
+  bdd = new BDD();
   //frameRate(25);
   
-  
   setPaleta();
+  strokeCap(PROJECT);
 
-  cosasLocasSetUp();
 
   initOSC();
 
   uiControl = new UIcontrol(new PVector(0, 0), width, height, paleta);
-  cp5 = new ControlP5(this);
-  ipManager = new IpManager(cp5);
-  ipManager.set();
+  /*cp5 = new ControlP5(this);
+   ipManager = new IpManager(cp5);
+   ipManager.set();*/
 
   //fuente = loadFont("28DaysLater-48.vlw");
   //fuente = loadFont("Castellar-30.vlw");
   fuente = loadFont("Consolas-48.vlw");
 
-
-
   textFont(fuente);
-
-
 
   consola = new Consola(paleta);
   controlador = new Controlador(consola);
@@ -122,101 +128,135 @@ public void setup() {
 public void draw() {
 
   background( fondo);
-  
-  
-  if (consola != null) {
+  if (consola != null && conectadoConSistema) {
     consola.ejecutar();
-  }
-
-  ipManager.fondo();
-
-  if (totales && existentes) {
-    botonesListo();
-    println("..........listo botones.........");
-    controlador.anadir();
-    controlador.cancelar();
-  }
-
-  if (!conectadoConSistema) {
-  modoSoloKinect.actualizar(width/2,height/2,1);
-  
-    if (frameCount%60==0) {
-      println("pido");
-      consola.mandarMensaje("/pedir/modificadores/total");
-    }
-
+  } else if (!conectadoConSistema && existeSistema) {
     pushStyle();
     fill(255);
     textSize(30);
-    text("desconectado", width/2, height/2);
+    textAlign(CENTER, CENTER);
+    text("conectando", width/2, height/2);
     popStyle();
+    consolaDebug();
+  } else {
+    pushStyle();
+    fill(255);
+    textSize(30);
+    textAlign(CENTER, CENTER);
+    text("desconectando", width/2, height/2);
+    popStyle();
+    consolaDebug();
   }
 
+  // ipManager.fondo();//-----esto ya no sirve pero lo dejo aqui para recordarme 
+  //-----que tengoq ue borrar la pesata\u00f1a y todo lo demas qe 
+  //-----tenga uqe ver con esto
+
+  revisarConectadoConSistema();
+  if (!existeSistema) {
+    estadoDesconectado();
+  }
+  UI_paleta();
+}
+
+public void revisarConectadoConSistema() {   
+  if (!conectadoConSistema && totales && existentes) {
+    botonesListo();
+    println("..........listo.........");
+    consolaDebug.printlnAlerta("..........listo.........");
+    conectadoConSistema = true;
+    controlador.anadir();
+  }
+}
+
+public void estadoDesconectado() {
+  if (frameCount%60==0) {
+    println("pido");
+    consolaDebug.printlnAlerta("pido");
+    //consola.mandarMensaje("/pedir/modificadores/total");
+    consola.mandarMensaje("/pedir/opciones");
+  }
+}
+
+public void reiniciarCarrete() {
+  existeSistema=false;
+  conectadoConSistema=false;
+}
+
+public void UI_paleta() {
   if (mousePressed) {
     uiControl.mouseDrag(mouseX, mouseY);
   }
   uiControl.dibujar();
-
-  cosasLocasDraw();  
 }
 
 public void keyPressed() {
 
-  if (key == ' ') {
-    if (uiControl.escondido)
-      ipManager.esconder();
-  }
+  /* if (key == ' ') {
+   if (uiControl.escondido)
+   ipManager.esconder();
+   }*/
+  if (conectadoConSistema) {
+    if (keyCode==RIGHT) {
+      controlador.derecha();
+    }
 
-  if (keyCode==RIGHT) {
-    controlador.derecha();
-  }
-
-  /*if (keyCode==ALT) {
-    if (ipManager.escondido)
+    if (keyCode==ALT) {
+      //  if (ipManager.escondido)
       uiControl.esconder();
-  }*/
+    }
 
-  if (keyCode==LEFT) {
-    controlador.izquierda();
-  }
+    if (keyCode==LEFT) {
+      controlador.izquierda();
+    }
 
-  if (keyCode==ENTER) {
-    controlador.aceptar();
-  }
+    if (keyCode==ENTER) {
+      controlador.aceptar();
+    }
 
-  if (key == 'A' || key == 'a') {
+    if (key == 'A' || key == 'a') {
+      controlador.anadir();
+    }
 
-    controlador.anadir();
-  }
+    if (key == 's' || key == 'S') {
+      controlador.quitar();
+    }
 
-  if (key == 's' || key == 'S') {
-    controlador.quitar();
-  }
+    if (key == 'q' || key == 'Q') {
+      controlador.opciones();
+    }
 
-  if (key == 'q' || key == 'Q') {
-    controlador.opciones();
-  }
+    if (key == 'i' || key == 'I') {
+      //consola.imprimirLista();
+      consola.cC.imprimirMaquinaria();
+    }
 
-  if (key == 'w' || key == 'W') {
-    controlador.estimulos();
-  }
+    if (key == 'g' || key == 'G') {
+      saveFrame("capturas/captura_####.tff");
+      contadorCapturas++;
+    }
 
-  if (key == 'd' || key == 'D') {
-    controlador.cancelar();
-  }
 
-  if (key == 'i' || key == 'I') {
-    //consola.imprimirLista();
-  }
 
-  if (key == 'g' || key == 'G') {
-    saveFrame("capturas/captura_####.tff");
-    contadorCapturas++;
+    /*if (key == 'm' || key == 'M') {
+     consola.cC.imprimirMaquinaria();
+     }*/
+
+    if (key == 'm' || key == 'M') {
+      bdd.interaccionConMouse = !bdd.interaccionConMouse;
+    }
+
+    if (key == 'r' || key == 'R') {
+      reiniciarCarrete() ;
+    }
   }
 }
 
 public void mousePressed() {
   uiControl.mousePressed(mouseX, mouseY);
+  if (bdd.interaccionConMouse) {
+    consola.mousePressed();
+  }
 }
 
 public void actualizarMovimiento() {
@@ -224,23 +264,27 @@ public void actualizarMovimiento() {
 }
 
 public void cantidadBotones(int cantidad_) {
-  conectadoConSistema = true;
+  existeSistema = true;
   cantidad=cantidad_;
-  nombresBotones = new ArrayList<String>();
+  nombresModificadores = new ArrayList<String>();
   nombresCategorias = new ArrayList<String>();
-  // estado = new ArrayList<Boolean>();
+  nombresMaquinarias = new ArrayList<String>();
+  nombresOpciones = new ArrayList<String>();
+  //estado = new ArrayList<Boolean>();
+  consolaDebug.printlnAlerta("cantidad botones: "+cantidad_);
 }
 
 public void cantidadBotonesExistentes(int cantidad_) {
   cantidadExistentes=cantidad_;
-  nombresBotonesExistentes = new ArrayList<String>();
+  nombresModificadoresExistentes = new ArrayList<String>();
   // estadoExistentes = new ArrayList<Boolean>();
+  consolaDebug.printlnAlerta("cantidad existentes: "+cantidad_);
 }
 
 public void modificadores(String nombre_, String categoria_, int estado_) {
-  nombresBotones.add(nombre_); 
+  nombresModificadores.add(nombre_); 
   nombresCategorias.add(categoria_); 
-
+  consolaDebug.printlnAlerta("llega mod: "+nombre_ +" de "+categoria_);
   /* if (estado_ == 0) {
    estado.add(false);
    } else {
@@ -249,8 +293,9 @@ public void modificadores(String nombre_, String categoria_, int estado_) {
 }
 
 public void modificadoresExistentes(String nombre, int estado_) {
-  nombresBotonesExistentes.add(nombre); 
+  nombresModificadoresExistentes.add(nombre); 
 
+  consolaDebug.printlnAlerta("exite mod: "+nombre);
   /*if (estado_ == 0) {
    estado.add(true);
    } else {
@@ -259,9 +304,8 @@ public void modificadoresExistentes(String nombre, int estado_) {
 }
 
 public void opciones(String nombre_, int estado_) {
-
-  nombresBotones.add(nombre_); 
-
+  nombresOpciones.add(nombre_); 
+  consolaDebug.printlnAlerta("llega opcion: "+nombre_);
   /* if (estado_ == 0) {
    estado.add(true);
    } else {
@@ -269,62 +313,107 @@ public void opciones(String nombre_, int estado_) {
    }*/
 }
 
-public void estimulos(String nombre_, int estado_) {
-
-  nombresBotones.add(nombre_); 
-  println("me estan llegando los estimulos");
+public void maquinarias(String nombre_) {
+  nombresMaquinarias.add(nombre_); 
+  consolaDebug.printlnAlerta("llega maquinaria: "+nombre_);
   /* if (estado_ == 0) {
    estado.add(true);
    } else {
    estado.add(false);
    }*/
 }
+
+/*void estimulos(String nombre_, int estado_) {
+ 
+ nombresModificadores.add(nombre_); 
+ println("me estan llegando los estimulos");*/
+/* if (estado_ == 0) {
+ estado.add(true);
+ } else {
+ estado.add(false);
+ }*/
+/*}*/
 
 
 public void totalesListo() {
-
   totales =true;
+  println("totales listo");
+  consolaDebug.printlnAlerta("totales listo", paleta[2][3]);
   if (!existentes) {
     consola.mandarMensaje("/pedir/modificadores/existentes");
   }
 }
 
 public void  existentesListo() {
-
   existentes =true;
+  println("existentes listo");
+  consolaDebug.printlnAlerta("existentes listo", paleta[2][3]);
+  /*if (!maquinarias) {
+   consola.mandarMensaje("/pedir/maquinarias");
+   }*/
 }
 
-public void  estimulosListo() {
-  consola.renovarDatosEstimulos(nombresBotones);
-  println("estimulos listos");
-  consola.mandarMensaje("/pedir/opciones");
+public void  maquinariasListo() {
+  maquinarias = true;
+  consola.renovarDatosMaquinarias(nombresMaquinarias);
+  println("maquinarias listo");
+  consolaDebug.printlnAlerta("maquinarias Listo", paleta[2][3]);
+  if (!conectadoConSistema) {
+    consola.mandarMensaje("/pedir/modificadores/total");
+  }
+  /* if (!estimulos) {
+   consola.mandarMensaje("/pedir/estimulos");
+   }*/
 }
+
+/*void  estimulosListo() {
+ consola.renovarDatosEstimulos(nombresModificadores);
+ println("estimulos listos");
+ consola.mandarMensaje("/pedir/opciones");
+ }*/
 
 public void botonesListo() {
+  consola.renovarDatosCategorias(nombresModificadores, nombresCategorias, nombresModificadoresExistentes);
 
-  consola.renovarDatosCategorias(nombresBotones, nombresCategorias, nombresBotonesExistentes);
-  println("mods listos");
+  // consola.renovarDatosCategorias(nombresModificadores, nombresCategorias, nombresModificadoresExistentes);
   //  renovarConsola = false;
   totales = false;
   existentes = false;
-  consola.mandarMensaje("/pedir/estimulos");
+  //consola.mandarMensaje("/pedir/estimulos");
 }
 public void opcionesListo() {
-  consola.renovarDatosOpciones(nombresBotones);
+  consola.renovarDatosOpciones(nombresOpciones);
   println("opciones listos");
-  // consola.renovarDatos(cantidad, estado, nombresBotones);
+  consolaDebug.printlnAlerta("opciones Listo", paleta[2][3]);
+  consola.mandarMensaje("/pedir/maquinarias");
+  // consola.renovarDatos(cantidad, estado, nombresModificadores);
 }
 
 public void agregarMod(String cual) {
   consola.agregarMod(cual);
 }
 public void quitarMod(String cual) {
+  consola.quitarMod(cual);  
 
-  consola.quitarMod(cual);
-
-  // consola.renovarDatos(cantidad, estado, nombresBotones);
+  // consola.renovarDatos(cantidad, estado, nombresModificadores);
 }
 
+public void agregarListaMod(String cual) {
+  String[] lista = cual.split("_");
+  for (int i=0; i<lista.length; i++) {
+    consola.agregarMod(lista[i]);
+  }
+}
+
+public void quitarListaMod(String cual, char separador) {
+  println("llega mensaje");
+  println(cual);
+
+  String[] lista = split(cual, separador); 
+  for (int i=0; i<lista.length; i++) {    
+    consola.quitarMod(lista[i]);
+  }
+}
 //-----------------------------------------------------------------------------------CAPTURA--------------------------
 
 public void menuQuitarModificador() {
@@ -361,30 +450,10 @@ public void nivel(int valor) {
   nivelValor = valor;
   println( "nivelValor: " +  nivelValor);
 }
-public void cursorMoCap(float x, float y) {
-  consola.setCursor(x*width, y*height);
-}
-
-//-------------------------- HARD CORDE -----------------
-
-public void cosasLocasSetUp() {
-  iconos = new Iconos(110);
-}
-
-public void cosasLocasDraw() {
-  if (conectadoConSistema) {
-    if (!consola.modos.getModo().equals(ESPERA)) {
-      String nombreDelIcono;
-      PVector cenHardCode;
-      ColeccionCategorias cChardCode = consola.cC;
-      nombreDelIcono = cChardCode.getSensible(consola.selector);
-      cenHardCode = cChardCode.posCentro;
-      iconos.dibujar(nombreDelIcono, cenHardCode.x, cenHardCode.y);
-    }
-  }
-}
+/*oid cursorMoCap(float x, float y) {
+ consola.setCursor(x*width, y*height);
+ }*/
 ConfiguracionCOD05 config;
-
 public void initOSC() {
   if (config == null) config = new ConfiguracionCOD05();
   XML xmlConfig = null;
@@ -392,28 +461,38 @@ public void initOSC() {
   if (xmlConfig != null) xmlConfig = xmlConfig.getChild(xmlTagEjecucion);
 
   config.cargar(xmlConfig);
-  
+
+  /* oscP5 = new OscP5(this, 14000);//config.carrete.puerto);
+   sistema = new NetAddress("127.0.0.1", 12010);//"config.lienzo.ip, config.lienzo.puerto);
+   */
   oscP5 = new OscP5(this, config.carrete.puerto);
   sistema = new NetAddress(config.lienzo.ip, config.lienzo.puerto);
 
   //-----------------------------------------OSC sistema de particulas
 
   oscP5.plug(this, "cantidadBotones", "/modificadores/totales");
-  oscP5.plug(this, "cantidadBotonesExistentes", "/modificadores/existentes");
-  oscP5.plug(this, "cantidadBotones", "/opciones");
-  oscP5.plug(this, "cantidadBotones", "/estimulos/totales");
   oscP5.plug(this, "modificadores", "/modificadores/totales");
-  oscP5.plug(this, "modificadoresExistentes", "/modificadores/existentes");
-  oscP5.plug(this, "estimulos", "/estimulos/totales");
-  oscP5.plug(this, "opciones", "/opciones");
-  oscP5.plug(this, "opcionesListo", "/opciones/listo");
-  oscP5.plug(this, "existentesListo", "/modificadores/existentes/listo");
   oscP5.plug(this, "totalesListo", "/modificadores/totales/listo");
+
+  oscP5.plug(this, "cantidadBotonesExistentes", "/modificadores/existentes");
+  oscP5.plug(this, "modificadoresExistentes", "/modificadores/existentes");
+  oscP5.plug(this, "existentesListo", "/modificadores/existentes/listo");
+
+  oscP5.plug(this, "cantidadBotones", "/maquinarias");
+  oscP5.plug(this, "maquinarias", "/maquinarias");
+  oscP5.plug(this, "maquinariasListo", "/maquinarias/listo");
+
+  oscP5.plug(this, "cantidadBotones", "/estimulos/totales"); 
+  oscP5.plug(this, "estimulos", "/estimulos/totales");
   oscP5.plug(this, "estimulosListo", "/estimulos/listo");
- 
-   oscP5.plug(this, "agregarMod", "/agregarMod");
+
+  oscP5.plug(this, "cantidadBotones", "/opciones");
+  oscP5.plug(this, "opciones", "/opciones");
+  oscP5.plug(this, "opcionesListo", "/opciones/listo");  
+
+  oscP5.plug(this, "agregarMod", "/agregarMod");
   oscP5.plug(this, "quitarMod", "/quitarMod");
-  
+
   //----------------------------------------OSC captura de movimiento
 
 
@@ -425,6 +504,8 @@ public void initOSC() {
 
   oscP5.plug(this, "cancelar", "/Cancelar");
   oscP5.plug(this, "aceptar", "/Aceptar");
+  oscP5.plug(this, "quitarListaMod", "/quitarListaMod");
+  oscP5.plug(this, "agregarListaMod", "/agregarListaMod");
 
   oscP5.plug(this, "actualizarMovimiento", "/actualizarMovimiento");
   oscP5.plug(this, "cerrado", "/cerrado");
@@ -436,22 +517,22 @@ public void initOSC() {
 
 //---------------------------------------------IP MANAGER----EVENTOS-----------------------
 
-public void Conectar() { 
-
-  String unaIp = cp5.get(Textfield.class, "IP").getText();
-  String unPuertoEnvio = cp5.get(Textfield.class, "Puerto Envio").getText();
-  String unPuertoRecivo = cp5.get(Textfield.class, "Puerto Recivo").getText();
-
-  if (!unaIp.equals(""))ip = cp5.get(Textfield.class, "IP").getText();
-  if (!unPuertoEnvio.equals(""))puertoEnvio = cp5.get(Textfield.class, "Puerto Envio").getText();
-  if (!unPuertoRecivo.equals(""))puertoRecivo = cp5.get(Textfield.class, "Puerto Recivo").getText();
-
-  conectarOSC();
-
-  cp5.get(Textfield.class, "IP").clear();
-  cp5.get(Textfield.class, "Puerto Envio").clear();
-  cp5.get(Textfield.class, "Puerto Recivo").clear();
-}
+/*public void Conectar() { 
+ 
+ String unaIp = cp5.get(Textfield.class, "IP").getText();
+ String unPuertoEnvio = cp5.get(Textfield.class, "Puerto Envio").getText();
+ String unPuertoRecivo = cp5.get(Textfield.class, "Puerto Recivo").getText();
+ 
+ if (!unaIp.equals(""))ip = cp5.get(Textfield.class, "IP").getText();
+ if (!unPuertoEnvio.equals(""))puertoEnvio = cp5.get(Textfield.class, "Puerto Envio").getText();
+ if (!unPuertoRecivo.equals(""))puertoRecivo = cp5.get(Textfield.class, "Puerto Recivo").getText();
+ 
+ conectarOSC();
+ 
+ cp5.get(Textfield.class, "IP").clear();
+ cp5.get(Textfield.class, "Puerto Envio").clear();
+ cp5.get(Textfield.class, "Puerto Recivo").clear();
+ }*/
 
 public void conectarOSC() {
   int pe = PApplet.parseInt(puertoEnvio);
@@ -464,19 +545,28 @@ public void conectarOSC() {
   //-----------------------------------------OSC sistema de particulas
 
   oscP5.plug(this, "cantidadBotones", "/modificadores/totales");
-  oscP5.plug(this, "cantidadBotonesExistentes", "/modificadores/existentes");
-  oscP5.plug(this, "cantidadBotones", "/opciones");
   oscP5.plug(this, "modificadores", "/modificadores/totales");
+  oscP5.plug(this, "totalesListo", "/modificadores/totales/listo");
+  oscP5.plug(this, "cantidadBotonesExistentes", "/modificadores/existentes");
   oscP5.plug(this, "modificadoresExistentes", "/modificadores/existentes");
+  oscP5.plug(this, "existentesListo", "/modificadores/existentes/listo");
+
+  oscP5.plug(this, "cantidadBotones", "/estimulos/totales"); 
   oscP5.plug(this, "estimulos", "/estimulos/totales");
+  oscP5.plug(this, "estimulosListo", "/estimulos/listo");
+
+  oscP5.plug(this, "cantidadBotones", "/opciones");
   oscP5.plug(this, "opciones", "/opciones");
   oscP5.plug(this, "opcionesListo", "/opciones/listo");
-  oscP5.plug(this, "existentesListo", "/modificadores/existentes/listo");
-  oscP5.plug(this, "totalesListo", "/modificadores/totales/listo");
-  oscP5.plug(this, "estimulosListo", "/estimulos/listo");
-  
-   oscP5.plug(this, "agregarMod", "/agregarMod");
+
+  oscP5.plug(this, "cantidadBotones", "/maquinarias");
+  oscP5.plug(this, "maquinarias", "/maquinarias");
+  oscP5.plug(this, "maquinarias", "/maquinarias/listo");
+
+  oscP5.plug(this, "agregarMod", "/agregarMod");
   oscP5.plug(this, "quitarMod", "/quitarMod");
+
+
 
 
   //----------------------------------------OSC captura de movimiento
@@ -513,14 +603,42 @@ public void conectarOSC() {
  println(" typetag: "+theOscMessage.typetag());
  }
  */
-class Categoria extends Opcion {
+class BDD {
+  //--------------------- ESTRUCTURA RUEDA ---------------------
+  float ruedaX = width/2;
+  float ruedaY = height/5+(height-height/5-height/10)/2;
+  float ruedaDiametro =width>height?(height*7/10)/3:(width*7/10)/3;
 
+  //--------------------- ESTRUCTURA MONITOR ---------------------
+  float monitorX = width/2;
+  float monitorY = height/10;
+  float monitorDiametro = width<height? width/17 : height/17;
+  float baseMonitorX =0;
+  float baseMonitorY =0;
+  float baseMonitorAncho =width; 
+  float baseMonitorAlto =height/5;
+
+  //--------------------- ESTRUCTURA MAQUINARIAS ---------------------
+  float baseMaquinariasX =0;
+  float baseMaquinariasY =height-height/10;
+  float baseMaquinariasAncho =width;
+  float baseMaquinariasAlto =height/10;  
+
+  //-----------------------globales de toda la vida
+  boolean interaccionConMouse = false;
+
+ 
+}
+class Categoria extends Opcion {
   ArrayList modificadores;
   int mods = 0;
-
-
+  boolean esUnaOpcionDeNavegacion;
+  boolean hover;
+  String hoverMod;
+  Modificador hoverMod_modificador;
   Categoria(String nombre_) {
     nombre = nombre_;
+    esUnaOpcionDeNavegacion = false;
     modificadores = new ArrayList();
     col = color(255);
     t = 50;
@@ -548,14 +666,19 @@ class Categoria extends Opcion {
     posCentro = new PVector();
     conIcono = true;
   }
-  /*void inicializar( float t_, color col_, int cant_, PVector pos_, PVector posCentro_) {
-   col = col_;
-   cant = cant_;    
-   pos = pos_;
-   posCentro = posCentro_;
-   t = t_;
-   }
-   
+
+  public void inicializar( int col_, int cant_, PVector pos_, PVector posCentro_, float t_, boolean esUnaOpcionDeNavegacion_) {
+    col = col_;
+    cant = cant_;    
+    pos = pos_;
+    posCentro = posCentro_;
+    t = t_;//width>height?height/4:width/4;
+    tamFigura = t*26/100;
+    iconos = new Iconos(PApplet.parseInt(tamFigura));
+    esUnaOpcionDeNavegacion = esUnaOpcionDeNavegacion_;
+  }
+
+  /* 
    String getNombre() {
    String n = "no tengo";
    
@@ -568,7 +691,6 @@ class Categoria extends Opcion {
     mods++;
   }
   public void removerMod() {
-
     if (mods>0)
       mods--;
   }
@@ -586,6 +708,31 @@ class Categoria extends Opcion {
   public void aniadir(String nombre) {
     Modificador m = new Modificador(nombre, this);
     modificadores.add(m);
+  }
+
+  public void setHover() {
+    setSensible(false);
+    hover = false;
+    hoverMod = null;
+    hoverMod_modificador = null;
+    for (int i=0; i<modificadores.size (); i++) {
+      Modificador m = (Modificador) modificadores.get(i);
+      if (m.hoverExtendido) {       
+        setSensible(true);
+        if (m.hover) {
+          hover = true;
+          hoverMod = m.nombre;
+          hoverMod_modificador = m;
+        }
+      }
+    }
+  }
+  public String getHover() {
+    return hoverMod;
+  }
+
+  public Modificador getHover_modificador() {
+    return hoverMod_modificador;
   }
 
 
@@ -626,10 +773,15 @@ class Categoria extends Opcion {
   }
 
   public void dibujarCategoria() {
-    dibujar();
-    dibujarMods();
-    displayModificadoresExistentes();
+    if (!esUnaOpcionDeNavegacion) {      
+      dibujar();
+      dibujarMods();
+      displayModificadoresExistentes();
+    } else {
+      dibujar();
+    }
   }
+
 
   //  void setSensible(boolean sensible_/*, boolean estado_*/) {
   /*   sensible = sensible_;
@@ -662,65 +814,74 @@ class Categoria extends Opcion {
    popStyle();
    }*/
 
+  public void coneccionCanal(float px, float py, float x, float y, float ang) {   
+
+    pushStyle();
+    strokeWeight(2);
+    stroke(paleta[1][3]);
+    noFill();
+    float xar1 = pos.x+t*16/100*cos(ang+radians(90));
+    float yar1 = pos.y+t*16/100*sin(ang+radians(90));
+    float xab1 = posCentro.x+t*16/100*cos(ang+radians(90));
+    float yab1 = posCentro.y+t*16/100*sin(ang+radians(90));
+    float xar2 = pos.x+t*16/100*cos(ang-radians(90));
+    float yar2 = pos.y+t*16/100*sin(ang-radians(90));
+    float xab2 = posCentro.x+t*16/100*cos(ang-radians(90));
+    float yab2 = posCentro.y+t*16/100*sin(ang-radians(90));
+    line(xar1, yar1, xab1, yab1);
+    line(xar2, yar2, xab2, yab2);
+    arc(pos.x, pos.y, t*32/100, t*32/100, ang+radians(270), ang+radians(270)+radians(180));
+    popStyle();
+  }
+
+  public void coneccionLinea(float px, float py, float cx, float cy) {
+    pushStyle();
+    strokeWeight(1);
+    stroke(paleta[1][3]);
+    noFill();     
+    line(px, py, cx, cy);    
+    ellipse(pos.x, pos.y, t*32/100, t*32/100);
+    popStyle();
+  }
+
+  public void feedbackModificadores(float px, float py, float diam, float ang) {
+    float x = 0;
+    float y = 0;
+    if (mods<4) {        
+      for (int i=0; i<mods; i++) {
+        x = px-diam/(mods+1)*(i+1)*cos(ang);
+        y = py-diam/(mods+1)*(i+1)*sin(ang);
+        pushStyle();
+        fill(paleta[2][3]);
+        ellipse(x, y, t*9/100, t*9/100);
+        /*textAlign(CENTER, CENTER);
+         fill(255);
+         textSize(15);
+         text(mods, x, y);*/
+        popStyle();
+      }
+    } else {
+      for (int i=0; i<3; i++) {
+        x = px-diam/(4)*(i+1)*cos(ang);
+        y = py-diam/(4)*(i+1)*sin(ang);
+        pushStyle();
+        fill(paleta[2][3]);
+        ellipse(x, y, t*9/100, t*9/100);
+        popStyle();
+      }
+    }
+  }
   public void displayModificadoresExistentes() {
     if (mods>0) {
-      /*  if (coneccion == null) {
-       coneccion = loadImage("coneccion.png");
-       coneccion.resize(t*135/100, t*135/100);
-       }*/
-
       float ang = atan2(pos.y-posCentro.y, pos.x-posCentro.x);
-      float px = pos.x-(t*13/100/2)*cos(ang);
-      float py = pos.y-(t*13/100/2)*sin(ang);
-      float x = posCentro.x+(t/2-t*13/100/2)*cos(ang);
-      float y = posCentro.y+(t/2-t*13/100/2)*sin(ang);
-
-      float diam = dist(x, y, px, py);
-
-      pushStyle();
-      strokeWeight(2);
-      stroke(150, 150, 220);
-      noFill();
-      float xar1 = pos.x+t*16/100*cos(ang+radians(90));
-      float yar1 = pos.y+t*16/100*sin(ang+radians(90));
-      float xab1 = posCentro.x+t*16/100*cos(ang+radians(90));
-      float yab1 = posCentro.y+t*16/100*sin(ang+radians(90));
-      float xar2 = pos.x+t*16/100*cos(ang-radians(90));
-      float yar2 = pos.y+t*16/100*sin(ang-radians(90));
-      float xab2 = posCentro.x+t*16/100*cos(ang-radians(90));
-      float yab2 = posCentro.y+t*16/100*sin(ang-radians(90));
-      line(xar1, yar1, xab1, yab1);
-      line(xar2, yar2, xab2, yab2);
-      arc(pos.x, pos.y, t*32/100, t*32/100, ang+radians(270), ang+radians(270)+radians(180));
-      popStyle();
-      /*  popMatrix();
-       rotate(ang);
-       translate(cx,cy);
-       image(coneccion, 0, 0);
-       pushMatrix();*/
-      if (mods<4) {        
-        for (int i=0; i<mods; i++) {
-          x = px-diam/(mods+1)*(i+1)*cos(ang);
-          y = py-diam/(mods+1)*(i+1)*sin(ang);
-          pushStyle();
-          fill(paleta[2][3]);
-          ellipse(x, y, t*13/100, t*13/100);
-          /*textAlign(CENTER, CENTER);
-           fill(255);
-           textSize(15);
-           text(mods, x, y);*/
-          popStyle();
-        }
-      } else {
-        for (int i=0; i<3; i++) {
-          x = px-diam/(4)*(i+1)*cos(ang);
-          y = py-diam/(4)*(i+1)*sin(ang);
-          pushStyle();
-          fill(paleta[2][3]);
-          ellipse(x, y, t*13/100, t*13/100);
-          popStyle();
-        }
-      }
+      float px = pos.x-(t*32/100/2)*cos(ang);
+      float py = pos.y-(t*32/100/2)*sin(ang);
+      float cx = posCentro.x+(t/2)*cos(ang);
+      float cy = posCentro.y+(t/2)*sin(ang);     
+      float diam = dist(px, py, cx, cy);
+      coneccionCanal(px, py, cx, cy, ang);
+      //coneccionLinea( px, py, cx, cy);
+      feedbackModificadores(px, py, diam, ang);
     }
   }
 }
@@ -739,7 +900,7 @@ class ColeccionCategorias {
     paleta = new int[4][12];
     for (int i=0; i<5; i++) {
       for (int j=0; j<12; j++) {
-      paleta[i][j] = color(random(255), random(255), random(255));
+        paleta[i][j] = color(random(255), random(255), random(255));
       }
     }
   }
@@ -749,10 +910,10 @@ class ColeccionCategorias {
     posCentro = posCentro_;
   }
 
-  public void inicializar(String[] nombresCategorias, String[] nombresModificadores, String[] nombresModificadoresExistentes) {
+  public void inicializar(String[] nombresCategorias, boolean[]opcionesDeNavegacion, String[] nombresModificadores, String[] nombresModificadoresExistentes) {
 
     if (nombresCategorias != null && nombresModificadores != null) {
-      setCategorias(nombresCategorias, nombresModificadores);
+      setCategorias(nombresCategorias, opcionesDeNavegacion, nombresModificadores);
     }
 
     if (nombresModificadoresExistentes != null) {
@@ -780,11 +941,11 @@ class ColeccionCategorias {
     }
     //--------------i
   }
-  public void setCategorias(String[] nombresCategorias, String[] nombresModificadores) {
+  public void setCategorias(String[] nombresCategorias, boolean[]opcionesDeNavegacion, String[] nombresModificadores) {
 
     categorias = new ArrayList();
+    ArrayList<Boolean> opcionesDeNav = new ArrayList<Boolean>();
     for (int i=0; i<nombresCategorias.length; i++) {
-
       boolean existe = false;
       int indiceCategoria = 0;
       for (int j=0; j<categorias.size (); j++) {
@@ -801,6 +962,7 @@ class ColeccionCategorias {
         Categoria c = new Categoria(nombresCategorias[i], paleta);       
         c.aniadir(nombresModificadores[i], paleta);
         categorias.add(c);
+        opcionesDeNav.add(opcionesDeNavegacion[i]);
         popStyle();
       } else {
         Categoria c = (Categoria)categorias.get(indiceCategoria);
@@ -825,15 +987,16 @@ class ColeccionCategorias {
       int colorsito = color(hue, 150, 220);
       float norm = map(i, 0, cant, 0, 1);
       //float normUnidad = map(1, 0, cant, 0, 1);
-      float angulo = radians(360*norm+270);
+      float angulo = radians(360*norm+90);
       //float anguloUnidad = radians(360*normUnidad);
       float diametroSelector = t*118/100;
-      float x = width/2+(diametroSelector*cos(angulo));
-      float y = height/1.7f+(diametroSelector*sin(angulo));
+      float x = bdd.ruedaX+(diametroSelector*cos(angulo));
+      float y = bdd.ruedaY+(diametroSelector*sin(angulo));
       PVector pos = new PVector(x, y);
 
       println(c.nombre+": "+c.modificadores.size());
-      c.inicializar(colorsito, cant, pos, posCentro, t);
+      //c.inicializar(colorsito, cant, pos, posCentro, t);
+      c.inicializar(colorsito, cant, pos, posCentro, t, opcionesDeNav.get(i));
       popStyle();
     }
     println(categorias.size());
@@ -843,11 +1006,9 @@ class ColeccionCategorias {
     if (categorias!=null) {
       for (int i=0; i<categorias.size (); i++) {
         pushStyle();
-        colorMode(HSB);  
-
+        colorMode(HSB); 
         Categoria c = (Categoria)categorias.get(i);     
         c.dibujar();
-
         popStyle();
       }
     }
@@ -857,11 +1018,9 @@ class ColeccionCategorias {
     if (categorias!=null) {
       for (int i=0; i<categorias.size (); i++) {
         pushStyle();
-        colorMode(HSB);  
-
+        colorMode(HSB); 
         Categoria c = (Categoria)categorias.get(i);     
         c.dibujarCategoria();
-
         popStyle();
       }
     }
@@ -890,33 +1049,79 @@ class ColeccionCategorias {
     return nombreSensible;
   }
 
+  public int getColorSensible(int sensible) {
+    int colorSensible;
+    Modificador mod = listaMods.get(sensible);
+    Categoria c = mod.categoria;   
+    colorSensible = c.col;
+    return colorSensible;
+  }
+
   public Modificador getModSensible(int sensible) {
     Modificador mod = listaMods.get(sensible);    
     return mod;
   }
-  ///////////////////////------------------------------------MALSISISMO
-  public int getContadorSeleccionEstimulo(PVector cursor) {
-    boolean seleccionando = false;
-    for (int i=0; i<categorias.size (); i++) {
-      Categoria c = (Categoria)categorias.get(i);  
-      if (dist(c.pos.x, c.pos.y, cursor.x, cursor.y)<30 ) {
-        if ( contador < 420)
-          contador+=5;
-        seleccionando = true;
+
+  //---------------------MOUSE------------
+  public void mouse() {
+    if (categorias != null) {
+      for (int i=0; i<categorias.size (); i++) {
+        Categoria c = (Categoria)categorias.get(i);
+        c.setHover();
       }
     }
-    if (!seleccionando && contador > 0) {
-      contador--;
+  }
+  public String getSensibleMouse() {
+    String nombreSensibleMouse = null;
+    for (int i=0; i<categorias.size (); i++) {
+      Categoria c = (Categoria)categorias.get(i);
+      if (c.hover) {
+        nombreSensibleMouse = c.getHover();
+      }
     }
-
-    return contador;
+    return nombreSensibleMouse;
   }
 
-  public boolean getSeleccionarEstimulo() {
-    boolean sE = contador > 400?true:false;
-    return sE;
+  public Modificador getSensibleMouse_modificador() {
+    Modificador modificadorSensibleMouse = null;
+    for (int i=0; i<categorias.size (); i++) {
+      Categoria c = (Categoria)categorias.get(i);
+      if (c.hover) {
+        modificadorSensibleMouse = c.getHover_modificador();
+      }
+    }
+    return modificadorSensibleMouse;
   }
 
+  public int getColorSensibleMouse() {
+    int colorSensibleMouse = color(0);
+    for (int i=0; i<categorias.size (); i++) {
+      Categoria c = (Categoria)categorias.get(i);
+      if (c.hover) {
+        colorSensibleMouse = c.col;
+      }
+    }    
+    return colorSensibleMouse;
+  }
+
+  //------------------------------------------------
+  public void imprimirMaquinaria() {
+    String maquinaria = "";
+    for (int i=0; i<categorias.size (); i++) {
+      Categoria c = (Categoria)categorias.get(i);  
+      c.setSensible(false);
+
+      for (int j=0; j<c.modificadores.size (); j++) {
+        Modificador m = (Modificador)c.modificadores.get(j); 
+        if (m.mods>0) {
+          maquinaria = maquinaria.equals("")?maquinaria+m.nombre:maquinaria+"|"+m.nombre;
+        }
+      }
+    }
+    println(maquinaria);
+  }
+ 
+ 
   public void agregar(String cual) {
     Modificador m = listaModsPorNombre.get(cual);
     m.categoria.addMod();
@@ -929,36 +1134,36 @@ class ColeccionCategorias {
     m.removerMod();
   }
 }
-class ColeccionEstimulos {
+/*class ColeccionEstimulos {
   int contador;
   int cant;
   PVector posCentro;
   ArrayList estimulos;  
-  int[][] paleta;
+  color[][] paleta;
   float t;
 
   ColeccionEstimulos() {
-     paleta = new int[4][12];
+     paleta = new color[4][12];
     for (int i=0; i<5; i++) {
       for (int j=0; j<12; j++) {
       paleta[i][j] = color(random(255), random(255), random(255));
       }
     }
   }
-  ColeccionEstimulos(int[][] paleta_,PVector posCentro_,float t_) {
+  ColeccionEstimulos(color[][] paleta_,PVector posCentro_,float t_) {
     paleta = paleta_;
     t = t_;
     posCentro = posCentro_;
   }
 
-  public void inicializar(String[] nombresEstimulos) {
+  void inicializar(String[] nombresEstimulos) {
     
     if (nombresEstimulos != null) {
       setEstimulos(nombresEstimulos);
     }
   }
 
-  public void setEstimulos(String[] nombresEstimulos) {
+  void setEstimulos(String[] nombresEstimulos) {
 
     estimulos = new ArrayList();
     for (int i=0; i<nombresEstimulos.length; i++) {
@@ -973,14 +1178,14 @@ class ColeccionEstimulos {
       pushStyle();
       colorMode(HSB);
       float hue = map(i, 0, cant, 0, 255);
-      int colorsito = color(hue, 100, 200);
+      color colorsito = color(hue, 100, 200);
       float norm = map(i, 0, cant, 0, 1);
       //float normUnidad = map(1, 0, cant, 0, 1);
       float angulo = radians(360*norm+270);
       //float anguloUnidad = radians(360*normUnidad);
         float diametroSelector = t*118/100;
         float x = width/2+(diametroSelector*cos(angulo));
-      float y = height/1.7f+(diametroSelector*sin(angulo));
+      float y = height/1.7+(diametroSelector*sin(angulo));
       PVector pos = new PVector(x, y);
 
       //println(e.nombre+": "+e.modificadores.size());
@@ -990,7 +1195,7 @@ class ColeccionEstimulos {
     println(estimulos.size());
   }
 
-  public void dibujar() {   
+  void dibujar() {   
     if (estimulos!=null) {
       for (int i=0; i<estimulos.size (); i++) {
         pushStyle();
@@ -1004,7 +1209,7 @@ class ColeccionEstimulos {
     }
   }
 
-  public void setSensible(int sensible) {
+  void setSensible(int sensible) {
     for (int i=0; i<estimulos.size (); i++) {
       Estimulo e = (Estimulo)estimulos.get(i);  
       e.setSensible(false);
@@ -1013,7 +1218,7 @@ class ColeccionEstimulos {
     e.setSensible(true);
   }
 
-  public String getSensible(int sensible) {
+  String getSensible(int sensible) {
     String nombreSensible;
     Estimulo e = (Estimulo)estimulos.get(sensible);
     nombreSensible = e.getNombre();
@@ -1021,7 +1226,7 @@ class ColeccionEstimulos {
     return nombreSensible;
   }
 
-  public int getContadorSeleccionEstimulo(PVector cursor) {
+  int getContadorSeleccionEstimulo(PVector cursor) {
     boolean seleccionando = false;
     for (int i=0; i<estimulos.size (); i++) {
       Estimulo e = (Estimulo)estimulos.get(i);  
@@ -1038,9 +1243,145 @@ class ColeccionEstimulos {
     return contador;
   }
 
-  public boolean getSeleccionarEstimulo() {
+  boolean getSeleccionarEstimulo() {
     boolean sE = contador > 400?true:false;
     return sE;
+  }
+}*/
+class ColeccionMaquinarias {
+  int contador;
+  int cant;
+  PVector posInicial;
+  ArrayList maquinarias;  
+  int[][] paleta;
+  float t;
+  int selector; //--- el selector
+
+    ColeccionMaquinarias() {
+    paleta = new int[4][12];
+    for (int i=0; i<5; i++) {
+      for (int j=0; j<12; j++) {
+        paleta[i][j] = color(random(255), random(255), random(255));
+      }
+    }
+  }
+  ColeccionMaquinarias(int[][] paleta_, float t_) {
+    paleta = paleta_;
+    t = t_;
+  }
+
+  public void inicializar(String[] nombresMaquinarias) {
+    if (nombresMaquinarias != null) {
+      setMaquinarias(nombresMaquinarias);
+    }
+  }
+
+  public void setMaquinarias(String[] nombresMaquinarias) {
+    maquinarias = new ArrayList();
+    for (int i=0; i<nombresMaquinarias.length; i++) {
+      Maquinaria m = new Maquinaria(nombresMaquinarias[i], paleta);       
+      maquinarias.add(m);
+    }
+    cant = maquinarias.size();
+    //int contadorDeListaDeModificadores = 0;
+
+    for (int i=0; i<maquinarias.size (); i++) {
+      Maquinaria m = (Maquinaria)maquinarias.get(i);
+      pushStyle();
+      colorMode(HSB);
+      float hue = map(0, 0, cant, 0, 255);
+      int colorsito = color(hue, 100, 200);
+      float norm = map(0, 0, cant, 0, 1);
+      //float normUnidad = map(1, 0, cant, 0, 1);
+      //float angulo = radians(360*norm+270);
+      //float anguloUnidad = radians(360*normUnidad);
+      //float diametroSelector = t*50/100;
+
+      //PVector pos = new PVector(x, y);      
+      //println(e.nombre+": "+e.modificadores.size());
+      m.inicializar(colorsito, cant, new PVector(), new PVector(bdd.ruedaX, bdd.ruedaY), t*25/100);
+      popStyle();
+    }
+    println(maquinarias.size());
+  }
+  public void dibujarBase(float a, float b, float ancho, float alto) {
+    pushStyle();
+    rectMode(CORNER);
+    noStroke();
+    fill(paleta[1][2]);
+    rect(a, b, ancho, alto);
+    popStyle();
+  }
+
+  public void dibujar() {    
+    dibujarBase(bdd.baseMaquinariasX, bdd.baseMaquinariasY, bdd.baseMaquinariasAncho, bdd.baseMaquinariasAlto);
+    int cantidadMaqsVisibles=8;//cuantos se van a ver en el pie
+    float espacioMaqsX = width/cantidadMaqsVisibles;//cuanto espacio ocupa cada uno incluido bordes
+    float alCentro = espacioMaqsX/2;//cuanto hay desde el borde hasta el centro
+    float x = 0;
+    float y = height-bdd.baseMaquinariasAlto/2;
+    if (maquinarias!=null) {
+      pushStyle();
+      colorMode(HSB); 
+      int contadorColores = 0;
+      int contadorOrden = 0;
+      Maquinaria m = null;
+      for (int i=selector-1; i>=0; i--) { 
+        contadorOrden++;
+        x = width/2-contadorOrden*espacioMaqsX;//+espacioMaqsX;        
+        m = (Maquinaria)maquinarias.get(i);
+        m.dibujarIconos(x, y, t, paleta[3][contadorColores]);
+        contadorColores++;
+        contadorColores = (contadorColores+paleta[3].length)%paleta[3].length;
+      }
+      x = width/2;
+      m = (Maquinaria)maquinarias.get(selector);     
+        m.dibujarIconos(x, y, t, paleta[3][contadorColores]);
+      contadorColores++;
+      contadorColores = (contadorColores+paleta[3].length)%paleta[3].length;
+      contadorOrden=0;
+      for (int i=selector+1; i<maquinarias.size (); i++) {   
+        contadorOrden++;     
+        x = width/2+contadorOrden*espacioMaqsX;//+espacioMaqsX;
+        m = (Maquinaria)maquinarias.get(i);
+        m.dibujarIconos(x, y, t, paleta[3][contadorColores]);
+        contadorColores++;
+        contadorColores = (contadorColores+paleta[3].length)%paleta[3].length;
+      }
+      popStyle();
+    }
+  }
+
+  public void setSensible(int sensible) {
+    selector = sensible;
+    if (sensible>-1) {
+      for (int i=0; i<maquinarias.size (); i++) {
+        Maquinaria e = (Maquinaria)maquinarias.get(i);  
+        e.setSensible(false);
+      }
+      Maquinaria e = (Maquinaria)maquinarias.get(sensible);
+      e.setSensible(true);
+    }
+  }
+
+  public String getSensible(int sensible) {
+    String nombreSensible;
+    Maquinaria e = (Maquinaria)maquinarias.get(sensible);
+    nombreSensible = e.getNombre();
+
+    return nombreSensible;
+  }
+
+  public int getColorSensible(int sensible) {
+    int colorSensible;
+    Maquinaria maq = (Maquinaria)maquinarias.get(sensible);
+    colorSensible = maq.col;
+    return colorSensible;
+  }
+
+  public Maquinaria getMaqSensible(int sensible) {
+    Maquinaria maq = (Maquinaria)maquinarias.get(sensible);
+    return maq;
   }
 }
 class ColeccionOpciones {
@@ -1095,8 +1436,8 @@ class ColeccionOpciones {
       //float anguloUnidad = radians(360*normUnidad);
       //float diametroSelector = width<height? width/4 : height/4;
       float diametroSelector = t*118/100;
-      float x = width/2+(diametroSelector*cos(angulo));
-      float y = height/1.7f+(diametroSelector*sin(angulo));
+      float x = posCentro.x+(diametroSelector*cos(angulo));
+      float y = posCentro.y+(diametroSelector*sin(angulo));
       PVector pos = new PVector(x, y);
 
 
@@ -1131,12 +1472,144 @@ class ColeccionOpciones {
 
   public String getSensible(int sensible) {
     String nombreSensible;
-    Opcion c = (Opcion)opciones.get(sensible);
+ Opcion c = (Opcion)opciones.get(sensible);
     nombreSensible = c.getNombre();
 
     return nombreSensible;
   }
+  
+  public int getColorSensible(int sensible) {
+    int colorSensible;
+    Opcion o = (Opcion)opciones.get(sensible);
+    colorSensible = o.col;
+
+    return colorSensible;
+  }
 }
+/*final class Conexiones {
+ 
+ private String nombreArchivo;
+ private XML configuracion;
+ 
+ Conexiones() {
+ nombreArchivo = "configuracion.xml";
+ configuracion = cargarConfiguracion(nombreArchivo);
+ }
+ 
+ Conexiones(String rutaArchivo) {
+ nombreArchivo = rutaArchivo;
+ configuracion = cargarConfiguracion(nombreArchivo);
+ }  
+ 
+ public String[][] getConexiones() {
+ XML[] conexiones = configuracion.getChildren("conexion");
+ String[][] lista = new String[conexiones.length][3];
+ for (int i = 0; i < conexiones.length; i++) {
+ lista[i][0] = (conexiones[i].hasAttribute("nombre") ? conexiones[i].getString("nombre") : "No especificado");
+ lista[i][1] = (conexiones[i].hasAttribute("ip") ? conexiones[i].getString("ip") : "No especificado");
+ lista[i][2] = (conexiones[i].hasAttribute("puerto") ? conexiones[i].getString("puerto") : "No especificado");
+ }
+ return lista;
+ }
+ 
+ private XML cargarConfiguracion(String nombre) {
+ XML archivo;
+ try {
+ archivo = loadXML(nombre);
+ }
+ catch(Exception e) {
+ archivo = crearArchivoXML();
+ guardarXML(archivo);
+ }
+ return archivo;
+ }
+ 
+ private void guardarXML(XML archivo) {
+ saveXML(archivo, "configuracion.xml");
+ }
+ 
+ public void agregarConexion(String nombre, String ip, int puerto) {
+ XML nueva = configuracion.addChild("conexion");
+ nueva.setString("id", str(configuracion.getChildren("conexion").length-1));
+ nueva.setString("nombre", nombre);
+ nueva.setString("ip", ip);
+ nueva.setInt("puerto", puerto);
+ guardarXML(configuracion);
+ }
+ 
+ //Crea un archivo default de XML en caso de no encontrarse
+ private XML crearArchivoXML() {
+ String estructura = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><gestor><conexion id=\"0\" nombre=\"Kinect\" ip=\"127.0.0.1\" puerto=\"11000\"></conexion><conexion id=\"1\" nombre=\"Interfaz\" ip=\"127.0.0.1\" puerto=\"11000\"></conexion><conexion id=\"2\" nombre=\"Particulas\" ip=\"127.0.0.1\" puerto=\"11000\"></conexion></gestor>";
+ return parseXML(estructura);
+ }
+ 
+ //Devuelve la IP buscando por nombre, en caso de no encontrar devuelve null
+ public String getIP(String nombre) {
+ return getAtributo("nombre", nombre, "ip");
+ }
+ 
+ //Devuelve la IP buscando por id, en caso de no encontrar devuelve null
+ public String getIP(int id) {
+ return getAtributo("id", str(id), "ip");
+ }
+ 
+ public int getPuerto(String nombre) {
+ String puerto = getAtributo("nombre", nombre, "puerto");
+ if (puerto == null) {
+ return 0;
+ } else {
+ return int(puerto);
+ }
+ }
+ 
+ public int getPuerto(int id) {
+ String puerto = getAtributo("id", str(id), "puerto");
+ if (puerto == null) {
+ return 0;
+ } else {
+ return int(puerto);
+ }
+ }
+ 
+ public boolean setPuerto(String nombre, String valor) {
+ return setAtributo("nombre", nombre, "puerto", valor);
+ }
+ 
+ public boolean setPuerto(int id, String valor) {
+ return setAtributo("id", str(id), "puerto", valor);
+ }
+ 
+ public boolean setIP(String nombre, String valor) {
+ return setAtributo("nombre", nombre, "ip", valor);
+ }
+ 
+ public boolean setIP(int id, String valor) {
+ return setAtributo("id", str(id), "ip", valor);
+ }
+ 
+ 
+ private String getAtributo(String atributo, String busqueda, String devuelve) {
+ XML[] IPs = configuracion.getChildren("conexion");
+ for (int i = 0; i < IPs.length; i++) {
+ if (IPs[i].hasAttribute(atributo) && IPs[i].getString(atributo).equals(busqueda)) {
+ return IPs[i].getString(devuelve);
+ }
+ }
+ return null;
+ }
+ 
+ private boolean setAtributo(String atributo, String busqueda, String cambiaAtributo, String guarda) {
+ XML[] IPs = configuracion.getChildren("conexion");
+ for (int i = 0; i < IPs.length; i++) {
+ if (IPs[i].hasAttribute(atributo) && IPs[i].getString(atributo).equals(busqueda)) {
+ IPs[i].setString(cambiaAtributo, guarda);
+ guardarXML(configuracion);
+ return true;
+ }
+ }
+ return false;
+ }
+ }*/
 //v 22/06/2017
 String archivoConfigXML = "../configcod05.xml";
 String xmlTagPanel = "panel", xmlTagEjecucion = "ejecucion";
@@ -1203,23 +1676,25 @@ class ConfiguracionCOD05 {
   }
 }
 class Consola {
-
   Modos modos;
   ColeccionCategorias cC;
-  ColeccionEstimulos cE;
+  //ColeccionEstimulos cE;
   ColeccionOpciones cO;
+  ColeccionMaquinarias cM;
   Monitor monitor;
 
-  String modoActual = "cualquiercosa";
-  float centroX = width/2;
-  float centroY = height/1.7f;
-  float tam = width>height?height/4.5f:width/4.5f;
+  float centroX = bdd.ruedaX;
+  float centroY = bdd.ruedaY;
+  float tam = bdd.ruedaDiametro;
 
   String[] datosDeSistema_nombresCategorias;
   String[] datosDeSistema_nombresModificadores;
   String[] datosDeSistema_nombresModificadoresExistentes;
   String[] datosDeSistema_nombresOpciones;
-  String[] datosDeSistema_nombresEstimulos;
+ // String[] datosDeSistema_nombresEstimulos;
+  String[] datosDeSistema_nombresMaquinarias;
+
+  boolean[]datosDeAPI_opcionesDeNavegacion;
 
   int cerrado=0;
   int nivel=0;
@@ -1239,11 +1714,13 @@ class Consola {
     modos.inicializar(new PVector(centroX, centroY), tam);
     cC = new ColeccionCategorias();
     cO = new ColeccionOpciones();
-    cE = new ColeccionEstimulos();
-    cC.inicializar(datosDeSistema_nombresCategorias, datosDeSistema_nombresModificadores, 
+  // cE = new ColeccionEstimulos();
+    cM = new ColeccionMaquinarias();    
+    cC.inicializar(datosDeSistema_nombresCategorias, datosDeAPI_opcionesDeNavegacion, datosDeSistema_nombresModificadores, 
     datosDeSistema_nombresModificadoresExistentes);
     cO.inicializar(datosDeSistema_nombresOpciones);    
-    cE.inicializar(datosDeSistema_nombresEstimulos);    
+   // cE.inicializar(datosDeSistema_nombresEstimulos);    
+    cM.inicializar(datosDeSistema_nombresMaquinarias);    
     monitor = new Monitor();
   }
 
@@ -1252,45 +1729,54 @@ class Consola {
     modos = new Modos(paleta_, new PVector(centroX, centroY), tam);
     cC = new ColeccionCategorias(paleta_, new PVector(centroX, centroY), tam);
     cO = new ColeccionOpciones(paleta_, new PVector(centroX, centroY), tam);
-    cE = new ColeccionEstimulos(paleta_, new PVector(centroX, centroY), tam);
-    cC.inicializar(datosDeSistema_nombresCategorias, datosDeSistema_nombresModificadores, 
+  //  cE = new ColeccionEstimulos(paleta_, new PVector(centroX, centroY), tam);
+    cM = new ColeccionMaquinarias(paleta_, tam);
+    cC.inicializar(datosDeSistema_nombresCategorias, datosDeAPI_opcionesDeNavegacion, datosDeSistema_nombresModificadores, 
     datosDeSistema_nombresModificadoresExistentes);
     cO.inicializar(datosDeSistema_nombresOpciones);    
-    cE.inicializar(datosDeSistema_nombresEstimulos);    
+   // cE.inicializar(datosDeSistema_nombresEstimulos);    
+    cM.inicializar(datosDeSistema_nombresMaquinarias);    
     monitor = new Monitor(paleta_, new PVector(centroX, centroY), tam);
   }
 
 
   public void ejecutar() {
-
- base();
+    base();
     if (modos.getModo().equals(ESPERA)) {
       //mandarMensaje("/holi...ten un buen dia");
-      monitor.dibujar(cerrado, nivel, eje);
-    } else if (modos.getModo().equals(AGREGAR)) {        
-     
-      monitor.dibujar(cerrado, nivel, eje);
-     cC.dibujarCategoria();
-    } else if (modos.getModo().equals(ELIMINAR)) {       
-      
+      monitor.dibujar(cerrado, nivel, eje/*,width/2,height/2*/);
+    } else if (modos.getModo().equals(AGREGAR)) {       
       monitor.dibujar(cerrado, nivel, eje);
       cC.dibujarCategoria();
-    } else if (modos.getModo().equals(ESTIMULOS)) {      
-
-      int contadorSeleccionEstimulo = cC.getContadorSeleccionEstimulo(cursor);//limites 0,400
-      monitor.dibujar(cerrado, nivel, eje, contadorSeleccionEstimulo);       
-      fill(255);
-      ellipse(cursor.x, cursor.y, 10, 10);      
-      if (cE.getSeleccionarEstimulo()) {
-        botonesAccionesN2();
-        mandarMensaje("/pedir/estimulos/totales");
-      }
-      cE.dibujar();
+    } else if (modos.getModo().equals(ELIMINAR)) {      
+      monitor.dibujar(cerrado, nivel, eje);
+      cC.dibujarCategoria();
+    //} else if (modos.getModo().equals(ESTIMULOS)) {     
+      /* int contadorSeleccionEstimulo = cC.getContadorSeleccionEstimulo(cursor);//limites 0,400
+       monitor.dibujar(cerrado, nivel, eje, contadorSeleccionEstimulo);       
+       fill(255);
+       ellipse(cursor.x, cursor.y, 10, 10);      
+       if (cE.getSeleccionarEstimulo()) {
+       botonesAccionesN2();
+       mandarMensaje("/pedir/estimulos/totales");
+       }
+       cE.dibujar();*/
     } else if (modos.getModo().equals(OPCIONES)) {
       monitor.dibujar(cerrado, nivel, eje);
       cO.dibujar();
+    } else if (modos.getModo().equals(MAQUINARIAS)) {
+      monitor.dibujar(cerrado, nivel, eje);
+      cC.dibujarCategoria();
     }
-    modos.ejecutar(modoActual);
+    modos.ejecutar();
+
+    if (conectadoConSistema) { //conectado con sistema es una variable global que posdria paserle como variable
+      cM.dibujar();
+    }
+
+    if (bdd.interaccionConMouse) {
+      mouse();
+    }
   }
 
   public void setCursor(float x, float y) {
@@ -1319,13 +1805,18 @@ class Consola {
     limitarSelector();
     // botonesAccionesN1();
   }
-  public void activarEstimulos() {
+ /* void activarEstimulos() {
     modos.setModo(ESTIMULOS); 
     limitarSelector();
     //  botonesAccionesN1();
-  }
+  }*/
   public void activarEspera() {
     modos.setModo(ESPERA); 
+    limitarSelector();
+    // botonesAccionesN1();
+  }
+  public void activarMaquinarias() {
+    modos.setModo(MAQUINARIAS); 
     limitarSelector();
     // botonesAccionesN1();
   }
@@ -1349,42 +1840,158 @@ class Consola {
     selector = PApplet.parseInt(constrain(selector, 0, limiteSelector));
     if (modos.getModo().equals(AGREGAR)) {     
       cC.setSensible(selector);
+      cM.setSensible(0);
+      modos.setIconoCentral(cC.getSensible(selector), cC.getColorSensible(selector));
     } else if (modos.getModo().equals(ELIMINAR)) {       
       cC.setSensible(selector);
-    } else if (modos.getModo().equals(ESTIMULOS)) {
+      cM.setSensible(0);
+      modos.setIconoCentral(cC.getSensible(selector), cC.getColorSensible(selector));
+   // } else if (modos.getModo().equals(ESTIMULOS)) {
+      //cM.setSensible(0);
     } else if (modos.getModo().equals(OPCIONES)) {
-      cC.setSensible(selector);
+      cO.setSensible(selector);
+      cM.setSensible(0);
+      modos.setIconoCentral(cO.getSensible(selector), cC.getColorSensible(selector));
+    } /*else if (modos.getModo().equals(OPCIONES)) {
+     cC.setSensible(selector);
+     cM.setSensible(0);
+     modos.setIconoCentral(cC.getSensible(selector),cC.getColorSensible(selector));
+     }*/
+    else if (modos.getModo().equals(MAQUINARIAS)) {
+      cM.setSensible(selector);
+      modos.setIconoCentral(cM.getSensible(selector), cM.getColorSensible(selector));
     }
+  }
+
+
+
+  boolean seDetuboElMouse=false;
+  boolean seMueveElMouse=false;
+  public void mouse() {
+    cC.mouse();  
+
+    if (mouseX != pmouseX) {
+      seDetuboElMouse = false;
+      seMueveElMouse = true;
+    }
+
+    if (seMueveElMouse && !seDetuboElMouse && mouseX == pmouseX) {
+      seDetuboElMouse = true;
+      seMueveElMouse = false;
+    }
+    if (seDetuboElMouse) {
+      if (!(modos.getModo().equals(ELIMINAR)) && !(modos.getModo().equals(ESPERA)) ) {
+        Modificador modSeleccionado = cC.getSensibleMouse_modificador();    
+        modos.setIconoCentral(modSeleccionado, cC.getColorSensibleMouse());
+        if ( modSeleccionado!=null) {
+          if (modSeleccionado.mods>0) {
+            activarQuitar();
+          }
+        }
+      }
+      if (!(modos.getModo().equals(AGREGAR)) && !(modos.getModo().equals(ESPERA)) ) {
+        Modificador modSeleccionado = cC.getSensibleMouse_modificador();   
+        modos.setIconoCentral(modSeleccionado, cC.getColorSensibleMouse()); 
+        if ( modSeleccionado!=null) {
+          if (modSeleccionado.mods<1) {
+            activarAnadir();
+          }
+        }
+      }
+    }
+    seDetuboElMouse = false;
+  }
+
+  public void mousePressed() {   
+    String nombreModSeleccionado = cC.getSensibleMouse();    
+    if (nombreModSeleccionado != null) {
+      if (modos.getModo().equals(AGREGAR)) {
+        if (esOpcionDeNavegacion(nombreModSeleccionado)) {
+          activarNavegacion(nombreModSeleccionado);
+        } else {
+          OscMessage mensajeModificadores;
+          mensajeModificadores = new OscMessage("/agregar/modificadores");
+          mensajeModificadores.add(nombreModSeleccionado); 
+          oscP5.send(mensajeModificadores, sistema);
+        }
+      } else if (modos.getModo().equals(ELIMINAR)) {
+        if (esOpcionDeNavegacion(nombreModSeleccionado)) {
+          activarNavegacion(nombreModSeleccionado);
+        } else {        
+          int cantModSeleccionado = cC.getSensibleMouse_modificador().getCant();
+          OscMessage mensajeModificadores;
+          mensajeModificadores = new OscMessage("/quitar/modificadores");
+          mensajeModificadores.add(nombreModSeleccionado+"_"+(cantModSeleccionado-1));           
+          oscP5.send(mensajeModificadores, sistema);
+        }
+      }
+    }
+    //-------Para que cada vez que se preciona el mouse se revise el estado de 
+    //-------los modificadores
+    seDetuboElMouse = true;
   }
 
   public void botonesAccionesN2() {
     if (modos.getModo().equals(AGREGAR)) {
       String nombreModSeleccionado = cC.getSensible(selector);
-      OscMessage mensajeModificadores;
-      mensajeModificadores = new OscMessage("/agregar/modificadores");
-      mensajeModificadores.add(nombreModSeleccionado); 
-      oscP5.send(mensajeModificadores, sistema);
+      if (esOpcionDeNavegacion(nombreModSeleccionado)) {
+        activarNavegacion(nombreModSeleccionado);
+      } else {
+        OscMessage mensajeModificadores;
+        mensajeModificadores = new OscMessage("/agregar/modificadores");
+        mensajeModificadores.add(nombreModSeleccionado); 
+        oscP5.send(mensajeModificadores, sistema);
+      }
     } else if (modos.getModo().equals(ELIMINAR)) {
       String nombreModSeleccionado = cC.getSensible(selector);
-      int cantModSeleccionado = cC.getModSensible(selector).getCant();
-      OscMessage mensajeModificadores;
-      mensajeModificadores = new OscMessage("/quitar/modificadores");
-      mensajeModificadores.add(nombreModSeleccionado+"_"+(cantModSeleccionado-1));           
-      oscP5.send(mensajeModificadores, sistema);
-    } else if (modos.getModo().equals(ESTIMULOS)) {
-      OscMessage mensajeOpciones;
-      mensajeOpciones = new OscMessage("/seleccionar/estimulo");
-      // mensajeOpciones.add(nombreModSeleccionado);           
-      oscP5.send(mensajeOpciones, sistema);
+      if (esOpcionDeNavegacion(nombreModSeleccionado)) {
+        activarNavegacion(nombreModSeleccionado);
+      } else {        
+        int cantModSeleccionado = cC.getModSensible(selector).getCant();
+        OscMessage mensajeModificadores;
+        mensajeModificadores = new OscMessage("/quitar/modificadores");
+        mensajeModificadores.add(nombreModSeleccionado+"_"+(cantModSeleccionado-1));           
+        oscP5.send(mensajeModificadores, sistema);
+      }
+   // } else if (modos.getModo().equals(ESTIMULOS)) {
+      /*OscMessage mensajeOpciones;
+       mensajeOpciones = new OscMessage("/seleccionar/estimulo");
+       // mensajeOpciones.add(nombreModSeleccionado);           
+       oscP5.send(mensajeOpciones, sistema);*/
     } else if (modos.getModo().equals(OPCIONES)) {
       String nombreModSeleccionado = cO.getSensible(selector);
       OscMessage mensajeOpciones;
       mensajeOpciones = new OscMessage("/accion/opciones");
       mensajeOpciones.add(nombreModSeleccionado);           
       oscP5.send(mensajeOpciones, sistema);
+    } else if (modos.getModo().equals(MAQUINARIAS)) {
+      String nombreMaqSeleccionado = cM.getSensible(selector);
+      OscMessage mensajeOpciones;
+      mensajeOpciones = new OscMessage("/set/maquinaria");
+      mensajeOpciones.add(nombreMaqSeleccionado);           
+      oscP5.send(mensajeOpciones, sistema);
+      activarAnadir();
     }
 
-    //activarEspera();
+    // activarEspera();
+  }
+
+  public boolean esOpcionDeNavegacion(String nombre) {
+    boolean navegable = false;
+    for (int i=0; i<opcionesDeNavegacion.length; i++) {
+      if (nombre.equals(opcionesDeNavegacion[i]))
+        navegable = true;
+    }
+    return navegable;
+  }
+
+
+  public void activarNavegacion(String aDonde) {
+    if (aDonde.equals(MAQUINARIAS)) {
+      activarMaquinarias();
+    } else if (aDonde.equals(OPCIONES)) {
+      activarOpciones();
+    }
   }
 
 
@@ -1401,43 +2008,58 @@ class Consola {
       limiteSelector = datosDeSistema_nombresModificadores.length; //cambiar con no se nada supongo
     } else if (modos.getModo().equals(ELIMINAR)) {
       limiteSelector = datosDeSistema_nombresModificadores.length; //cambiar con no se nada supongo
-    } else if (modos.getModo().equals(ESTIMULOS)) {
-      limiteSelector = datosDeSistema_nombresEstimulos.length; //cambiar con no se nada supongo
+   // } else if (modos.getModo().equals(ESTIMULOS)) {
+     // limiteSelector = datosDeSistema_nombresEstimulos.length; //cambiar con no se nada supongo
     } else if (modos.getModo().equals(OPCIONES)) {
       limiteSelector = datosDeSistema_nombresOpciones.length; //cambiar con no se nada supongo
+    } else if (modos.getModo().equals(MAQUINARIAS)) {
+      limiteSelector = datosDeSistema_nombresMaquinarias.length; //cambiar con no se nada supongo
     }
   }
 
-
+  String[] opcionesDeNavegacion = {
+    MAQUINARIAS
+  } 
+  ;
   public void renovarDatosCategorias( ArrayList<String>nombres_, ArrayList<String>nombresCategorias_, ArrayList<String>nombresExistentes_) {
 
     dosNivelesDeSeleccion = true;
-    int c = nombres_.size();
+    int c = (nombres_.size()+opcionesDeNavegacion.length);
     int ce = nombresExistentes_.size();
 
     datosDeSistema_nombresCategorias = new String[c];
     datosDeSistema_nombresModificadores  = new String[c];
+    datosDeAPI_opcionesDeNavegacion = new boolean[c];
     datosDeSistema_nombresModificadoresExistentes  = new String[ce];
 
-    for (int i=0; i<c; i++) {
-      datosDeSistema_nombresModificadores[i] = (String)nombres_.get(i);
-      datosDeSistema_nombresCategorias[i] = (String)nombresCategorias_.get(i);
+    for (int i=0; i<opcionesDeNavegacion.length; i++) {
+      datosDeSistema_nombresModificadores[i] = opcionesDeNavegacion[i];
+      datosDeSistema_nombresCategorias[i] = opcionesDeNavegacion[i];
+      datosDeAPI_opcionesDeNavegacion[i] = true;
     }
+
+    for (int i=opcionesDeNavegacion.length; i<c; i++) {
+      println(i-opcionesDeNavegacion.length);
+      datosDeSistema_nombresModificadores[i] = (String)nombres_.get(i-opcionesDeNavegacion.length);
+      datosDeSistema_nombresCategorias[i] = (String)nombresCategorias_.get(i-opcionesDeNavegacion.length);
+      datosDeAPI_opcionesDeNavegacion[i] = false;
+    }
+
     for (int i=0; i<ce; i++) {
       String[] n = split(nombresExistentes_.get(i), "_");
       datosDeSistema_nombresModificadoresExistentes[i] = n[0];
     }
 
-    cC.inicializar(datosDeSistema_nombresCategorias, datosDeSistema_nombresModificadores, 
+    cC.inicializar(datosDeSistema_nombresCategorias, datosDeAPI_opcionesDeNavegacion, datosDeSistema_nombresModificadores, 
     datosDeSistema_nombresModificadoresExistentes);
 
     limitarSelector();
   }
 
-  public void renovarDatosEstimulos( ArrayList<String>nombres_) {
+  /*void renovarDatosEstimulos( ArrayList<String>nombres_) {
 
     int c = nombres_.size();
-    datosDeSistema_nombresEstimulos  = new String[c];
+  //  datosDeSistema_nombresEstimulos  = new String[c];
     for (int i=0; i<c; i++) {
       datosDeSistema_nombresEstimulos[i] = (String)nombres_.get(i);
     }
@@ -1445,7 +2067,7 @@ class Consola {
     cE.inicializar(datosDeSistema_nombresEstimulos);
 
     limitarSelector();
-  }
+  }*/
 
   public void renovarDatosOpciones( ArrayList<String>nombres_) {
 
@@ -1460,14 +2082,29 @@ class Consola {
     limitarSelector();
   }
 
+  public void renovarDatosMaquinarias( ArrayList<String>nombres_) {
+
+    int c = nombres_.size();
+    datosDeSistema_nombresMaquinarias  = new String[c];
+    for (int i=0; i<c; i++) {
+      datosDeSistema_nombresMaquinarias[i] = (String)nombres_.get(i);
+      println( datosDeSistema_nombresMaquinarias[i]);
+    }
+
+    cM.inicializar(datosDeSistema_nombresMaquinarias);
+
+    limitarSelector();
+    println();
+  }
+
   public void agregarMod(String cual) {
     cC.agregar(cual);
   }
   public void quitarMod(String cual) {
-     
+
     cC.quitar(cual);
   }
-  
+
   public void base() {
     noStroke();
     fill(paleta[1][0]);
@@ -1475,7 +2112,258 @@ class Consola {
     float tam_ = tam*350/100;
     fill(paleta[1][1]);
     ellipse(centroX, centroY, tam_, tam_);
-   
+  }
+}
+Reloj reloj = new Reloj();
+ConsolaDebug consolaDebug = new ConsolaDebug();
+
+public void consolaDebug() {
+  reloj.actualizar();
+  consolaDebug.ejecutar();
+}
+
+public final class ConsolaDebug {
+
+  private String texto;
+  private ArrayList<Alerta> alertas = new ArrayList<Alerta>();
+  private int colorTexto, colorAlerta, colorSuperAlerta;
+  private int tamanoTexto, tamanoAlerta;
+  private boolean debug;
+
+  private boolean verFps, verDatos, verAlertas;
+
+  private static final float LEADIN = 1.5f; //--- NUEVO!
+
+  public ConsolaDebug() {
+    texto = "";
+    colorTexto = color( 0xff000000 );//color( 255 );
+    colorAlerta = color(175, 194, 43);//#FF0000
+    tamanoTexto = PApplet.parseInt( height * 0.12f ); //int( height * 0.023 ); //tamanoTexto = 20;
+    tamanoAlerta = PApplet.parseInt( height * 0.12f ); //int( height * 0.023 ); //tamanoAlerta = 20;
+
+    debug = verFps = verDatos = verAlertas = true;
+  }
+
+  //--------------------------------------- METODOS PUBLICOS
+
+  //GETERS AND SETERS
+  public void setDebug( boolean debug ) {
+    this.debug = debug;
+  }
+
+  public void setVerFps( boolean verFps ) {
+    this.verFps = verFps;
+  }
+
+  public void setVerDatos( boolean verDatos ) {
+    this.verDatos = verDatos;
+  }
+
+  public void setVerAlertas( boolean verAlertas ) {
+    this.verAlertas = verAlertas;
+  }
+
+  public boolean getDebug() {
+    return debug;
+  }
+
+  public boolean getVerFps() {
+    return verFps;
+  }
+
+  public boolean getVerDatos() {
+    return verDatos;
+  }
+
+  public boolean getVerAlertas() {
+    return verAlertas;
+  }
+  //--------
+
+  public void println( String texto ) {
+    this.texto += texto + "\n";
+  }
+
+  public void printlnAlerta( String alerta ) {
+    alertas.add( new Alerta( alerta ) );
+    System.out.println( alerta );
+  }
+
+  public void printlnAlerta( String alerta, int c ) {
+    alertas.add( new Alerta( alerta, c ) );
+    System.out.println( alerta );
+  }
+
+  public void ejecutar() {
+
+    if ( !verDatos ) texto = "";
+    if ( verFps ) texto = "fps: " + nf( frameRate, 0, 2 ) + "\n" + texto;
+
+    if ( debug ) ejecutarDebug();
+    else ejecutarNoDebug();
+    texto = "";
+  }
+
+  //--------------------------------------- METODOS PRIVADOS
+
+  private void ejecutarDebug() {
+    pushStyle();
+
+    textAlign( LEFT, TOP );
+    textSize( tamanoTexto );
+    textLeading( tamanoTexto * LEADIN ); 
+
+    noStroke();
+
+    //NUEVO rectangulo negro de fondo
+
+    fill( 255 );
+    int desde = 0, hasta = 0, iteracion = 0;
+    while ( texto.indexOf( "\n", desde ) > 0 ) {
+
+      hasta = texto.indexOf( "\n", desde );
+      String aux = texto.substring( desde, hasta );
+
+      rect( 0, iteracion * (tamanoTexto * LEADIN), textWidth( aux ) + 3, tamanoTexto * ( LEADIN * 1.1666666f ) );
+
+      desde = hasta + 1;
+      iteracion++;
+    }
+
+    //
+
+    fill( colorTexto );
+    text( texto, 0, 3 );
+    if ( !texto.equals("") ) System.out.println( texto );
+
+    textAlign( RIGHT, BOTTOM );
+    textSize( tamanoAlerta );
+    imprimirAlertas( verAlertas );
+
+    popStyle();
+  }
+
+  private void ejecutarNoDebug() {
+    if ( !texto.equals("") ) System.out.println( texto );
+    imprimirAlertas( false );
+  }
+
+  private void imprimirAlertas( boolean debug ) {
+
+    float posY = tamanoAlerta + tamanoAlerta * (LEADIN * 0.16666666f) ;//0.25
+
+    for ( int i = alertas.size() - 1; i >= 0; i-- ) {
+
+      Alerta a = alertas.get( i );
+      a.ejecutar();
+
+      if ( a.getEstado() == Alerta.ESTADO_ELIMINAR ) {
+        alertas.remove( i );
+      } else if ( debug ) {
+
+        //------ NUEVO rectangulo negro de fondo
+
+        if ( a.getEstado() == Alerta.ESTADO_MOSTRAR )
+          fill( 0 );
+        else
+          fill( 0, map( a.getTiempo(), 0, Alerta.TIEMPO_DESAPARECER, 255, 0 ) );
+
+        rect( width - textWidth( a.getAlerta() ) - 5, posY- tamanoAlerta * ( LEADIN * 0.875f ), textWidth( a.getAlerta() ) + 5, tamanoAlerta * LEADIN );
+
+        //------
+        int colorTexto = a.tengoColor?a.m_color:colorAlerta;
+        if ( a.getEstado() == Alerta.ESTADO_MOSTRAR ) {
+          fill( colorTexto );
+        } else {
+          fill( colorTexto, map( a.getTiempo(), 0, Alerta.TIEMPO_DESAPARECER, 255, 0 ) );
+        }
+        text( a.getAlerta(), width, posY );
+        posY += tamanoAlerta * LEADIN;
+
+        if ( posY > height && i - 1 >= 0 ) {
+          removerAlertasFueraDePantalla( i - 1 );
+          return;
+        }
+      }
+    }//end for
+  }
+
+  private void removerAlertasFueraDePantalla( int desde ) {
+    for ( int i = desde; i >= 0; i-- )
+      alertas.remove( i );
+  }
+
+  //clase interna y miembro
+  public class Alerta {
+
+    private String alerta;
+    int m_color;
+    boolean tengoColor;
+    private int estado;
+    public static final int
+      ESTADO_MOSTRAR = 0, 
+      ESTADO_DESAPARECER = 1, 
+      ESTADO_ELIMINAR = 2;
+
+    private int tiempo;
+    public static final int
+      TIEMPO_MOSTRAR = 5000, //3000
+      TIEMPO_DESAPARECER = 2000;
+
+    public Alerta( String alerta ) {
+      this.alerta = alerta;
+      estado = ESTADO_MOSTRAR;
+      tengoColor = false;
+    }
+
+    public Alerta( String alerta, int c ) {
+      this.alerta = alerta;
+      m_color = c;
+      estado = ESTADO_MOSTRAR;
+      tengoColor = true;
+    }
+
+    //------------------------------ METODOS PUBLICOS
+
+    public String getAlerta() {
+      return alerta;
+    }
+
+    public int getEstado() {
+      return estado;
+    }
+
+    public int getTiempo() {
+      return tiempo;
+    }
+
+    public void ejecutar() {
+      tiempo += reloj.getDeltaMillis();
+      if ( estado == ESTADO_MOSTRAR && tiempo > TIEMPO_MOSTRAR ) {
+        estado = ESTADO_DESAPARECER;
+        tiempo = 0;
+      } else if ( estado == ESTADO_DESAPARECER && tiempo > TIEMPO_DESAPARECER ) {
+        estado = ESTADO_ELIMINAR;
+      }
+    }
+  }
+}
+
+public class Reloj {
+
+  private int millisActual, millisAnterior, deltaMillis;
+
+  public Reloj() {
+  }
+
+  public int getDeltaMillis() {
+    return deltaMillis;
+  }
+
+  public void actualizar() {
+    millisAnterior = millisActual;
+    millisActual = millis();
+    deltaMillis = millisActual - millisAnterior;
   }
 }
 class Controlador {
@@ -1491,17 +2379,17 @@ class Controlador {
   public void aceptar() {
     //consola.activar();
     consola.botonesAccionesN2();
-   /* if (consola.modos.getModo().equals(ESPERA)) {
-      consola.mandarMensaje("/holi...ten un buen dia");
-    } else if (consola.modos.getModo().equals(AGREGAR)) {
-      consola.mandarMensaje("/pedir/modificadores/existentes");
-    } else if (consola.modos.getModo().equals(ELIMINAR)) {
-      consola.mandarMensaje("/pedir/modificadores/existentes");
-    } else if (consola.modos.getModo().equals(ESTIMULOS)) {
-      consola.mandarMensaje("/pedir/estimulos/totales");
-    } else if (consola.modos.getModo().equals(OPCIONES)) {
-      consola.mandarMensaje("/pedir/opciones");
-    }*/
+    /* if (consola.modos.getModo().equals(ESPERA)) {
+     consola.mandarMensaje("/holi...ten un buen dia");
+     } else if (consola.modos.getModo().equals(AGREGAR)) {
+     consola.mandarMensaje("/pedir/modificadores/existentes");
+     } else if (consola.modos.getModo().equals(ELIMINAR)) {
+     consola.mandarMensaje("/pedir/modificadores/existentes");
+     } else if (consola.modos.getModo().equals(ESTIMULOS)) {
+     consola.mandarMensaje("/pedir/estimulos/totales");
+     } else if (consola.modos.getModo().equals(OPCIONES)) {
+     consola.mandarMensaje("/pedir/opciones");
+     }*/
   }
 
   public void izquierda() {
@@ -1513,7 +2401,9 @@ class Controlador {
   }
 
   public void anadir() {
-    consola.activarAnadir();
+    if (!(consola.modos.getModo().equals(MAQUINARIAS))) {
+      consola.activarAnadir();
+    }
   }
   public void quitar() {
     consola.activarQuitar();
@@ -1521,17 +2411,16 @@ class Controlador {
   public void opciones() {
     consola.activarOpciones();
   }
-  public void estimulos() {
+  /*void estimulos() {
     consola.activarEstimulos();
-  }
+  }*/
 
   public void cancelar() {    
 
     //consola.cancelar();
   }
 
-  public void actualizarIconos(int cerrado, int nivel, int eje) {    
-
+  public void actualizarIconos(int cerrado, int nivel, int eje) {   
     consola.actualizarIconos(cerrado, nivel, eje);
   }
 }
@@ -1569,20 +2458,20 @@ class Estimulo extends Opcion{
 }
 public void setPaleta() {
   paleta = new int[4][];
-  
+
   int[] x1 = {
     color(0xff000000), color(0xffFFFFFF)
   };
   paleta[0] = x1;
 
   int[] x2 = {
-    color(0xff25282D), color(0xff1F2227), color(0xff21262A)
+    color(0xff25282D)/*baseDeLaBaseDeLaRueda*/, color(0xff2D3235)/*baseCirculardelarueda*/, color(0xff202529)/*baseDeMonitoryMaquinarias*/, color(0xff818181)
   };
 
   paleta[1] = x2;
 
   int[] x3 = {
-    color(0xff1b1922), color(0xff25282D), color(0xffAFC22B), color(0xffBE4041), color(0xff43B4D0)
+    color(0xff1b1922), color(0xff25282D), color(0xffAFC22B), color(0xffBE4041), color(0xff1F2227)//conector
   };
 
   paleta[2] = x3;
@@ -1594,66 +2483,96 @@ public void setPaleta() {
 
   paleta[3] = x4;
 }
+//---- PARA LOS ICONOS:
+//---- primero que las iamgenes tengan los nombres y no tenerlos todos aqui
+//---- entonces el nombre sale de las iamgenes y no al reves
+//---- segundo que haya un contructor donde le pasas un arreglo de nombres y te 
+//---- crea un hashmap con lso iconos solo de esos string que encesesita asi no usa 
+//---- espacio de memoria de gana
+//---- tercero poner en lsonombre de lso iconos si son modificadores categorias u otros
+//---- asi hay otor contructor al que le pasas solo un string diciendole modificadores o categorias
+//---- y te pasa el hashmap de es gran conglomerado de cosas... por la misma razon que el anterior.
+//---- como lso nombres estos tiene que coincidir con lso de los modificadores de el lienzo hay que
+//---- crea algo para dividir las iamgenes algo como mod/nombre_del_mod.png asi se peude ahce run 
+//---- split primeor por el '.' pra extraer el modo y segundo por el '/' pARA SACAr solo el nombre y 
+//---- si es un modificador.
+
 class Iconos {
   HashMap<String, PImage> iconos;
-
+  float tamanioTexto;
+  int w, h;
   String[] nombres = {
-    "Colision Con Joint", "Aplicar Colisiones", "Colision Simple", "Dibujar Reas", "Varios", 
+    "Sin Imagen", "Colision Con Joint", "Aplicar Colisiones", "Colision Simple", "Dibujar Reas", "Varios", 
     "Vizualizar Particulas", "Dibujar Circulo", "Aplicar Fuerza", "Atraccion Al Centro", "Friccion Global", 
     "Escena", "Dibujar Flecha", "Espacio Cerrado", "Espacio Toroidal", "Dibujar Rastro Circular", 
     "Rastro Normal", "Rastro Elastico", "Forma De Rastro", "Dibujar Rastro Triangular", "Dibujar Rastro", 
     "Flock Separacion", "Flock Cohesion", "Flocking", "Transparencia", "Alfa Segun Velocidad", 
     "Aplicar Movimiento", "Dibujar Rastro Lineal", "Reset Lluvia", "Fuerzas Por Semejanza", "Flock Alineamiento", 
-    "Reset Lluvia", "Fuerzas Por Semejanza", "Mover", "Gravedad"
+    "Reset Lluvia", "Fuerzas Por Semejanza", "Mover", "Gravedad", "maquinarias", "espera", "opciones", "eliminar", 
+    "agregar", "Lumiere", "Cohl", "Melies", "Guy Blache", "Estimulos", "Alfa Segun Cercania", 
+    "Atraccion Al Torso", "Mod Fuerzas Por Semejanza", "Egoespacio", "Paleta Color", "Paleta Personalizada", "Paleta Default", 
+    "Dibujar Rastro Cuadrado", "Dibujar Rastro Shape", "Dibujar Cuadrado", "cod05 1", "cod05 2", ABIERTO, CERRADO, N_MEDIO, 
+    N_ALTO, N_BAJO, EJE_DERECHA, EJE_IZQUIERDA, EJE_CENTRO, MONITOR_BASE
   };
-
-  Iconos() {
-    iconos = new HashMap<String, PImage>();
-    for (int i=0; i<34; i++) {
-      PImage icono = loadImage("icono ("+(i+1)+").png");         
-      iconos.put(nombres[i], icono);
-    }
-    /* PImage icono;
-     icono = loadImage("icono (29).png"); 
-     iconos.put( nombres[31], icono); 
-     icono = loadImage("icono (30).png"); 
-     iconos.put( nombres[32], icono);
-     icono = loadImage("icono (27).png");
-     iconos.put( nombres[33], icono);*/
-  }
 
   Iconos(int t) {
     iconos = new HashMap<String, PImage>();
-    for (int i=0; i<34; i++) {
-      PImage icono = loadImage("iconos/blancos/icono ("+(i+1)+").png");  
-      icono.resize(t, t);      
+    PImage imagenVacia = imagenVacia();
+    imagenVacia.resize(t, t);      
+    iconos.put(nombres[0], imagenVacia);
+    for (int i=1; i<66; i++) {
+      PImage icono = loadImage("iconos/blancos/icono ("+(i)+").png");  
+      int rw = icono.width>=icono.height?t:(icono.width*t/icono.height);
+      int rh = icono.height>=icono.width?t:(icono.height*t/icono.width);
+      w = rw;
+      h = rh;
+      icono.resize(rw, rh);      
       iconos.put(nombres[i], icono);
-     
+      tamanioTexto = t/3;
     }
-    /* PImage icono;
-     icono = loadImage("iconos/icono (29).png"); 
-     icono.resize(t, t);  
-     iconos.put( nombres[31], icono); 
-     icono = loadImage("iconos/icono (30).png"); 
-     icono.resize(t, t);  
-     iconos.put( nombres[32], icono);
-     icono = loadImage("iconos/icono (27).png");
-     icono.resize(t, t);  
-     iconos.put( nombres[33], icono);*/
+  }
+
+  public PImage imagenVacia() {
+    PImage img = createImage(100, 100, ARGB);
+    img.loadPixels();
+    for (int i = 0; i < 100; i++) {
+      for (int j = 0; j < 100; j++) {
+        int pixelIndex = i+j*img.width;
+        if (((i-j)<4 && (i-j)>-4 && dist(i, j, 50, 50) <= 50) || (dist(i, j, 50, 50) <= 50 && dist(i, j, 50, 50)>50-4) ) {
+          img.pixels[pixelIndex] = color(255);
+        } else  /*if (dist(i, j, 50, 50)<50) {
+         img.pixels[pixelIndex] = color(255);
+         } else */ {
+          img.pixels[pixelIndex] = color(255, 0);
+        }
+      }
+    }
+    img.updatePixels();
+    return img;
   }
 
   public void dibujar(String nombre, float x, float y) {
     imageMode(CENTER);
     PImage icono = iconos.get(nombre);
-    if (icono!=null)
+    if (icono!=null) {
       image(icono, x, y);
-    else
-      println(nombre+ " no sirve por alguna razon");
+    } else {
+      icono = iconos.get("Sin Imagen");
+      image(icono, x, y);
+      if (nombre!=null) {
+        pushStyle();
+        fill(255);
+        textAlign(CENTER, CENTER);
+        textSize(tamanioTexto);
+        text(nombre, x, y);
+        popStyle();
+      }
+    }
   }
 }
 ////-------------------- el nombre de netAddres y de oscP5 deberian ser especificados en el constructor para un futuro 
 
-class IpManager {
+/*class IpManager {
   ControlP5 cp5;
   float alto = height/20;
   float margenSuperior = height/2-alto*5;
@@ -1671,7 +2590,7 @@ class IpManager {
     cp5 = cp5_;
   }
 
-  public void set() {
+  void set() {
 
     /* cp5.addTextfield("IP")
      .setPosition(width-franjaW*3, margenSuperior)
@@ -1716,19 +2635,19 @@ class IpManager {
      .setColorForeground(color(paleta[2][1], 100)) 
      // .setAutoClear(false)
      ;*/
-    ipEnvio = new Input();
+  /*  ipEnvio = new Input();
     ipEnvio.setPos(new PVector(width-franjaW*3, margenSuperior));
-    ipEnvio.setSize(PApplet.parseInt(franjaW*3.5f)/2, PApplet.parseInt(alto)/2);
+    ipEnvio.setSize(int(franjaW*3.5)/2, int(alto)/2);
     ipEnvio.setNombre("IP");
 
     puertoEnvio = new Input();
     puertoEnvio.setPos(new PVector(width-franjaW*3, margenSuperior+alto*2));
-    puertoEnvio.setSize(PApplet.parseInt(franjaW*3.5f)/2, PApplet.parseInt(alto)/2);
+    puertoEnvio.setSize(int(franjaW*3.5)/2, int(alto)/2);
     puertoEnvio.setNombre("Puerto Envio");
 
     puertoRecivo = new Input();
     puertoRecivo.setPos(new PVector(width-franjaW*3, margenSuperior+alto*4));
-    puertoRecivo.setSize(PApplet.parseInt(franjaW*3.5f)/2, PApplet.parseInt(alto)/2);
+    puertoRecivo.setSize(int(franjaW*3.5)/2, int(alto)/2);
     puertoRecivo.setNombre("Puerto Recivo");    
 
     botonConectar = new Boton();
@@ -1739,7 +2658,7 @@ class IpManager {
     esconder();
   }
 
-  public void esconder() {
+  void esconder() {
     if (!escondido) {
       //franjaW = -width;
       escondido=true;
@@ -1753,15 +2672,15 @@ class IpManager {
      cp5.get(Textfield.class, "Puerto Recivo") .setPosition(width-franjaW*3, margenSuperior+alto*4);
      cp5.get(Bang.class, "Conectar")  .setPosition(width-franjaW*2.8, margenSuperior+alto*8);
      */
-  }
+ /* }
 
-  public void fondo() {
+  void fondo() {
     if (!escondido) {
       pushStyle();
       rectMode(CORNER);
       fill(0, 100);
       noStroke();
-      rect(width-franjaW*3-franjaW*0.1f, 0, franjaW*4, height);
+      rect(width-franjaW*3-franjaW*0.1, 0, franjaW*4, height);
       popStyle();
       ipEnvio.dibujar();  
       puertoEnvio.dibujar();
@@ -1769,23 +2688,105 @@ class IpManager {
       botonConectar.dibujar();
     }
   }
+}*/
+class Maquinaria extends Opcion {
+
+  String nombre;
+  boolean sensible;
+  int[][] paleta;
+  Iconos iconos;
+
+  Maquinaria(String nombre_) {
+    nombre = nombre_;
+    paleta = new int[4][12];
+    for (int i=0; i<5; i++) {
+      for (int j=0; j<12; j++) {
+        paleta[i][j] = color(random(255), random(255), random(255));
+      }
+    }
+  }
+
+  Maquinaria(String nombre_, int[][] paleta_) {
+    nombre = nombre_;
+    paleta = paleta_;
+  }
+
+  public void setSensible(boolean sensible_/*, boolean estado_*/) {
+    sensible = sensible_;
+  }
+
+  public String getNombre() {
+    return nombre;
+  }
+
+  /*void dibujar(float x, float y, color c) {
+   noStroke();
+   pushMatrix();
+   if (sensible) {
+   enSensible( x, y, t);
+   } 
+   fill(c);
+   
+   ellipse(x, y, t, t);
+   textSize(14);
+   fill(255);
+   float angulo = atan2(y-categoria.posCentro.y, x-categoria.posCentro.x);
+   pushMatrix();
+   translate(x, y);
+   if (angulo>radians(90) || angulo<radians(-90)) {
+   textAlign(RIGHT, CENTER);
+   rotate(angulo-PI);
+   } else {
+   textAlign(LEFT, CENTER);
+   rotate(angulo);
+   }
+   text(nombre, 0, 0);
+   popMatrix();
+   }*/
+
+  public void dibujarIconos(float x, float y, float t, int col) {
+    if (iconos == null)
+      iconos = new Iconos(PApplet.parseInt(t*27/100));
+    noStroke();
+    if (sensible) {
+      enSensible( x, y, t);
+    } 
+    tint(col);
+    iconos.dibujar(nombre, x, y);
+
+ 
+  }
+
+  public void enSensible(float x, float y, float t) {
+    pushStyle();
+    noFill();
+    strokeWeight(1.5f);
+    stroke(paleta[2][3]);
+    ellipse(x, y, (t*35/100)*1.1f, (t*35/100)*1.1f);
+    popStyle();
+  }
 }
 class Modificador {
 
   String nombre;
   boolean sensible;
+  boolean hover;
+  boolean hoverExtendido; //---------------como el icono es muy peque\u00f1o el espaio de hover es muy reducido
+  //---------------- entonces esto es para extender el espacio de hover sin embargo mantener 
+  //----------------el click solo en el espacio de incono
   Categoria categoria;
   int[][] paleta;
   int mods;
   Iconos iconos;
-
+  float x_;
+  float y_;
   Modificador(String nombre_, Categoria categoria_) {
     nombre = nombre_;
     categoria = categoria_;
     paleta = new int[4][12];
     for (int i=0; i<5; i++) {
       for (int j=0; j<12; j++) {
-      paleta[i][j] = color(random(255), random(255), random(255));
+        paleta[i][j] = color(random(255), random(255), random(255));
       }
     }
   }
@@ -1820,7 +2821,8 @@ class Modificador {
 
   public void dibujar(float x, float y, float t, int c) {
     noStroke();
-
+    x_ = x;
+    y_ = y;
     if (categoria.sensible) {    
       if (sensible) {
         enSensible( x, y, t);
@@ -1854,39 +2856,73 @@ class Modificador {
       iconos = new Iconos(PApplet.parseInt(t*13/100));
 
     noStroke();
+    if (bdd.interaccionConMouse) {
+      mouseHover( x, y, t*12/100);
+      mouseHover_extendido( x, y, t*18/100);
+      sensible = hover;
+    }
 
     if (categoria.sensible) {    
       if (sensible) {
         enSensible( x, y, t);
       } 
-    
+
+
       tint(col);
       iconos.dibujar(nombre, x, y);
-     
+
       if (mods>0) {
         pushStyle();
         noFill();
-        stroke(150, 150, 220);
-        ellipse(x, y, t*18/100, t*18/100);
+        stroke(paleta[1][3]);  
+        strokeWeight(2);      
+        ellipse(x, y, t*20/100, t*20/100);
         popStyle();
       }
     } else {
       fill(col);
       ellipse(x, y, t*6/100, t*6/100);
+
+      if (mods>0) {
+        pushStyle();
+        noFill();
+        stroke(paleta[1][3]);  
+        strokeWeight(2);      
+        ellipse(x, y, t*8/100, t*8/100);
+        popStyle();
+      }
     }
   }
 
+
+
   public void enSensible(float x, float y, float t) {
     pushStyle();
-    noFill();
-    strokeWeight(1);
-    stroke(paleta[2][3]);
-    ellipse(x, y, (t*13/100)*1.25f, (t*13/100)*1.25f);
+    // noFill();
+    // strokeWeight(1);
+    // stroke(paleta[2][3]);
+    noStroke();
+    fill(paleta[2][4]);
+    ellipse(x, y, (t*13/100)*1.5f, (t*13/100)*1.5f);
     popStyle();
   }
 
   public int getCant() {
     return mods;
+  }
+
+  public void mouseHover(float x, float y, float t) {
+    if (dist(mouseX, mouseY, x, y)<t)
+      hover=true;
+    else
+      hover=false;
+  }
+
+  public void mouseHover_extendido(float x, float y, float t) {
+    if (dist(mouseX, mouseY, x, y)<t)
+      hoverExtendido=true;
+    else
+      hoverExtendido=false;
   }
 }
 ModoSoloKinect modoSoloKinect = new ModoSoloKinect();
@@ -1945,16 +2981,20 @@ class ModoSoloKinect {
 class Modos {
 
   String modo;
-  float tElipse;
-  float tLineas;
-  float tCuerpo;
   float tam;
+  float diametroIconoCentral;
   int[][] paleta;
   float centroX ;
   float centroY ;
-  float strokeW = 5;
   boolean usarTexto = false;
+
+  Iconos iconos;
+  Iconos iconosGrandes;
+  IconoCentral iconoCentral;
+
+
   Modos() {
+    iconoCentral = new IconoCentral();
     paleta = new int[4][12];
     for (int i=0; i<5; i++) {
       for (int j=0; j<12; j++) {
@@ -1962,12 +3002,20 @@ class Modos {
       }
     }
     modo = ESPERA;
+    iconos = new Iconos(PApplet.parseInt(tam*70/100));
+    iconosGrandes = new Iconos((int)tam);
+    setIconoCentral(COD05_2, paleta[2][3]);
   }
 
-  Modos(int[][] paleta_, PVector posCentral_, float tam_) {
+  Modos(int[][] paleta_, PVector posCentral_, float tam_) {    
+    iconoCentral = new IconoCentral();
     paleta = paleta_;
     modo = ESPERA;
     inicializar(posCentral_, tam_);
+    iconos = new Iconos(PApplet.parseInt(tam*70/100));
+    iconosGrandes = new Iconos((int)tam);
+    if (iconoCentral.nombre==null)
+      setIconoCentral(COD05_2, paleta[2][3]);
   }
 
   public void inicializar(PVector posCentral, float tam_) {
@@ -1976,129 +3024,95 @@ class Modos {
     tam = tam_;
   }
 
-  public void base(float cX, float cY, float t) {
-    tElipse = t/11*2;
-    tLineas = t/5*2;
-    tCuerpo = t/2*2;
-    noStroke();
-    fill(paleta[2][3]);      
+  public void baseGris(float cX, float cY, float t) {
+    fill(paleta[1][1]);     
     ellipse(cX, cY, t, t);
   }
-   
-  public void espera(float cX, float cY, float t) {
-    pushMatrix();
-    fill(paleta[2][1]);
-    stroke(paleta[2][3]); 
-    strokeWeight(strokeW);
-    translate(cX, cY);      
-    ellipse( 0, 0, t, t);
-    ellipse( 0-t*1.3f, 0, t, t);
-    ellipse( 0+t*1.3f, 0, t, t);
-    popMatrix();
+
+  public void espera(float cX, float cY) {
+    tint(paleta[2][3]);
+    iconosGrandes.dibujar(ESPERA, cX, cY);
   }
-  public void agregar(String nombre, float cX, float cY, float t) {
-    //fill(paleta[2][4][3]);      
-    //ellipse(centroX, centroY, ancho/2, ancho/2);
-    pushStyle();
-    stroke(paleta[2][1]);
-    strokeWeight(strokeW);
-    pushMatrix();
-    translate(cX, cY);      
-    line( t, 0, -t, 0);
-    line( 0, t, 0, -t);
-    popMatrix();
-    popStyle();
-
-    if (usarTexto) {
-      fill(paleta[2][2]);
-      text(nombre, cX, cY);
-    }
+  public void agregar(float cX, float cY) {
+    tint(paleta[2][3]);
+    iconosGrandes.dibujar(AGREGAR, cX, cY);
   }
-  public void eliminar(String nombre, float cX, float cY, float t) {
-    //fill(paleta[2][4][3]);
-    //ellipse(centroX, centroY, ancho/2, ancho/2);      
-    pushStyle();
-    stroke(paleta[2][1]);
-    strokeWeight(strokeW);
-    pushMatrix();
-    translate(cX, cY);
-    rotate(QUARTER_PI);      
-    line( -t, 0, t, 0);
-    line( 0, t, 0, -t);
-    popMatrix();
-    popStyle();
-
-    if (usarTexto) {       
-      fill(paleta[2][2]);
-      text(nombre, cX, cY);
-    }
+  public void eliminar(float cX, float cY) {
+    tint(paleta[2][3]);
+    iconosGrandes.dibujar(ELIMINAR, cX, cY);
   }
-  public void estimulos(String nombre, float cX, float cY, float t) {
-    pushStyle();
-    stroke(paleta[2][1]);
-    strokeWeight(strokeW);
-    pushMatrix();
-    translate(cX, cY);
-
-    line( 0, (t/3)/3.5f, 0, -(t/3)/2);
-    line( 0, (t/3)/3.5f, (t/3)/1.2f, t/3);
-    line( 0, (t/3)/3.5f, -(t/3)/1.2f, t/3);
-    line( -(t/3), -(t/4)/20, (t/3), -(t/4)/20);
-    ellipse( 0, -(t/3)/1.5f, t/5, t/5 );
-    popMatrix();
-    popStyle();
-
-    if (usarTexto) {       
-      fill(paleta[2][2]);
-      text(nombre, cX, cY);
-    }
+  public void maquinarias(float cX, float cY) {
+    tint(paleta[2][3]);
+    iconosGrandes.dibujar(MAQUINARIAS, cX, cY);
   }
-  public void opciones(String nombre, float cX, float cY, float t) {
-    //fill(paleta[2][4][3]);
-    //ellipse(centroX, centroY, ancho/2, ancho/2);
-    pushMatrix();    
-    pushStyle();
-    noStroke();
-    rectMode(CENTER);
-
-    fill(paleta[2][1]);
-    translate(cX, cY);   
-    ellipse(0, 0, t*4, t*4);
-
-    for (int i=0; i<8; i++) {
-      rect(0, t*2, t, t) ;
-      rotate(radians(360/8));
-    }
-    fill(paleta[2][3]);
-    ellipse(0, 0, t*2, t*2);
-
-    popStyle();
-    popMatrix();
-
-    if (usarTexto) {       
-      fill(paleta[2][2]);
-      text(nombre, cX, cY);
-    }
+  public void opciones( float cX, float cY) {
+    tint(paleta[2][3]);
+    iconosGrandes.dibujar(OPCIONES, cX, cY);
   }
 
-  public void ejecutar(String nombre) {
-    base(centroX, centroY, tam);
+  public void ejecutar() {
     fill(paleta[2][1]);
     textAlign(CENTER, CENTER);
     textSize(30);
     if (modo.equals(ESPERA)) {
-      espera(centroX, centroY, tElipse) ;
+      baseGris(centroX, centroY, tam);
+      espera(centroX, centroY) ;
     } else if (modo.equals(AGREGAR)) {
-      agregar( nombre, centroX, centroY, tLineas) ;
+      baseGris(centroX, centroY, tam);
+      agregar(centroX, centroY) ;
     } else if (modo.equals(ELIMINAR)) {
-      eliminar( nombre, centroX, centroY, tLineas) ;
-    } else if (modo.equals(ESTIMULOS)) {
-      estimulos( nombre, centroX, centroY, tCuerpo) ;
+      baseGris(centroX, centroY, tam);
+      eliminar(centroX, centroY) ;
     } else if (modo.equals(OPCIONES)) {
-      opciones( nombre, centroX, centroY, tElipse*0.9f) ;
+      baseGris(centroX, centroY, tam);
+      opciones(centroX, centroY) ;
+    } else if (modo.equals(MAQUINARIAS)) {
+      baseGris(centroX, centroY, tam);
+      maquinarias(centroX, centroY) ;
     } else {
-      text(nombre, centroX, centroY);
+      text(modo, centroX, centroY);
     }
+
+    if (!(getModo().equals(OPCIONES)) && !(getModo().equals(ESPERA)) && !(getModo().equals(MAQUINARIAS))) {
+      if (iconos == null)
+        iconos = new Iconos(PApplet.parseInt(tam*70/100));
+      tint(iconoCentral.col);    
+      iconos.dibujar(iconoCentral.nombre, centroX, centroY);
+      //dibujoDeEstadoDelIconoCentral(centroX, centroY, int(tam*70/100), iconoCentral.mods);
+    }
+  }
+
+  public void dibujoDeEstadoDelIconoCentral(float x, float y, float t, boolean mods) {
+    if (mods) {
+      pushStyle();
+      stroke(paleta[1][1]);
+      strokeWeight(6);
+      fill(paleta[2][3]);  
+      float tamDivisor = 4;  
+      float px = x+(t/2-t/(tamDivisor*2))*cos(radians(-45));
+      float py = y+(t/2-t/(tamDivisor*2))*sin(radians(-45));
+      ellipse(px, py, t/tamDivisor, t/tamDivisor);
+      popStyle();
+    }
+  }
+
+  public void setIconoCentral(Modificador mod, int c) {
+    if (mod!=null) {
+      iconoCentral.setNombre(mod.nombre);
+      iconoCentral.setColor(c);
+
+      if (mod.mods>0) {
+        iconoCentral.setMods(true);
+      } else {
+        iconoCentral.setMods(false);
+      }
+    }
+  }
+
+  public void setIconoCentral(String nombre, int c) {
+    iconoCentral.setNombre(nombre);
+    iconoCentral.setColor(c);
+    iconoCentral.setMods(false);
   }
 
   public void setModo(String modo_) {
@@ -2109,11 +3123,30 @@ class Modos {
     return modo;
   }
 }
+
+class IconoCentral {
+  String nombre;
+  int col;
+  boolean mods = false;
+  IconoCentral() {
+  }
+  public void setNombre(String n) {
+    nombre = n;
+  }
+  public void setColor(int c) {
+    col = c;
+  }  
+  public void setMods(boolean m) {
+    mods = m;
+  }
+}
 class Monitor {
   int[]  colorsitos;
   int[][]  paleta;
   PVector centro;
   float tam;
+  Iconos iconos;
+  Iconos iconoMarca;
   Monitor() {
     colorsitos = new int[5];
     paleta = new int[4][12];
@@ -2122,6 +3155,8 @@ class Monitor {
         paleta[i][j] = color(random(255), random(255), random(255));
       }
     }
+    iconos = new Iconos(PApplet.parseInt(bdd.monitorDiametro));
+    iconoMarca = new Iconos(PApplet.parseInt(bdd.monitorDiametro*20/100));
   }
 
   Monitor(int[][] paleta_, PVector centro_, float tam_) {
@@ -2129,190 +3164,221 @@ class Monitor {
     paleta = paleta_;
     centro = centro_;
     tam = tam_;
+    iconos = new Iconos(PApplet.parseInt(tam*70/100));
+    iconoMarca = new Iconos((int)tam);
   }
 
   public void cerrado(float a, float b, float t, int cerrado) {
     pushStyle();
-    colorMode(RGB);
-    float pI =  HALF_PI;
-    float fI = PI+HALF_PI;
-    float pD = PI+HALF_PI;
-    float fD = TWO_PI+HALF_PI;
+    /*colorMode(RGB);
+     float pI =  HALF_PI;
+     float fI = PI+HALF_PI;
+     float pD = PI+HALF_PI;
+     float fD = TWO_PI+HALF_PI;*/
+    tint(paleta[2][3]);
     if (cerrado!=1) {
-      pI =  HALF_PI+0.2f;
-      fI = PI+HALF_PI-0.2f;
-      pD = PI+HALF_PI+0.2f;
-      fD = TWO_PI+HALF_PI-0.2f;
+      iconos.dibujar(CERRADO, a, b);
+      /* pI =  HALF_PI+0.2;
+       fI = PI+HALF_PI-0.2;
+       pD = PI+HALF_PI+0.2;
+       fD = TWO_PI+HALF_PI-0.2;*/
+    } else {
+      iconos.dibujar(ABIERTO, a, b);
     }
-    strokeWeight(5);
-    stroke(paleta[2][3]);
-    noFill();
-    arc(a, b, t*2, t*2, pI, fI);  
-    arc(a, b, t*2, t*2, pD, fD);
-    popStyle();
+    /* strokeWeight(5);
+     stroke(paleta[2][3]);
+     noFill();
+     arc(a, b, t*2, t*2, pI, fI);  
+     arc(a, b, t*2, t*2, pD, fD);
+     popStyle();*/
   }
 
   public void niveles(float a, float b, float t, int nivel) {
 
-    pushStyle();
-    colorMode(RGB);
-    for (int i= 0; i<3; i++) {
-      colorsitos[i]= paleta[2][1];
-    }
-    colorsitos[nivel] = paleta[2][2];
-    noStroke();
-    fill(colorsitos[0], 150);
-    //----------Nivel superior
-    for (int i= 0; i<3; i++) {
-      float x = a+t/2*cos(map(i, 0, 3, -QUARTER_PI, -PI));
-      float y = b+t/2*sin(map(i, 0, 3, -QUARTER_PI, -PI));
-      ellipse(x, y, t/4, t/4);
-    }
+    /* pushStyle();
+     colorMode(RGB);
+     for (int i= 0; i<3; i++) {
+     colorsitos[i]= paleta[2][1];
+     }
+     colorsitos[nivel] = paleta[2][2];
+     noStroke();
+     fill(colorsitos[0], 150);
+     //----------Nivel superior
+     for (int i= 0; i<3; i++) {
+     float x = a+t/2*cos(map(i, 0, 3, -QUARTER_PI, -PI));
+     float y = b+t/2*sin(map(i, 0, 3, -QUARTER_PI, -PI));
+     ellipse(x, y, t/4, t/4);
+     }
+     
+     fill(colorsitos[1], 150);
+     //----------Nivel medio
+     for (int i= 0; i<2; i++) {
+     float x=a+t/2*cos(map(i, 0, 1, 0, PI));
+     float y=b+t/2*sin(map(i, 0, 1, 0, PI));
+     ellipse(x, y, t/4, t/4);
+     }
+     ellipse(a, b, t/4, t/4);
+     
+     fill(colorsitos[2], 150);
+     for (int i= 0; i<3; i++) {
+     float x=a+t/2*cos(map(i, 0, 3, QUARTER_PI, PI));
+     float y=b+t/2*sin(map(i, 0, 3, QUARTER_PI, PI));
+     ellipse(x, y, t/4, t/4);
+     }
+     
+     popStyle();*/
 
-    fill(colorsitos[1], 150);
-    //----------Nivel medio
-    for (int i= 0; i<2; i++) {
-      float x=a+t/2*cos(map(i, 0, 1, 0, PI));
-      float y=b+t/2*sin(map(i, 0, 1, 0, PI));
-      ellipse(x, y, t/4, t/4);
+    tint(paleta[2][2], 170);
+    if (nivel==0) {
+      iconos.dibujar(N_ALTO, a, b);
+    } else if (nivel==1) {
+      iconos.dibujar(N_MEDIO, a, b);
+    } else if (nivel==2) {
+      iconos.dibujar(N_BAJO, a, b);
     }
-    ellipse(a, b, t/4, t/4);
-
-    fill(colorsitos[2], 150);
-    for (int i= 0; i<3; i++) {
-      float x=a+t/2*cos(map(i, 0, 3, QUARTER_PI, PI));
-      float y=b+t/2*sin(map(i, 0, 3, QUARTER_PI, PI));
-      ellipse(x, y, t/4, t/4);
-    }
-
-    popStyle();
   }
 
   public void eje(float a, float b, float t, int inclinacion) {
-    pushStyle();
-    float tam = t/4;
-    colorMode(RGB);
-    for (int i= 0; i<5; i++) {
-      colorsitos[i] = paleta[2][1];
-    }
-    noStroke();
-    if (inclinacion != 0 && inclinacion != 4) {
-      colorsitos[inclinacion] = paleta[2][2];
-
-      if (colorsitos[2]!=paleta[2][1]) {
-        fill(colorsitos[2], 150);
-        // -----------eje central
-        for (int i= 0; i<2; i++) {
-          float x=a+t/2*cos(map(i, 0, 1, HALF_PI, PI+HALF_PI));
-          float y=b+t/2*sin(map(i, 0, 1, HALF_PI, PI+HALF_PI));
-          ellipse(x, y, tam, tam);
-        }
-        ellipse(a, b, tam, tam);
-      }
-      if (colorsitos[3]!=paleta[2][1]) {
-        fill(colorsitos[3], 150);
-        // eje derecho
-        for (int i= 0; i<3; i++) {
-          float x=a+t/2*cos(map(i, 0, 2, QUARTER_PI, -QUARTER_PI));
-          float y=b+t/2*sin(map(i, 0, 2, QUARTER_PI, -QUARTER_PI));
-          ellipse(x, y, tam, tam);
-        }
-      }
-      if (colorsitos[1]!=paleta[2][1]) {
-        fill(colorsitos[1], 150);
-        // -----------eje izquierdo
-        for (int i= 0; i<3; i++) {
-          float x=a+t/2*cos(map(i, 0, 2, PI-QUARTER_PI, PI+QUARTER_PI));
-          float y=b+t/2*sin(map(i, 0, 2, PI-QUARTER_PI, PI+QUARTER_PI));
-          ellipse(x, y, tam, tam);
-        }
-      }
-      popStyle();
-    } else {
-      colorsitos[inclinacion] = paleta[2][3];
-
-      if (colorsitos[2]!=paleta[2][1]) {
-        fill(colorsitos[2], 150);
-        // -----------eje central
-        for (int i= 0; i<2; i++) {
-          float x=a+t/2*cos(map(i, 0, 1, HALF_PI, PI+HALF_PI));
-          float y=b+t/2*sin(map(i, 0, 1, HALF_PI, PI+HALF_PI));
-          ellipse(x, y, tam, tam);
-        }
-        ellipse(a, b, tam, tam);
-      }
-      if (colorsitos[4]!=paleta[2][1]) {
-        fill(colorsitos[4], 150);
-        // eje derecho
-        for (int i= 0; i<3; i++) {
-          float x=a+t/2*cos(map(i, 0, 2, QUARTER_PI, -QUARTER_PI));
-          float y=b+t/2*sin(map(i, 0, 2, QUARTER_PI, -QUARTER_PI));
-          ellipse(x, y, tam, tam);
-        }
-      }
-      if (colorsitos[0]!=paleta[2][1]) {
-        fill(colorsitos[0], 150);
-        // -----------eje izquierdo
-        for (int i= 0; i<3; i++) {
-          float x=a+t/2*cos(map(i, 0, 2, PI-QUARTER_PI, PI+QUARTER_PI));
-          float y=b+t/2*sin(map(i, 0, 2, PI-QUARTER_PI, PI+QUARTER_PI));
-          ellipse(x, y, tam, tam);
-        }
-      }
-      popStyle();
-    }
-  }
-
-  public void seleccionEstimulo(float a, float b, float t, int seleccionEstimulo) {
-    pushStyle();
-    colorMode(RGB);
-    float p =  PI+HALF_PI;
-    float f = map(seleccionEstimulo, 0, 400, PI+HALF_PI, PI+HALF_PI+TWO_PI);
-
-    /* if (cerrado!=1) {
-     pI =  HALF_PI+0.2;
-     fI = PI+HALF_PI-0.2;
-     pD = PI+HALF_PI+0.2;
-     fD = TWO_PI+HALF_PI-0.2;
+    /* pushStyle();
+     float tam = t/4;
+     colorMode(RGB);
+     for (int i= 0; i<5; i++) {
+     colorsitos[i] = paleta[2][1];
+     }
+     noStroke();
+     if (inclinacion != 0 && inclinacion != 4) {
+     colorsitos[inclinacion] = paleta[2][2];
+     
+     if (colorsitos[2]!=paleta[2][1]) {
+     fill(colorsitos[2], 150);
+     // -----------eje central
+     for (int i= 0; i<2; i++) {
+     float x=a+t/2*cos(map(i, 0, 1, HALF_PI, PI+HALF_PI));
+     float y=b+t/2*sin(map(i, 0, 1, HALF_PI, PI+HALF_PI));
+     ellipse(x, y, tam, tam);
+     }
+     ellipse(a, b, tam, tam);
+     }
+     if (colorsitos[3]!=paleta[2][1]) {
+     fill(colorsitos[3], 150);
+     // eje derecho
+     for (int i= 0; i<3; i++) {
+     float x=a+t/2*cos(map(i, 0, 2, QUARTER_PI, -QUARTER_PI));
+     float y=b+t/2*sin(map(i, 0, 2, QUARTER_PI, -QUARTER_PI));
+     ellipse(x, y, tam, tam);
+     }
+     }
+     if (colorsitos[1]!=paleta[2][1]) {
+     fill(colorsitos[1], 150);
+     // -----------eje izquierdo
+     for (int i= 0; i<3; i++) {
+     float x=a+t/2*cos(map(i, 0, 2, PI-QUARTER_PI, PI+QUARTER_PI));
+     float y=b+t/2*sin(map(i, 0, 2, PI-QUARTER_PI, PI+QUARTER_PI));
+     ellipse(x, y, tam, tam);
+     }
+     }
+     popStyle();
+     } else {
+     colorsitos[inclinacion] = paleta[2][3];
+     
+     if (colorsitos[2]!=paleta[2][1]) {
+     fill(colorsitos[2], 150);
+     // -----------eje central
+     for (int i= 0; i<2; i++) {
+     float x=a+t/2*cos(map(i, 0, 1, HALF_PI, PI+HALF_PI));
+     float y=b+t/2*sin(map(i, 0, 1, HALF_PI, PI+HALF_PI));
+     ellipse(x, y, tam, tam);
+     }
+     ellipse(a, b, tam, tam);
+     }
+     if (colorsitos[4]!=paleta[2][1]) {
+     fill(colorsitos[4], 150);
+     // eje derecho
+     for (int i= 0; i<3; i++) {
+     float x=a+t/2*cos(map(i, 0, 2, QUARTER_PI, -QUARTER_PI));
+     float y=b+t/2*sin(map(i, 0, 2, QUARTER_PI, -QUARTER_PI));
+     ellipse(x, y, tam, tam);
+     }
+     }
+     if (colorsitos[0]!=paleta[2][1]) {
+     fill(colorsitos[0], 150);
+     // -----------eje izquierdo
+     for (int i= 0; i<3; i++) {
+     float x=a+t/2*cos(map(i, 0, 2, PI-QUARTER_PI, PI+QUARTER_PI));
+     float y=b+t/2*sin(map(i, 0, 2, PI-QUARTER_PI, PI+QUARTER_PI));
+     ellipse(x, y, tam, tam);
+     }
+     }
+     popStyle();
      }*/
-    strokeWeight(5);
-    stroke(paleta[2][3]);
-    noFill();
-    arc(a, b, t*2.5f, t*2.5f, p, f);  
-    //arc(a, b, t*2, t*2, pD, fD);
-    popStyle();
+
+    tint(paleta[2][2], 170);
+    if (inclinacion==0) {
+      tint(paleta[2][3], 170);
+      iconos.dibujar(EJE_IZQUIERDA, a, b);
+    } else if (inclinacion==1) {
+      iconos.dibujar(EJE_IZQUIERDA, a, b);
+    } else if (inclinacion==2) {
+      iconos.dibujar(EJE_CENTRO, a, b);
+    } else if (inclinacion==3) {
+      iconos.dibujar(EJE_DERECHA, a, b);
+    } else if (inclinacion==4) {
+      tint(paleta[2][3], 170);
+      iconos.dibujar(EJE_DERECHA, a, b);
+    }
   }
 
-  public void dibujarBase() {
+  /* void seleccionEstimulo(float a, float b, float t, int seleccionEstimulo) {
+   pushStyle();
+   colorMode(RGB);
+   float p =  PI+HALF_PI;
+   float f = map(seleccionEstimulo, 0, 400, PI+HALF_PI, PI+HALF_PI+TWO_PI);
+   
+   
+   strokeWeight(5);
+   stroke(paleta[2][3]);
+   noFill();
+   arc(a, b, t*2.5, t*2.5, p, f);  
+   //arc(a, b, t*2, t*2, pD, fD);
+   popStyle();
+   }*/
+
+  public void dibujarBase(float a, float b, float ancho, float alto) {
     pushStyle();
     rectMode(CORNER);
     noStroke();
     fill(paleta[1][2]);
-    rect(0, 0, width, height/5.3f);
-
-  
-
+    rect(a, b, ancho, alto);
+    tint(paleta[1][3]);
+    iconoMarca.dibujar(COD05_1, iconoMarca.w/1.5f, alto/2); 
+    iconos.dibujar(MONITOR_BASE, bdd.monitorX, bdd.monitorY);      
     popStyle();
   }
+
   public void dibujar(int cerrado_, int nivel_, int eje_) {  
-    dibujarBase();
-    float t = width<height? width/17 : height/17;
-    cerrado(width/2, height/10, t, cerrado_);
-    niveles(width/2, height/10, t, nivel_);
-    eje(width/2, height/10, t, eje_);
+    dibujarBase(bdd.baseMonitorX, bdd.baseMonitorY, bdd.baseMonitorAncho, bdd.baseMonitorAlto);    
+    cerrado(bdd.monitorX, bdd.monitorY, bdd.monitorDiametro, cerrado_);
+    niveles(bdd.monitorX, bdd.monitorY, bdd.monitorDiametro, nivel_);
+    eje(bdd.monitorX, bdd.monitorY, bdd.monitorDiametro, eje_);
+  }
+  //----Hacer Esto
+  public void dibujar_noKinect(int cerrado_, int nivel_, int eje_) {  
+    dibujarBase(bdd.baseMonitorX, bdd.baseMonitorY, bdd.baseMonitorAncho, bdd.baseMonitorAlto);    
+    cerrado(bdd.monitorX, bdd.monitorY, bdd.monitorDiametro, cerrado_);
+    niveles(bdd.monitorX, bdd.monitorY, bdd.monitorDiametro, nivel_);
+    eje(bdd.monitorX, bdd.monitorY, bdd.monitorDiametro, eje_);
   }
 
-  public void dibujar(int cerrado_, int nivel_, int eje_, int seleccionEstimulo_) {  
-    dibujarBase();
-    float t = width<height? width/17 : height/17;
-    cerrado(width/2, height/10, t, cerrado_);
-    niveles(width/2, height/10, t, nivel_);
-    eje(width/2, height/10, t, eje_);
-    seleccionEstimulo(width/2, height/10, t, seleccionEstimulo_);
-  }
+  /*void dibujar(int cerrado_, int nivel_, int eje_, int seleccionEstimulo_) {  
+   dibujarBase(bdd.baseMonitorX, bdd.baseMonitorY,  bdd.baseMonitorAncho, bdd.baseMonitorAlto);
+   float t = width<height? width/17 : height/17;
+   cerrado(width/2, height/10, t, cerrado_);
+   niveles(width/2, height/10, t, nivel_);
+   eje(width/2, height/10, t, eje_);
+   seleccionEstimulo(width/2, height/10, t, seleccionEstimulo_);
+   }*/
 }
 class Opcion {
-
   int col;
   int cant;
   boolean sensible;
@@ -2340,7 +3406,7 @@ class Opcion {
     paleta = new int[4][12];
     for (int i=0; i<5; i++) {
       for (int j=0; j<12; j++) {
-      paleta[i][j] = color(random(255), random(255), random(255));
+        paleta[i][j] = color(random(255), random(255), random(255));
       }
     }
     iconos = new Iconos(PApplet.parseInt(t));
@@ -2348,7 +3414,7 @@ class Opcion {
     posCentro = new PVector();
   }
 
-  Opcion(String nombre_,int[][] paleta_) {
+  Opcion(String nombre_, int[][] paleta_) {
     nombre = nombre_;
     //modificadores = new ArrayList();
     col = color(255);
@@ -2397,6 +3463,12 @@ class Opcion {
   public void dibujarIcono() {
     tint(col);
     iconos.dibujar(nombre, pos.x, pos.y);
+
+    //-- dibujar FLecha Maquinarias.....
+    if (nombre.equals(MAQUINARIAS)) {
+      fill(paleta[2][0]);
+      triangle(pos.x, pos.y+tamFigura*1.3f, pos.x-7, pos.y+tamFigura*1.3f-10, pos.x+7, pos.y+tamFigura*1.3f-10);
+    }
   }
 
   public void dibujarElipse() {
@@ -2408,7 +3480,6 @@ class Opcion {
     text(nombre, pos.x, pos.y);
   }
 
-
   public void enSensible() {
     pushStyle();
     stroke(paleta[2][4]);
@@ -2418,21 +3489,27 @@ class Opcion {
     float angulo = atan2(pos.y-posCentro.y, pos.x-posCentro.x);
     float d = t*59/100;
 
-    for (int j =0; j< 5; j++) {
-      float cX = posCentro.x+t/3*cos(angulo);
-      float cY = posCentro.y+t/3*sin(angulo);
-      float x1 = (cX)+((d/4)*j)*cos(angulo);
-      float y1 = (cY)+((d/4)*j)*sin(angulo);
-      float x2 = x1+(d/10)*cos(angulo);
-      float y2 = y1+(d/10)*sin(angulo);
-      float x3 = x1+(d/5.75f)*cos(angulo);
-      float y3 = y1+(d/5.75f)*sin(angulo);
-      strokeWeight(3);
-      line(x1, y1, x2, y2);          
-
-      strokeWeight(5);
-      point(x3, y3);
-    }
+    /*for (int j =0; j< 2; j++) {
+     float cX = posCentro.x+t/3*cos(angulo);
+     float cY = posCentro.y+t/3*sin(angulo);
+     float x1 = (cX)+((d/4)*j)*cos(angulo);
+     float y1 = (cY)+((d/4)*j)*sin(angulo);
+     float x2 = x1+(d/10)*cos(angulo);
+     float y2 = y1+(d/10)*sin(angulo);
+     float x3 = x1+(d/5.75)*cos(angulo);
+     float y3 = y1+(d/5.75)*sin(angulo);
+     strokeWeight(10);
+     line(x1, y1, x2, y2);          
+     
+     strokeWeight(10);
+     point(x3, y3);
+     }*/
+    float cX = posCentro.x+t/2*cos(angulo);
+    float cY = posCentro.y+t/2*sin(angulo);
+    float x1 = cX+(dist(pos.x, pos.y, cX, cY)-tamFigura/2)*cos(angulo);
+    float y1 = cY+(dist(pos.x, pos.y, cX, cY)-tamFigura/2)*sin(angulo);
+    strokeWeight(10);
+    line(cX, cY, x1, y1);         
     popStyle();
   }
 }
@@ -2486,20 +3563,6 @@ class UIcontrol {
   public void esconder() {
     escondido = !escondido;
   }
-}
-boolean mouseActivo = true;
-
-public void setupMouse(){
-}
-
-public void drawMouse(){
-  if (mouseActivo)
-  {
-    
-  }
-}
-
-class UsaMouse{
 }
 class SelectorDeColor extends ElementoUI {
 
@@ -2616,6 +3679,7 @@ class SelectorDeColor extends ElementoUI {
     colorMode(RGB);    
     pushStyle();
     imageMode(CENTER);
+    noTint();
     image(imagenSelectorT, posT.x, posT.y);
     image(imagenSelectorByS, posByS.x, posByS.y);
     stroke(255, 255, 255);
@@ -3122,12 +4186,32 @@ class ElementoUI {
     return nombre;
   }
 }
+
+//------------  LA MARCA
+String COD05_2 = "cod05 2";
+String COD05_1 = "cod05 1";
+//---------- EL MONITOR
+String ABIERTO =  "abierto";
+String CERRADO = "cerrado";
+String N_MEDIO = "nivel medio";
+String N_ALTO = "nivel alto";
+String N_BAJO = "nivel bajo";
+String EJE_DERECHA = "inclinacion derecha";
+String EJE_IZQUIERDA = "inclinacion izquierda";
+String EJE_CENTRO = "sin inclinacion";
+String MONITOR_BASE = "base monitor";
+
+
+//------------MODOS
 String ESPERA = "espera";
 String AGREGAR = "agregar";
 String ELIMINAR = "eliminar";
-String ESTIMULOS = "estimulos";
+//String ESTIMULOS = "estimulos";
 String OPCIONES = "opciones";
+String MAQUINARIAS = "maquinarias";
 
+
+//-------------- DE AQUI  PARA ABAJO LOS NOMBRES YA NO SON NECESARIOS porque vamos asacarlos de los nombres de las iamgenes.
 //-modificadores
 String M_ALFA_SEGUN_VELOCIDAD = "Alfa Segun Velocidad"   ;
 String M_ATRACCION_AL_CENTRO = "Atraccion Al Centro"  ;  
@@ -3166,7 +4250,7 @@ String C_VARIOS = "Varios";
 String C_APLICAR_COLISIONES = "Aplicar Colisiones";
 String C_APLICAR_MOVIMIENTO = "Aplicar Movimiento";
 String C_RESET_LLUVIA = "Reset Lluvia"  ;
-  public void settings() {  size(600, 600);  smooth(); }
+  public void settings() {  size(500, 600);  smooth(); }
   static public void main(String[] passedArgs) {
     String[] appletArgs = new String[] { "Carrete" };
     if (passedArgs != null) {

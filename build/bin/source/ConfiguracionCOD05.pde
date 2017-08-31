@@ -6,17 +6,19 @@ enum EstadoModulo {
   APAGADO, LOCAL, REMOTO
 }
 final EstadoModulo[] EstadoModuloList = new EstadoModulo[]{EstadoModulo.APAGADO, EstadoModulo.LOCAL, EstadoModulo.REMOTO};
-int EstadoModuloToInt(EstadoModulo estado) {return estado==EstadoModulo.APAGADO?0:estado==EstadoModulo.LOCAL?1:2;};
+int EstadoModuloToInt(EstadoModulo estado) {
+  return estado==EstadoModulo.APAGADO?0:estado==EstadoModulo.LOCAL?1:2;
+};
 
 class ConfiguracionCOD05 {
   ConfigModulo lienzo, observador, carrete;
   boolean panelConexiones = false;
 
-ConfiguracionCOD05(){
+  ConfiguracionCOD05() {
     lienzo = new ConfigModulo().Iniciar("lienzo", 12010);
     observador = new ConfigModulo().Iniciar("observador", 12020);
     carrete = new ConfigModulo().Iniciar("carrete", 12030);
-}
+  }
   class ConfigModulo {
     String id = "indefinido";
     String ip = "127.0.0.1";
@@ -46,9 +48,9 @@ ConfiguracionCOD05(){
     }
   }
   void cargar(XML xml) {
-    if(lienzo==null)lienzo = new ConfigModulo().Iniciar("lienzo", 12010);
-    if(observador==null)observador = new ConfigModulo().Iniciar("observador", 12020);
-    if(carrete==null)carrete = new ConfigModulo().Iniciar("carrete", 12030);
+    if (lienzo==null)lienzo = new ConfigModulo().Iniciar("lienzo", 12010);
+    if (observador==null)observador = new ConfigModulo().Iniciar("observador", 12020);
+    if (carrete==null)carrete = new ConfigModulo().Iniciar("carrete", 12030);
     if (xml != null) {
       panelConexiones = xml.getInt("panelConexiones", panelConexiones?1:0)==1;
       XML[] configs = xml.getChildren("ConfigModulo");
@@ -58,6 +60,11 @@ ConfiguracionCOD05(){
         }
       }
     }
+  }
+  void cargar_local() {
+    if (lienzo==null)lienzo = new ConfigModulo().Iniciar("lienzo", 12010);
+    if (observador==null)observador = new ConfigModulo().Iniciar("observador", 12020);
+    if (carrete==null)carrete = new ConfigModulo().Iniciar("carrete", 12030);
   }
   XML guardar(String nombre) {
     XML xml = new XML(nombre);

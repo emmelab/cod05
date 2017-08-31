@@ -1,5 +1,5 @@
 boolean modoPDE = false;// poner en false cuando se haga una exportacion posta
-boolean modoDummies = true && modoPDE;// lo mismo
+boolean modoDummies = false && modoPDE;// lo mismo
 
 import oscP5.*;
 import netP5.*;
@@ -34,6 +34,7 @@ void draw() {
   lt = millis();
     background(paleta.fondo);
   for(AutoDraw auto : autoDraw) auto.draw();
+  consolaDebug();
 }
 void keyPressed() {
   if(!interfaz.introActiva)for(AutoKeyPressed auto : autoKeyPressed) auto.keyPressed();

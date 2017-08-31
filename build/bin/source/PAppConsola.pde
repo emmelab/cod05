@@ -2,8 +2,8 @@ import java.io.InputStreamReader;
 
 class PAppConsola extends PApplet {
 
-    String que = "nada";
-    
+  String que = "nada";
+
   public void settings() {
     size(400, 600);
   }
@@ -16,12 +16,12 @@ class PAppConsola extends PApplet {
   }
 
   void pasarStream(Process process) {
-    try{
-    process.waitFor();
-    println(process.exitValue());
-    que = getStringFromInputStream(process.getErrorStream());
+    try {
+      process.waitFor();
+      println(process.exitValue());
+      que = getStringFromInputStream(process.getErrorStream());
     }
-    catch(Exception e){
+    catch(Exception e) {
       que = e.getMessage();
     }
   }

@@ -1,6 +1,6 @@
 ////-------------------- el nombre de netAddres y de oscP5 deberian ser especificados en el constructor para un futuro 
 
-class IpManager {
+/*class IpManager {
   ControlP5 cp5;
   float alto = height/20;
   float margenSuperior = height/2-alto*5;
@@ -63,7 +63,7 @@ class IpManager {
      .setColorForeground(color(paleta[2][1], 100)) 
      // .setAutoClear(false)
      ;*/
-    ipEnvio = new Input();
+  /*  ipEnvio = new Input();
     ipEnvio.setPos(new PVector(width-franjaW*3, margenSuperior));
     ipEnvio.setSize(int(franjaW*3.5)/2, int(alto)/2);
     ipEnvio.setNombre("IP");
@@ -100,7 +100,7 @@ class IpManager {
      cp5.get(Textfield.class, "Puerto Recivo") .setPosition(width-franjaW*3, margenSuperior+alto*4);
      cp5.get(Bang.class, "Conectar")  .setPosition(width-franjaW*2.8, margenSuperior+alto*8);
      */
-  }
+ /* }
 
   void fondo() {
     if (!escondido) {
@@ -116,5 +116,4 @@ class IpManager {
       botonConectar.dibujar();
     }
   }
-}
-
+}*/

@@ -25,24 +25,24 @@ Maquinarias maquinarias;
 XML xmlMaquinarias;
 
 void setup() {
-  
+
   fullScreen( 2 );
-  
+
   //size(displayWidth, displayHeight);
   //size(displayWidth/2, displayHeight/2);
   //size( 800, 600 );
-  
+
   //sketchFullScreen();
-  
+
   noCursor();
- 
+
   xmlMaquinarias  = loadXML("maqs.xml"); 
   maquinarias = new Maquinarias(xmlMaquinarias);
-  
+
   managerUsuarios = new ManagerUsuarios();
-  
+
   sistema = new Sistema(this, raizDeCantidad*raizDeCantidad, managerUsuarios);
-  
+
   //if (sistema.registroModificadores==null)sistema.registroModificadores = new HashMap();
   //println(sistema.registroModificadores);
   println(Mod_AlfaSegunVelocidad.registrador);
@@ -63,7 +63,7 @@ void setup() {
   println(Mod_FuerzasPorSemejanza.registrador);
   println(Mod_Gravedad.registrador);
   println(Mod_Mover.registrador);
-  println(Mod_ResetLluvia.registrador); 
+  //println(Mod_ResetLluvia.registrador); 
   println(Mod_RastroElastico.registrador);
   println(Mod_DibujarRastroCircular.registrador);
   println(Mod_DibujarRastroCuadrado.registrador);
@@ -95,14 +95,13 @@ void setup() {
   //---------------------------------------------------------------------------MODIFICADORES TOTAL----------------------------------------------------------------------------
 
   initOSC();
-  modificadoresExistentes();
+  //modificadoresExistentes();
 
   //modificadoresTotal();
   for (String n : sistema.registroModificadores.keySet ()) {
     String categoria = sistema.registroModificadores.get(n).categoria();
     // println(categoria);
   }
-  
 }
 
 void draw() {
@@ -126,19 +125,19 @@ void ciclo() {
 
   fill(255);
   text(frameRate, 5, 10);
-  
-  if( sistema.debug ){
+
+  if ( sistema.debug ) {
     text( "DEBUG", 5, 30 );
-    managerUsuarios.debug( this );
+    managerUsuarios.debug( this );    
   }
-  
+  consolaDebug();
 }
 
 /*
 boolean sketchFullScreen() {
-  return true;
-}
-*/
+ return true;
+ }
+ */
 
 void keyPressed() {
 

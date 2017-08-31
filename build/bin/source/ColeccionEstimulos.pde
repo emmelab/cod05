@@ -1,4 +1,4 @@
-class ColeccionEstimulos {
+/*class ColeccionEstimulos {
   int contador;
   int cant;
   PVector posCentro;
@@ -111,4 +111,4 @@ class ColeccionEstimulos {
     boolean sE = contador > 400?true:false;
     return sE;
   }
-}
+}*/

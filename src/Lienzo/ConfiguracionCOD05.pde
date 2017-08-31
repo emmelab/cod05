@@ -6,7 +6,9 @@ enum EstadoModulo {
   APAGADO, LOCAL, REMOTO
 }
 final EstadoModulo[] EstadoModuloList = new EstadoModulo[]{EstadoModulo.APAGADO, EstadoModulo.LOCAL, EstadoModulo.REMOTO};
-int EstadoModuloToInt(EstadoModulo estado) {return estado==EstadoModulo.APAGADO?0:estado==EstadoModulo.LOCAL?1:2;};
+int EstadoModuloToInt(EstadoModulo estado) {
+  return estado==EstadoModulo.APAGADO?0:estado==EstadoModulo.LOCAL?1:2;
+};
 
 class ConfiguracionCOD05 {
   ConfigModulo lienzo, observador, carrete;

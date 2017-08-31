@@ -18,7 +18,7 @@ class Interfaz implements AutoSetup, AutoDraw {
   void setup() {
     {
       float verti = height/2;
-      float sepHoriz = 160;
+      float sepHoriz = 110;
       lienzo = new BotonModulo(new PVector(width/2-sepHoriz, verti), dicIcos.lienzo, paleta.ips[0]);
       observador = new BotonModulo(new PVector(width/2, verti), dicIcos.observador, paleta.ips[1]);
       carrete = new BotonModulo(new PVector(width/2+sepHoriz, verti), dicIcos.carrete, paleta.ips[2]);
@@ -68,12 +68,18 @@ class Interfaz implements AutoSetup, AutoDraw {
     if (new File(sketchPath(archivoConfigXML)).exists()) xmlConfig = loadXML( archivoConfigXML );
     if (xmlConfig != null) xmlConfig = xmlConfig.getChild(xmlTagPanel);
 
-    config.cargar(xmlConfig);
+    //config.cargar(xmlConfig);
+    //-------- para cargar local
+    //--- :D esto no tien que ver con le cambio feo de el boton basico peor igual lo comento
+    //---- para que siempre empiece en localhost y se vea como en la documentacion
+    //---- comente el cargar con el xml y cree en metodo que crea los campos pero con info de local host
+    config.cargar_local();
     lienzo.set(config.lienzo);
     observador.set(config.observador);
     carrete.set(config.carrete);
     interfazYSensorConexion.setConfig(config);
   }
+
   void guardarDatos() {
     if (config != null) {
       XML xmlArchivo = null;

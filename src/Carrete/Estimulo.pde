@@ -30,4 +30,3 @@ class Estimulo extends Opcion{
   }
  
 }
-

@@ -1,19 +1,19 @@
 void setPaleta() {
   paleta = new color[4][];
-  
+
   color[] x1 = {
     color(#000000), color(#FFFFFF)
   };
   paleta[0] = x1;
 
   color[] x2 = {
-    color(#25282D), color(#1F2227), color(#21262A)
+    color(#25282D)/*baseDeLaBaseDeLaRueda*/, color(#2D3235)/*baseCirculardelarueda*/, color(#202529)/*baseDeMonitoryMaquinarias*/, color(#818181)
   };
 
   paleta[1] = x2;
 
   color[] x3 = {
-    color(#1b1922), color(#25282D), color(#AFC22B), color(#BE4041), color(#43B4D0)
+    color(#1b1922), color(#25282D), color(#AFC22B), color(#BE4041), color(#1F2227)//conector
   };
 
   paleta[2] = x3;

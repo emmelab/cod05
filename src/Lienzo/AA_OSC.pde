@@ -15,7 +15,8 @@ void initOSC() {
 
   noSmooth();
   noStroke();
-
+  /* oscP5 = new OscP5(this, 12010);
+   consola = new NetAddress("127.0.0.1", 14000);*/
   oscP5 = new OscP5(this, config.lienzo.puerto);
   consola = new NetAddress(config.carrete.ip, config.carrete.puerto);
 
@@ -32,7 +33,7 @@ void initOSC() {
 
   oscP5.plug(this, "recibirUsuarioJoint", "/enviar/usuario/joint");
   oscP5.plug(this, "removerUsuario", "/remover/usuario" );
-  //oscP5.plug(this, "enviarEstimulos", "/pedir/estimulos");
+  oscP5.plug(this, "enviarEstimulos", "/pedir/estimulos");
 }
 
 void accionOpciones(String cual) {
@@ -158,6 +159,7 @@ void mensaje(String mensaje) {
   OscMessage mensajeModificadores ;
   mensajeModificadores = new OscMessage(mensaje);
   oscP5.send(mensajeModificadores, consola);
+  consolaDebug.printlnAlerta(mensaje);
 }
 
 void mensaje_CANTIDAD(String mensaje, int cantidad) {
@@ -165,6 +167,7 @@ void mensaje_CANTIDAD(String mensaje, int cantidad) {
   mensajeModificadores = new OscMessage(mensaje);
   mensajeModificadores.add(cantidad);
   oscP5.send(mensajeModificadores, consola);
+  consolaDebug.printlnAlerta(mensaje);
 }
 
 void mensaje_NOMBRE(String mensaje, String nombre) {
@@ -172,6 +175,7 @@ void mensaje_NOMBRE(String mensaje, String nombre) {
   mensajeModificadores = new OscMessage(mensaje);
   mensajeModificadores.add(nombre);
   oscP5.send(mensajeModificadores, consola);
+  consolaDebug.printlnAlerta(mensaje+"/"+nombre);
 }
 
 void mensaje_NOMBRE_ESTADO(String mensaje, String nombre, int estado) {
@@ -180,6 +184,7 @@ void mensaje_NOMBRE_ESTADO(String mensaje, String nombre, int estado) {
   mensajeModificadores.add(nombre);
   mensajeModificadores.add(estado); // 0 para false   --- 1 para true // para evitar usar otra funcion agrego un dato de estado de las opciones luego peude serviar para revisar el estado dle alfa y al pausa por ejemplo
   oscP5.send(mensajeModificadores, consola);
+  consolaDebug.printlnAlerta(mensaje+"/"+nombre);
 }
 
 void mensaje_NOMBRE_CATEGORIA_ESTADO(String mensaje, String nombre, String categoria, int estado) {
@@ -189,6 +194,7 @@ void mensaje_NOMBRE_CATEGORIA_ESTADO(String mensaje, String nombre, String categ
   mensajeModificadores.add(categoria);
   mensajeModificadores.add(estado); // 0 para false   --- 1 para true // para evitar usar otra funcion agrego un dato de estado de las opciones luego peude serviar para revisar el estado dle alfa y al pausa por ejemplo
   oscP5.send(mensajeModificadores, consola);
+  consolaDebug.printlnAlerta(mensaje+"/"+nombre+" de "+categoria+"");
 }
 
 
@@ -198,4 +204,5 @@ void mensaje_POSICION_ESTADO(String mensaje, int posicion, int estado) {
   mensajeModificadores.add(posicion);
   mensajeModificadores.add(estado); // 0 para false   --- 1 para true // para evitar usar otra funcion agrego un dato de estado de las opciones luego peude serviar para revisar el estado dle alfa y al pausa por ejemplo
   oscP5.send(mensajeModificadores, consola);
+  consolaDebug.printlnAlerta(mensaje);
 }
