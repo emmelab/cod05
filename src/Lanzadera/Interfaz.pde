@@ -68,12 +68,7 @@ class Interfaz implements AutoSetup, AutoDraw {
     if (new File(sketchPath(archivoConfigXML)).exists()) xmlConfig = loadXML( archivoConfigXML );
     if (xmlConfig != null) xmlConfig = xmlConfig.getChild(xmlTagPanel);
 
-    //config.cargar(xmlConfig);
-    //-------- para cargar local
-    //--- :D esto no tien que ver con le cambio feo de el boton basico peor igual lo comento
-    //---- para que siempre empiece en localhost y se vea como en la documentacion
-    //---- comente el cargar con el xml y cree en metodo que crea los campos pero con info de local host
-    config.cargar_local();
+    config.cargar(xmlConfig);
     lienzo.set(config.lienzo);
     observador.set(config.observador);
     carrete.set(config.carrete);

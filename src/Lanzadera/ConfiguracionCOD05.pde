@@ -1,4 +1,4 @@
-//v 22/06/2017
+//v 07/09/2017
 String archivoConfigXML = "../configcod05.xml";
 String xmlTagPanel = "panel", xmlTagEjecucion = "ejecucion";
 
@@ -60,11 +60,6 @@ class ConfiguracionCOD05 {
         }
       }
     }
-  }
-  void cargar_local() {
-    if (lienzo==null)lienzo = new ConfigModulo().Iniciar("lienzo", 12010);
-    if (observador==null)observador = new ConfigModulo().Iniciar("observador", 12020);
-    if (carrete==null)carrete = new ConfigModulo().Iniciar("carrete", 12030);
   }
   XML guardar(String nombre) {
     XML xml = new XML(nombre);
