@@ -1,0 +1,60 @@
+//v 14/06/2017
+enum EstadoModulo {
+  APAGADO, LOCAL, REMOTO
+}
+
+class ConfiguracionCOD05 {
+  ConfigModulo lienzo, observador, carrete;
+  boolean panelConexiones = false;
+
+  class ConfigModulo {
+    String id = "indefinido";
+    String ip = "127.0.0.1";
+    int puerto = 12000;
+    EstadoModulo estado = EstadoModulo.LOCAL;
+
+    ConfigModulo Iniciar(String id, int puerto) {
+      this.id = id;
+      this.puerto = puerto;
+      return this;
+    }
+
+    void cargar(XML xml) {
+      id = xml.getString("id", id);
+      ip = xml.getString("ip", ip);
+      puerto = xml.getInt("puerto", puerto);
+      int estadoInt = xml.getInt("estado", -1);
+      if (estadoInt != -1) estado = new EstadoModulo[]{EstadoModulo.APAGADO, EstadoModulo.LOCAL, EstadoModulo.REMOTO}[estadoInt];
+    }    
+    XML generar() {
+      XML xml = new XML("ConfigModulo");
+      xml.setString("id", id);
+      xml.setString("ip", ip);
+      xml.setInt("puerto", puerto);
+      xml.setInt("estado", estado==EstadoModulo.APAGADO?0:estado==EstadoModulo.LOCAL?1:2);
+      return xml;
+    }
+  }
+  void cargar(XML xml) {
+    lienzo = new ConfigModulo().Iniciar("lienzo", 12010);
+    observador = new ConfigModulo().Iniciar("observador", 12020);
+    carrete = new ConfigModulo().Iniciar("carrete", 12030);
+    if (xml != null) {
+      panelConexiones = xml.getInt("panelConexiones", panelConexiones?1:0)==1;
+      XML[] configs = xml.getChildren("ConfigModulo");
+      for (ConfigModulo cm : new ConfigModulo[]{lienzo, observador, carrete}) {
+        for (XML cxml : configs) {
+          if (cm.id.equals(cxml.getString("id", ""))) cm.cargar(cxml);
+        }
+      }
+    }
+  }
+  XML guardar(String nombre) {
+    XML xml = new XML(nombre);
+    xml.setInt("panelConexiones", panelConexiones?1:0);
+    for (ConfigModulo cm : new ConfigModulo[]{lienzo, observador, carrete}) {
+      xml.addChild(cm.generar());
+    }
+    return xml;
+  }
+}

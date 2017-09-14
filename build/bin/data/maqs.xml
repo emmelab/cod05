@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<maqs>
+	<maq id="0" nombre="Lumiere">Atraccion Al Centro|Colision Simple|Dibujar Circulo|Alfa Segun Velocidad|Mover</maq>
+	<maq id="1" nombre="Cohl">Gravedad|Colision Simple|Espacio Cerrado|Flock Cohesion|Flock Separacion|Dibujar Reas|Mod Reset Lluvia|Mover</maq>
+	<maq id="2" nombre="Melies">Gravedad|Espacio Toroidal|Flock Cohesion|Flock Alineamiento|Flock Separacion|Rastro Elastico|Dibujar Rastro Shape|Mover</maq>
+	<maq id="3" nombre="Guy Blache">Atraccion Al Centro|Colision Simple|Espacio Toroidal|Rastro Elastico|Dibujar Rastro Circular|Mover</maq>
+</maqs>

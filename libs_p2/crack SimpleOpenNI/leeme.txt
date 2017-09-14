@@ -1,0 +1,2 @@
+copiar y remplazar SimpleOpenNI.jar
+en la carpeta /lib/ del ejecutable.
