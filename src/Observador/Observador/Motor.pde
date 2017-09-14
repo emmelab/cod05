@@ -89,15 +89,17 @@ class Motor{
   }
   
   public void ejecutar(){
+    
+    background( paleta.grisFondo );
+    
     if( kinect.isInit() ){
-      kinect.update();
-      background( #222222 );
+      guiP5.ejecutar();
+      kinect.update(); 
       if( dibujarEspacio3D ) actualizarEspacio3D();
       actualizarUsuarios();
       if( dibujarEspacio3D ) espacio3D.endDraw();
       dibujarCamaraKinect();
     }else{
-      background( #222222 );
       fill( 255 );
       textSize( height * 0.04 );
       text( "Kinect no se pudo iniciar.\nAsegurase de que este conectada y reinicie el programa.", 20, height * 0.4 );
@@ -286,8 +288,10 @@ class Motor{
         
         scale( escalaX, escalaY );
         
+        int tempY = 84 + round( ( height - 84 - kinect.userImage().height ) * 0.5 ); // tempY = 102
+        
         int posX = ( escalaX == 1 )? 0 : -kinect.userImage().width ;
-        int posY = ( escalaY == 1 )? 50 : -50 - kinect.userImage().height ;
+        int posY = ( escalaY == 1 )? tempY : -tempY - kinect.userImage().height ;
         
         image( kinect.userImage(), posX, posY );
         
@@ -296,8 +300,8 @@ class Motor{
     }
     
     else if( dibujarEspacio3D ){
-      image( espacio3D, width*0.5 - espacio3D.width*0.5, height*0.5 - espacio3D.height*0.5 );
-      image(kinect.userImage(), 0, 20, kinect.depthWidth()/3, kinect.depthHeight()/3);
+      image( espacio3D, width*0.5 - espacio3D.width*0.5, 51 + height*0.5 - espacio3D.height*0.5 );
+      image(kinect.userImage(), width*0.5 - espacio3D.width*0.5, 102, kinect.depthWidth() * 0.25, kinect.depthHeight() * 0.25);
     }
   }
   

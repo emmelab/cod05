@@ -2,6 +2,8 @@ import controlP5.*;
 
 class GuiP5 extends ControlP5{
   
+  final String titulo = "CONFIGURADOR DEL OBSERVADOR";
+  
   //HashMap<String, Tab> pestanas = new HashMap<String, Tab>();
   
   GuiDesequilibrio guiDesequilibrio;
@@ -14,14 +16,23 @@ class GuiP5 extends ControlP5{
     PFont fuente = loadFont( "MyriadPro-Regular-14.vlw" );
     setFont( fuente );
     
+    controlWindow.setPositionOfTabs( (int) controlWindow.getPositionOfTabs()[ 0 ], 42 );
+
     //------------ PESTANAS
     for( int i = 1; i < pestanas.length; i++ ){
       addTab( pestanas[ i ] )
       .activateEvent( true )
       .setId( i )
+      .setPosition( 500, 400 )
       .setWidth( (width / pestanas.length) - 5 )
+      .setHeight( 42 )
       .getCaptionLabel().alignX( ControlP5.CENTER )
       ;
+      
+      ControllerGroup<Tab> grupo = ( ControllerGroup<Tab> ) getTab( pestanas[ i ] );
+      grupo.setColorBackground( paleta.grisClaro );
+      grupo.setColorActive( paleta.amarillo );
+      
     }
     
     Tab t = getTab("default");
@@ -29,7 +40,12 @@ class GuiP5 extends ControlP5{
     t.activateEvent( true );
     t.setId( 0 );
     t.setWidth( width / pestanas.length );
+    t.setHeight( 42 );
     t.getCaptionLabel().alignX( ControlP5.CENTER );
+    
+    ControllerGroup<Tab> grupo = ( ControllerGroup<Tab> ) getTab("default");
+    grupo.setColorBackground( paleta.grisClaro );
+    grupo.setColorActive( paleta.amarillo );
     //------------
     
     //PESTANA 0 - DEFAULT CAMARA COMUN
@@ -77,6 +93,21 @@ class GuiP5 extends ControlP5{
     }else{
       getTab( "default" ).bringToFront();
     }
+  }
+  
+  public void ejecutar(){
+    pushStyle();
+    fill( paleta.negro );
+    noStroke();
+    rect( 0, 0, width, 42 );
+    fill( paleta.grisFondo );
+    textAlign( CENTER, CENTER );
+    text( titulo, width * 0.5, 21 );
+    
+    fill( paleta.grisClaro );
+    rect( 0, 42, width, 42 );
+    
+    popStyle();
   }
  
 }

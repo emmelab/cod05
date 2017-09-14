@@ -1,6 +1,7 @@
 import SimpleOpenNI.*;
 
 ComunicacionOSC comunicacionOSC;
+Paleta paleta;
 Motor motor;
 
 int estabilidadGeneral = 6;
@@ -9,6 +10,7 @@ void setup(){
   size( 800, 600, P2D );
   
   comunicacionOSC = new ComunicacionOSC( this );
+  paleta = new Paleta();
   motor = new Motor(this);
 
 }
