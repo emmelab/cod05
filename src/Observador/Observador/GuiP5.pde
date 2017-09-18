@@ -23,7 +23,6 @@ class GuiP5 extends ControlP5{
       addTab( pestanas[ i ] )
       .activateEvent( true )
       .setId( i )
-      .setPosition( 500, 400 )
       .setWidth( (width / pestanas.length) - 5 )
       .setHeight( 42 )
       .getCaptionLabel().alignX( ControlP5.CENTER )
@@ -32,6 +31,7 @@ class GuiP5 extends ControlP5{
       ControllerGroup<Tab> grupo = ( ControllerGroup<Tab> ) getTab( pestanas[ i ] );
       grupo.setColorBackground( paleta.grisClaro );
       grupo.setColorActive( paleta.amarillo );
+      grupo.setColorForeground( paleta.negro ); 
       
     }
     
@@ -46,6 +46,7 @@ class GuiP5 extends ControlP5{
     ControllerGroup<Tab> grupo = ( ControllerGroup<Tab> ) getTab("default");
     grupo.setColorBackground( paleta.grisClaro );
     grupo.setColorActive( paleta.amarillo );
+    grupo.setColorForeground( paleta.negro ); 
     //------------
     
     //PESTANA 0 - DEFAULT CAMARA COMUN
