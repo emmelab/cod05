@@ -24,6 +24,9 @@ class Motor{
   public int[][] paresDeJoints;
   public String[] nombreDeJoint;
   
+  private final float FACTOR_VENTANA = 0.8;
+  private final int VENTANA_POSICION_Y;
+  
   public Motor( PApplet p5 ){
     
     this.p5 = p5;
@@ -54,6 +57,8 @@ class Motor{
       iniciarEspacio3D();
     
     }
+    
+    VENTANA_POSICION_Y = ( kinect.isInit() )? 84 + round( ( height - 84 - kinect.userImage().height * FACTOR_VENTANA ) * 0.5 ) : 0 ;
     
   }
   
@@ -93,7 +98,7 @@ class Motor{
     background( paleta.grisFondo );
     
     if( kinect.isInit() ){
-      guiP5.ejecutar();
+      guiP5.ejecutar( estado );
       kinect.update(); 
       if( dibujarEspacio3D ) actualizarEspacio3D();
       actualizarUsuarios();
@@ -164,7 +169,7 @@ class Motor{
   
   private void actualizarEspacio3D(){
     espacio3D.beginDraw();
-      espacio3D.background( #777777 );
+      espacio3D.background( paleta.grisClaro );
       
       espacio3D.translate(width/2, height/2, 0);
       espacio3D.lights();
@@ -228,8 +233,8 @@ class Motor{
     
     UsuarioDesequilibrio unUDesiq = usuario.getDesequilibrio();
     
-    dibujarDebugDesequilibrio( unUDesiq, p5.g, 50, kinect.depthHeight()*0.1, 
-    kinect.depthWidth(), kinect.depthHeight());
+    dibujarDebugDesequilibrio( unUDesiq, p5.g, width*0.5 - kinect.userImage().width * 0.5 * FACTOR_VENTANA, VENTANA_POSICION_Y * 0.8, 
+    kinect.depthWidth() * FACTOR_VENTANA, kinect.depthHeight() * FACTOR_VENTANA );
     
   }
   
@@ -279,6 +284,7 @@ class Motor{
   }
   
   private void dibujarCamaraKinect(){
+    
     if( estado == CAMARA_COMUN ){
       
       pushMatrix();
@@ -287,21 +293,19 @@ class Motor{
         int escalaY = ( comunicacionOSC.getInvertidoEjeY() )? -1 : 1;
         
         scale( escalaX, escalaY );
+                
+        float posX = ( escalaX == 1 )? width * 0.315 : -width * 0.315 - kinect.userImage().width * FACTOR_VENTANA ;
+        float posY = ( escalaY == 1 )? VENTANA_POSICION_Y : -VENTANA_POSICION_Y - kinect.userImage().height * FACTOR_VENTANA ;
         
-        int tempY = 84 + round( ( height - 84 - kinect.userImage().height ) * 0.5 ); // tempY = 102
-        
-        int posX = ( escalaX == 1 )? 0 : -kinect.userImage().width ;
-        int posY = ( escalaY == 1 )? tempY : -tempY - kinect.userImage().height ;
-        
-        image( kinect.userImage(), posX, posY );
+        image( kinect.userImage(), posX, posY, kinect.userImage().width * FACTOR_VENTANA, kinect.userImage().height * FACTOR_VENTANA);
         
       popMatrix();
       
     }
     
     else if( dibujarEspacio3D ){
-      image( espacio3D, width*0.5 - espacio3D.width*0.5, 51 + height*0.5 - espacio3D.height*0.5 );
-      image(kinect.userImage(), width*0.5 - espacio3D.width*0.5, 102, kinect.depthWidth() * 0.25, kinect.depthHeight() * 0.25);
+      image( espacio3D, width*0.5 - espacio3D.width * 0.5 * FACTOR_VENTANA, VENTANA_POSICION_Y * 0.8, espacio3D.width * FACTOR_VENTANA, espacio3D.height * FACTOR_VENTANA );
+      image(kinect.userImage(), width*0.5 - espacio3D.width * 0.5 * FACTOR_VENTANA, VENTANA_POSICION_Y * 0.8, kinect.depthWidth() * 0.25, kinect.depthHeight() * 0.25);
     }
   }
   

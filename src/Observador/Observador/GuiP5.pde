@@ -3,6 +3,7 @@ import controlP5.*;
 class GuiP5 extends ControlP5{
   
   final String titulo = "CONFIGURADOR DEL OBSERVADOR";
+  final PImage logoCOD05, logoObservador;
   
   //HashMap<String, Tab> pestanas = new HashMap<String, Tab>();
   
@@ -13,8 +14,13 @@ class GuiP5 extends ControlP5{
   public GuiP5( PApplet p5, String[] pestanas ){
     super( p5 );
     
+    logoCOD05 = loadImage( "logoCOD05.png" );
+    logoObservador = loadImage( "observador.png" );
+    logoObservador.resize( round( logoObservador.width * 0.45 ), round( logoObservador.height * 0.45 ) );
+    
     PFont fuente = loadFont( "MyriadPro-Regular-14.vlw" );
     setFont( fuente );
+    textFont( fuente );
     
     controlWindow.setPositionOfTabs( (int) controlWindow.getPositionOfTabs()[ 0 ], 42 );
 
@@ -50,14 +56,14 @@ class GuiP5 extends ControlP5{
     //------------
     
     //PESTANA 0 - DEFAULT CAMARA COMUN
-    
+    /*
     addTextlabel("espejo")
     .setText("Espejo hacia\nCod05Mundo")
-    .setPosition( width - 150, height * 0.5 - 75 )
-    .setHeight( 150 );
+    .setPosition( 150, height * 0.5 - 75 )
+    .setHeight( 75 );*/
 
     addToggle("espejoEjeX")
-     .setPosition(width - 150, height * 0.5 - 25)
+     .setPosition( 75, 84 + (height - 84) * 0.65 - 25 )
      .setSize(20,20)
      .setValue( comunicacionOSC.getInvertidoEjeX() )
      .setLabel( "Espejo eje X" )
@@ -65,7 +71,7 @@ class GuiP5 extends ControlP5{
      ;
      
      addToggle("espejoEjeY")
-     .setPosition(width - 150, height * 0.5 + 25)
+     .setPosition( 75, 84 + (height - 84) * 0.65 + 25 )
      .setSize(20,20)
      .setValue( comunicacionOSC.getInvertidoEjeY() )
      .setLabel( "Espejo eje Y" )
@@ -96,17 +102,34 @@ class GuiP5 extends ControlP5{
     }
   }
   
-  public void ejecutar(){
+  public void ejecutar( int estado ){
     pushStyle();
+    
     fill( paleta.negro );
     noStroke();
     rect( 0, 0, width, 42 );
-    fill( paleta.grisFondo );
+    
+    image( logoCOD05, 21, 0 );
+    
+    fill( paleta.grisClaro );//grisFondo
     textAlign( CENTER, CENTER );
     text( titulo, width * 0.5, 21 );
     
     fill( paleta.grisClaro );
     rect( 0, 42, width, 42 );
+    
+    if( estado == Motor.CAMARA_COMUN ){
+      fill( paleta.negro );
+      rect( width * 0.05, 84 + ( (height - 84) * 0.2 ), width * 0.215, (height - 84) * 0.6 );
+      
+      fill( 255 );
+      textAlign( CENTER, CENTER );
+      text( "Espejar hacia\nCOD05 Lienzo", width * 0.1575, 84 + ( (height - 84) * 0.525 ) );
+      
+      imageMode( CENTER );
+      image( logoObservador, width * 0.1575, 84 + ( (height - 84) * 0.25 ) + logoObservador.height * 0.5 );
+      
+    }
     
     popStyle();
   }
