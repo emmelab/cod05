@@ -21,6 +21,7 @@ class GuiP5 extends ControlP5{
     PFont fuente = loadFont( "MyriadPro-Regular-14.vlw" );
     setFont( fuente );
     textFont( fuente );
+    setColorCaptionLabel( paleta.blanco );
     
     controlWindow.setPositionOfTabs( (int) controlWindow.getPositionOfTabs()[ 0 ], 42 );
 
@@ -53,6 +54,7 @@ class GuiP5 extends ControlP5{
     grupo.setColorBackground( paleta.grisClaro );
     grupo.setColorActive( paleta.amarillo );
     grupo.setColorForeground( paleta.negro ); 
+    grupo.getCaptionLabel().setColor( paleta.negro );
     //------------
     
     //PESTANA 0 - DEFAULT CAMARA COMUN
@@ -67,6 +69,7 @@ class GuiP5 extends ControlP5{
      .setSize(20,20)
      .setValue( comunicacionOSC.getInvertidoEjeX() )
      .setLabel( "Espejo eje X" )
+     .setColorForeground( paleta.grisClaro ) 
      .getCaptionLabel().alignX( ControlP5.LEFT ).alignY( ControlP5.CENTER ).toUpperCase( false ).setPaddingX( 30 )
      ;
      
@@ -75,6 +78,7 @@ class GuiP5 extends ControlP5{
      .setSize(20,20)
      .setValue( comunicacionOSC.getInvertidoEjeY() )
      .setLabel( "Espejo eje Y" )
+     .setColorForeground( paleta.grisClaro ) 
      .getCaptionLabel().alignX( ControlP5.LEFT ).alignY( ControlP5.CENTER ).toUpperCase( false ).setPaddingX( 30 )
      ;
     
@@ -100,6 +104,19 @@ class GuiP5 extends ControlP5{
     }else{
       getTab( "default" ).bringToFront();
     }
+    actualizarColorPestanas();
+  }
+  
+  public void actualizarColorPestanas(){
+    
+    ControllerList listaPestanas = controlWindow.getTabs();
+    
+    for( int i = 0; i < listaPestanas.size(); i++ ){
+      Tab t = (Tab) listaPestanas.get( i );
+      if( t.isActive() ) t.getCaptionLabel().setColor( paleta.negro );
+      else t.getCaptionLabel().setColor( paleta.blanco );
+    }
+
   }
   
   public void ejecutar( int estado ){
@@ -122,7 +139,7 @@ class GuiP5 extends ControlP5{
       fill( paleta.negro );
       rect( width * 0.05, 84 + ( (height - 84) * 0.2 ), width * 0.215, (height - 84) * 0.6 );
       
-      fill( 255 );
+      fill( paleta.blanco );
       textAlign( CENTER, CENTER );
       text( "Espejar hacia\nCOD05 Lienzo", width * 0.1575, 84 + ( (height - 84) * 0.525 ) );
       

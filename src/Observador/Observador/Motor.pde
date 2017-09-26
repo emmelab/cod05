@@ -71,6 +71,7 @@ class Motor{
       setDibujarEspacio3D( true );
     else
       setDibujarEspacio3D( false );
+    guiP5.actualizarColorPestanas();
     print( "Estado: " + this.estado );
     println( " -> " + NOMBRE_ESTADO[ this.estado ] );
   }
