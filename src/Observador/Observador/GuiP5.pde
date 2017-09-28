@@ -58,12 +58,6 @@ class GuiP5 extends ControlP5{
     //------------
     
     //PESTANA 0 - DEFAULT CAMARA COMUN
-    /*
-    addTextlabel("espejo")
-    .setText("Espejo hacia\nCod05Mundo")
-    .setPosition( 150, height * 0.5 - 75 )
-    .setHeight( 75 );*/
-
     addToggle("espejoEjeX")
      .setPosition( 75, 84 + (height - 84) * 0.65 - 25 )
      .setSize(20,20)
@@ -146,6 +140,9 @@ class GuiP5 extends ControlP5{
       imageMode( CENTER );
       image( logoObservador, width * 0.1575, 84 + ( (height - 84) * 0.25 ) + logoObservador.height * 0.5 );
       
+    }else if( estado == Motor.DEBUG_DESEQUILIBRIO ){
+      fill( paleta.grisClaro );
+      rect( 144, 120, 512, 384 );
     }
     
     popStyle();

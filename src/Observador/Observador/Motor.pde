@@ -83,6 +83,10 @@ class Motor{
   public int getEstado(){
     return estado;
   }
+  
+  public GuiP5 getGuiP5(){
+    return guiP5;
+  }
   //----
   
   public void addUsuario( int idUsuario ){
@@ -106,9 +110,9 @@ class Motor{
       if( dibujarEspacio3D ) espacio3D.endDraw();
       dibujarCamaraKinect();
     }else{
-      fill( 255 );
-      textSize( height * 0.04 );
-      text( "Kinect no se pudo iniciar.\nAsegurase de que este conectada y reinicie el programa.", 20, height * 0.4 );
+      fill( paleta.blanco );
+      textSize( height * 0.035 );
+      text( "Kinect no se pudo iniciar.\nAsegúrese de que esté conectada y reinicie el programa.", 20, height * 0.43 );
     }
   }
   
@@ -233,7 +237,7 @@ class Motor{
   private void desequilibrio( Usuario usuario ) {
     
     UsuarioDesequilibrio unUDesiq = usuario.getDesequilibrio();
-    
+
     dibujarDebugDesequilibrio( unUDesiq, p5.g, width*0.5 - kinect.userImage().width * 0.5 * FACTOR_VENTANA, VENTANA_POSICION_Y * 0.8, 
     kinect.depthWidth() * FACTOR_VENTANA, kinect.depthHeight() * FACTOR_VENTANA );
     
