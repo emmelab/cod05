@@ -3,6 +3,7 @@ class Interfaz implements AutoSetup, AutoDraw {
   BotonBasico botonPlay;
   BotonModulo lienzo, observador, carrete;
   InterfazYSensorConexion interfazYSensorConexion;
+  InterfazModoObservador interfazModObs;
   BarraSuperior barraSuperior;
   TwOutQuad animTodoGris;
   Ejecutador ejecutadorLocal;//vive hasta que se mueran sus procesos
@@ -24,6 +25,7 @@ class Interfaz implements AutoSetup, AutoDraw {
       carrete = new BotonModulo(new PVector(width/2+sepHoriz, verti), dicIcos.carrete, paleta.ips[2]);
     }
     interfazYSensorConexion = new InterfazYSensorConexion();
+    interfazModObs = new InterfazModoObservador();
     barraSuperior = new BarraSuperior();
     cargarDatos();
 
@@ -90,6 +92,8 @@ class Interfaz implements AutoSetup, AutoDraw {
   float introTime = 0;
   boolean introActiva = true;
   void intro() {
+    if (interfazModObs.activo) return;
+    
     float introBotonModuloBase = 2, introBotonModuloSep = .05f;
     if (introCheck(introBotonModuloBase+introBotonModuloSep*0))lienzo.mostrar = true;
     if (introCheck(introBotonModuloBase+introBotonModuloSep*1))observador.mostrar = true;
@@ -103,8 +107,8 @@ class Interfaz implements AutoSetup, AutoDraw {
   }
 
   void grisPorTodoLocal() {
-    carrete.panelIPsAbierto = observador.panelIPsAbierto = lienzo.panelIPsAbierto = interfazYSensorConexion.visible;
-    todoLocal = todoLocal && !interfazYSensorConexion.visible;
+    carrete.panelIPsAbierto = observador.panelIPsAbierto = lienzo.panelIPsAbierto = interfazYSensorConexion.visible();
+    todoLocal = todoLocal && !interfazYSensorConexion.visible();
     animTodoGris.actualizar(todoLocal?dt:-dt);
     carrete.todoGris = constrain(animTodoGris.valor()-2, 0, 1);
     observador.todoGris = constrain(animTodoGris.valor()-1, 0, 1);
@@ -134,6 +138,10 @@ class Interfaz implements AutoSetup, AutoDraw {
         }
       }
     }
+
+    if (interfazYSensorConexion.lienzo.focus) controlOsc.ultimoPingLienzo = 0;
+    if (interfazYSensorConexion.observador.focus) controlOsc.ultimoPingObservador = 0;
+    if (interfazYSensorConexion.carrete.focus) controlOsc.ultimoPingCarrete = 0;
 
     lienzo.remotoEncontrado = millis()-controlOsc.ultimoPingLienzo <= pingOff;
     observador.remotoEncontrado = millis()-controlOsc.ultimoPingObservador <= pingOff;

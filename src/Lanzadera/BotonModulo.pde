@@ -36,7 +36,7 @@ class BotonModulo implements AutoDraw, AutoMousePressed {
     if (dist(pos.x, pos.y, mouseX, mouseY) < icono.width/2) {
       if (estado == EstadoModulo.APAGADO) estado = EstadoModulo.LOCAL;
       else if (estado == EstadoModulo.LOCAL) estado = panelIPsAbierto ? EstadoModulo.REMOTO : EstadoModulo.APAGADO;
-      else if (estado == EstadoModulo.REMOTO) estado = EstadoModulo.APAGADO;
+      else if (estado == EstadoModulo.REMOTO) estado = panelIPsAbierto? EstadoModulo.APAGADO : EstadoModulo.LOCAL;
       if (config!=null)config.estado = estado;
     }
   }
