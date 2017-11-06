@@ -18,7 +18,7 @@ class InterfazModoObservador implements AutoDraw {
       imageMode(CENTER);
       noStroke();
       fill(paleta.panelSuperior);
-      tint(paleta.fondo);
+      //tint(paleta.fondo);
       ellipse(width/4,height/2,icoCam.width-3,icoCam.height-3);
       image(icoCam,width/4,height/2);
       ellipse(width*3/4,height/2,icoKin.width-3,icoKin.height-3);
