@@ -101,9 +101,9 @@ class ControlOsc implements AutoSetup {
         osc.send( msj, destino);
         println(establecerEstados, msj, destino);
         msj = new OscMessage(establecerIPs)
-          .add(config.lienzo.ip).add(config.lienzo.puerto)
-          .add(config.observador.ip).add(config.observador.puerto)
-          .add(config.carrete.ip).add(config.carrete.puerto);
+          .add(config.lienzo.estado == EstadoModulo.LOCAL?oscP5.ip():config.lienzo.ip).add(config.lienzo.puerto)
+          .add(config.observador.estado == EstadoModulo.LOCAL?oscP5.ip():config.observador.ip).add(config.observador.puerto)
+          .add(config.carrete.estado == EstadoModulo.LOCAL?oscP5.ip():config.carrete.ip).add(config.carrete.puerto);
         osc.send( msj, destino);
         println(establecerIPs, msj, destino);
         osc.send(new OscMessage(lanzar).add(moduloID), destino);
