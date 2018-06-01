@@ -168,6 +168,7 @@ class Motor{
     espacio3D.rotateX(PI);
     espacio3D.translate(0, 0, -1000);
     espacio3D.translate(0, 0, width*2);
+    espacio3D.sphereDetail( 5 );
     espacio3D.endDraw();
   }
   
