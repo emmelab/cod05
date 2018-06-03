@@ -18,6 +18,11 @@ void setup(){
 void draw(){
   frame.setTitle( "fps: " + frameRate ); 
   motor.ejecutar();
+  pushStyle();
+  fill( 255 );
+  textSize( 35 );
+  text( "fps: " + nf(frameRate,0,-1), 10, height - 20 );
+  popStyle();
 }
 
 void keyPressed(){
