@@ -16,7 +16,7 @@ void initOSC() {
   noSmooth();
   noStroke();
   /* oscP5 = new OscP5(this, 12010);
-   consola = new NetAddress("127.0.0.1", 14000);*/
+   consola = new NetAddress("127.0.0.1", 12030);*/
   oscP5 = new OscP5(this, config.lienzo.puerto);
   consola = new NetAddress(config.carrete.ip, config.carrete.puerto);
 
