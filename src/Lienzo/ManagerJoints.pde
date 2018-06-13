@@ -1,3 +1,5 @@
+import java.util.Map;
+
 class ManagerJoints{
   
   public static final String
@@ -47,5 +49,28 @@ class ManagerJoints{
   float getConfianzaJoint( String nombre_joint ){
     return confianzasJoints.get( nombre_joint );
   }
+  
+  void debug(PApplet p5){
+      
+      p5.pushStyle();
+        p5.noStroke();
+        
+        for( Map.Entry p : posicionesJoints.entrySet() ){
+          
+          PVector posicion = p.getValue();
+          float confianza = confianzasJoints.get( p.getKey() );
+          
+          if( confianza < .2f ) p5.fill( 123, 0, 169 );
+          else if( confianza < .6f ) p5.fill( 0, 89, 255 );
+          else if( confianza < 1.0f ) p5.fill( 0, 163, 162 );
+          else p5.fill( 1, 214, 62 );
+          
+          p5.ellipse( posicion.x * p5.width, posicion.y * p5.height, 30, 30 );
+          
+        }
+        
+      p5.popStyle();
+      
+    }
   
 }
