@@ -68,7 +68,7 @@ void setup() {
   println(Mod_DibujarRastroCircular.registrador);
   println(Mod_DibujarRastroCuadrado.registrador);
   println(Mod_DibujarRastroShape.registrador);
-  println(Mod_AtraccionALaMano.registrador);
+  println(Mod_AtraccionAlTorso.registrador);
   println(Mod_Egoespacio.registrador);
   println(Mod_PaletaDefault.registrador);
   println(Mod_PaletaPersonalizada.registrador);
