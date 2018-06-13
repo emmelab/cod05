@@ -60,7 +60,7 @@ class ManagerJoints{
         
         for( Map.Entry p : posicionesJoints.entrySet() ){
           
-          PVector posicion = p.getValue();
+          PVector posicion = (PVector) p.getValue();
           float confianza = confianzasJoints.get( p.getKey() );
           
           if( confianza < .2f ) p5.fill( 123, 0, 169 );
