@@ -1,4 +1,7 @@
+import java.util.HashMap;
 import java.util.Map;
+import processing.core.PVector;
+import processing.core.PApplet;
 
 class ManagerJoints{
   
@@ -21,7 +24,7 @@ class ManagerJoints{
   
   HashMap<String, PVector> posicionesJoints = new HashMap<String, PVector>();
   HashMap<String, PVector> velocidadesJoints = new HashMap<String, PVector>();
-  HashMap<String, float> confianzasJoints = new HashMap<String, PVector>();
+  HashMap<String, Float> confianzasJoints = new HashMap<String, Float>();
   
   ManagerJoints(){
     
