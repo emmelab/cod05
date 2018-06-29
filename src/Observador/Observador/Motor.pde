@@ -17,6 +17,7 @@ class Motor{
   
   private PGraphics espacio3D;
   private boolean dibujarEspacio3D;
+  private float camaraZ;
   
   private HashMap<Integer, Usuario> usuarios = new HashMap <Integer, Usuario> ();
   
@@ -162,6 +163,7 @@ class Motor{
   
   private void iniciarEspacio3D(){
     espacio3D = createGraphics( kinect.depthImage().width, kinect.depthImage().height, P3D );
+    camaraZ = ((espacio3D.height/2.0) / tan(PI*60.0/360.0));
     espacio3D.beginDraw();
     espacio3D.translate(width/2, height/2, 0);
     //espacio3D.lights();// esto moverlo al loop cuando sepa donde queda lindo y prolijito xD
@@ -176,11 +178,11 @@ class Motor{
   private void actualizarEspacio3D(){
     espacio3D.beginDraw();
       espacio3D.background( paleta.grisClaro );
-      
+      espacio3D.perspective( PI/3.0, espacio3D.width/espacio3D.height, camaraZ/10.0, camaraZ*25.0 );
       espacio3D.translate(width/2, height/2, 0);
       espacio3D.lights();
       espacio3D.rotateX(PI);
-      espacio3D.translate(0, 0, -1000);
+      espacio3D.translate(0, 0, -1000 );
       espacio3D.translate(0, 0, width*2);
             
   }
