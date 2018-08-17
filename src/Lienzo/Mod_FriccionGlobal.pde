@@ -14,6 +14,8 @@ class Mod_FriccionGlobal extends Modificador {
     //Atr_Posicion posiciones = s.requerir(Atr_Posicion.manager, Atributo.OBLIGATORIO);
 
     for (int i=0; i<s.tamano; i++) {
+      factor = map( vel.v[i].magSq(), 0, 10000, 1.0, 0.001 );
+      factor = constrain( factor, 0.001f, 1.0f );
       vel.v[i].mult(factor);
       //PVector p=posiciones.p[i];
       //acel.a[i].add(PVector.mult(PVector.fromAngle(s.p5.atan2(s.p5.height/2-p.y, s.p5.width/2-p.x)), s.tamano*factor) );
