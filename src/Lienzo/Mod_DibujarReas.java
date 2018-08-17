@@ -11,12 +11,15 @@ class Mod_DibujarReas extends Modificador {
     Atr_Color colores = s.requerir(Atr_Color.manager, Atributo.OPCIONAL);
 
     float tamSinTam = (Atr_Tamano.inicialMinimo2Dados*.5f+Atr_Tamano.inicialMaximo2Dados*.5f)*2;
-
+    
+    final int MAXIMAS_LINEAS = 8;//NUEVO
+    
     s.p5.pushStyle();
     if (colores == null) s.p5.stroke(255);
     for (int i=0; i<s.tamano; i++) {
       PVector p1 = posiciones.p[i];
       float t1 = (tamanios==null? tamSinTam : tamanios.d[i]);
+      int contarLineas = 0;//NUEVO
       for (int j=i+1; j<s.tamano; j++) {
         if (i!=j) {
           PVector p2 = posiciones.p[j];
@@ -27,6 +30,8 @@ class Mod_DibujarReas extends Modificador {
               s.p5.stroke( s.p5.lerpColor(colores.c[i], colores.c[j], .5f) );
             }
             s.p5.line(p1.x, p1.y, p2.x, p2.y);
+            contarLineas++;
+            if( contarLineas >= MAXIMAS_LINEAS ) break;//NUEVO
           }
         }
       }
