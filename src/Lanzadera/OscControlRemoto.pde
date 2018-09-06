@@ -51,6 +51,7 @@ class ControlOsc implements AutoSetup {
     msjPingLienzo = new OscMessage("/Lanzadera/ping").add(osc.ip()).add(oscP5Port).add(0);
     msjPingObservador = new OscMessage("/Lanzadera/ping").add(osc.ip()).add(oscP5Port).add(1);
     msjPingCarrete = new OscMessage("/Lanzadera/ping").add(osc.ip()).add(oscP5Port).add(2);
+    debug();
   }
 
   void responderEstablecerIPs(String lienzoIp, int lienzoPort, 
@@ -152,5 +153,13 @@ class ControlOsc implements AutoSetup {
   }
   void pingCarrete(String ip, int puerto) {
     if (osc != null) osc.send(msjPingCarrete, new NetAddress(ip, modoDummies?puerto:oscP5Port));
+  }
+  
+  void debug(){
+    consola.printlnAlerta( "ControlOsc->Interfaces: " + getImplementaciones() );
+  }
+  
+  String getImplementaciones(){
+    return "AutoSetup";
   }
 }

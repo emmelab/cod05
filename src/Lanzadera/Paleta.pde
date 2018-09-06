@@ -15,5 +15,14 @@ class Paleta implements AutoSetup {
     fondo = color(#1A1D1E);
     panelSuperior = color(#141516);
     marca = color(#42494A);
+    debug();
+  }
+  
+  void debug(){
+    consola.printlnAlerta( "Paleta->Interfaces: " + getImplementaciones() );
+  }
+  
+  String getImplementaciones(){
+    return "AutoSetup";
   }
 }

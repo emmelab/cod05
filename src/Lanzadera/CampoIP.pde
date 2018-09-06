@@ -146,6 +146,7 @@ void digerirPort(){
   void draw() {
     drawIp();
     drawPuerto();
+    debug();
   }
   
   void drawIp(){
@@ -173,5 +174,13 @@ void digerirPort(){
     text(text + (focus && frameCount%60<30?"|":""), 0, -textAscent()/6);
     popMatrix();
     popStyle();
+  }
+  
+  void debug(){
+    consola.println( "CampoIP->Interfaces: " + getImplementaciones() );
+  }
+  
+  String getImplementaciones(){
+    return "AutoDraw, AutoKeyPressed, AutoMousePressed";
   }
 }

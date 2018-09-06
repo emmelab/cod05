@@ -97,7 +97,7 @@ void ejecutarLocales() {
     }
   }
   void ejecutarObservador() {
-    consolaDebug.printlnAlerta( "Vamos que intento correr el observadorr!!" );
+    consola.printlnAlerta( "Vamos que intento correr el observadorr!!" );//consolaDebug.printlnAlerta( "Vamos que intento correr el observadorr!!" );
     if (modoUtileria) {
       observador=launch( templateLanzador.replace(ejecutarKeyword, observadorUtileria));
       /*PAppConsola cons = new PAppConsola();

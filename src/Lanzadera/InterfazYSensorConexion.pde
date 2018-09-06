@@ -68,6 +68,7 @@ class InterfazYSensorConexion implements AutoDraw {
 
     observador.col = (lienzo.ip .equals( observador.ip) ) ? paleta.ips[0] : paleta.ips[1];
     carrete.col = (observador.ip .equals( carrete.ip) ) ? observador.col : (lienzo.ip .equals( carrete.ip) ) ? lienzo.col : paleta.ips[2];
+    debug();
   }
 
   void setConfig(ConfiguracionCOD05 config) {
@@ -112,5 +113,13 @@ class InterfazYSensorConexion implements AutoDraw {
     lienzo.pos.y = posYBase[0]+offsetPanel;
     observador.pos.y = posYBase[1]+offsetPanel;
     carrete.pos.y = posYBase[2]+offsetPanel;
+  }
+  
+  void debug(){
+    consola.println( "InterfazYSensorConexion->Interfaces: " + getImplementaciones() );
+  }
+  
+  String getImplementaciones(){
+    return "AutoDraw";
   }
 }

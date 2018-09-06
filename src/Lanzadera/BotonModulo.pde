@@ -76,6 +76,7 @@ class BotonModulo implements AutoDraw, AutoMousePressed {
     image(icono, 0, 0);  
     popMatrix();
     popStyle();
+    debug();
   }
 
   void aro(float x, float y, float w, float h, float divs, float offset) {
@@ -90,4 +91,13 @@ class BotonModulo implements AutoDraw, AutoMousePressed {
       }
     }
   }
+  
+  void debug(){
+    consola.println( "BotonModulo->Interfaces: " + getImplementaciones() );
+  }
+  
+  String getImplementaciones(){
+    return "AutoDraw, AutoMousePressed";
+  }
+  
 }

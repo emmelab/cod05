@@ -43,7 +43,9 @@ class BotonBasico implements AutoDraw, AutoMousePressed {
       popMatrix();
       popStyle();
     }
+    debug();
   }
+  
   void mousePressed() {
     if (over(mouseX, mouseY)) {
       presionado = true;
@@ -54,4 +56,13 @@ class BotonBasico implements AutoDraw, AutoMousePressed {
   boolean over(float x, float y) {
     return dist(x, y, pos.x, pos.y) < icono.width*escala/2;
   }
+  
+  void debug(){
+    consola.println( "BotonBasico->Interfaces: " + getImplementaciones() );
+  }
+  
+  String getImplementaciones(){
+    return "AutoDraw, AutoMousePressed";
+  }
+  
 }

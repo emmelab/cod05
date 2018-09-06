@@ -53,6 +53,7 @@ class Interfaz implements AutoSetup, AutoDraw {
         botonPlay.toggle = true;
       }
     } else if (botonPlay.presionado && botonPlay.toggle) ejecutar();
+    debug();
   }
 
   void ejecutar() {
@@ -143,5 +144,13 @@ class Interfaz implements AutoSetup, AutoDraw {
     lienzo.remotoEncontrado = millis()-controlOsc.ultimoPingLienzo <= pingOff;
     observador.remotoEncontrado = millis()-controlOsc.ultimoPingObservador <= pingOff;
     carrete.remotoEncontrado = millis()-controlOsc.ultimoPingCarrete <= pingOff;
+  }
+  
+  void debug(){
+    consola.println( "Interfaz->Interfaces: " + getImplementaciones() );
+  }
+  
+  String getImplementaciones(){
+    return "AutoSetup, AutoDraw";
   }
 }

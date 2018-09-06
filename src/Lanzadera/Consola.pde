@@ -1,12 +1,4 @@
-Reloj reloj = new Reloj();
-ConsolaDebug consolaDebug = new ConsolaDebug( false );
-
-public void consolaDebug() {
-  reloj.actualizar();
-  consolaDebug.ejecutar();
-}
-
-public final class ConsolaDebug {
+public final class Consola {
 
   private String texto;
   private ArrayList<Alerta> alertas = new ArrayList<Alerta>();
@@ -18,7 +10,7 @@ public final class ConsolaDebug {
 
   private static final float LEADIN = 1.5; //--- NUEVO!
 
-  public ConsolaDebug() {
+  public Consola() {
     texto = "";
     colorTexto = color( #000000 );//color( 255 );
     colorAlerta = color(175, 194, 43);//#FF0000
@@ -28,7 +20,7 @@ public final class ConsolaDebug {
     debug = verFps = verDatos = verAlertas = true;
   }
   
-  public ConsolaDebug( boolean verFps ) {
+  public Consola( boolean verFps ) {
     texto = "";
     colorTexto = color( #000000 );//color( 255 );
     colorAlerta = color(175, 194, 43);//#FF0000
@@ -241,23 +233,5 @@ public final class ConsolaDebug {
         estado = ESTADO_ELIMINAR;
       }
     }
-  }
-}
-
-public class Reloj {
-
-  private int millisActual, millisAnterior, deltaMillis;
-
-  public Reloj() {
-  }
-
-  public int getDeltaMillis() {
-    return deltaMillis;
-  }
-
-  public void actualizar() {
-    millisAnterior = millisActual;
-    millisActual = millis();
-    deltaMillis = millisActual - millisAnterior;
   }
 }

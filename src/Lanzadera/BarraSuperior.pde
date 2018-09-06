@@ -23,6 +23,16 @@ class BarraSuperior implements AutoDraw {
       fill(paleta.marca);
       textSize(27);
       text(oscP5.ip(), margen, alto+48);
-      popStyle();   
+      popStyle();
+      debug();
   }
+  
+  void debug(){
+    consola.println( "BarraSuperior->Interfaces: " + getImplementaciones() );
+  }
+  
+  String getImplementaciones(){
+    return "AutoDraw";
+  }
+  
 }

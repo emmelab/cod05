@@ -1,5 +1,5 @@
-boolean modoPDE = false;// poner en false cuando se haga una exportacion posta
-boolean modoDummies = false && modoPDE;// lo mismo
+boolean modoPDE = true;// poner en false cuando se haga una exportacion posta
+boolean modoDummies = true && modoPDE;// lo mismo
 
 import oscP5.*;
 import netP5.*;
@@ -12,6 +12,9 @@ PFont openSans_Light;
 
 int oscP5Port = 12000;
 OscP5 oscP5;
+
+Reloj reloj = new Reloj();
+Consola consola = new Consola( false /*show fps*/ );
 
 void settings() {
   size( 800, 600 );
@@ -30,13 +33,15 @@ void inicializarTipografias(float textSize){
 }
 
 void draw() {
+  reloj.actualizar();
   dt = (millis()-lt)/1000f;
   lt = millis();
     background(paleta.fondo);
   for(AutoDraw auto : autoDraw) auto.draw();
-  consolaDebug();
+  consola.ejecutar();
 }
 void keyPressed() {
+  if( key == 'c' || key == 'C' ) consola.setDebug( !consola.getDebug() );
   if(!interfaz.introActiva)for(AutoKeyPressed auto : autoKeyPressed) auto.keyPressed();
 }
 void keyReleased() {

@@ -5,12 +5,13 @@ ArrayList<AutoKeyReleased> autoKeyReleased = new ArrayList();
 ArrayList<AutoMousePressed> autoMousePressed = new ArrayList();
 ArrayList<AutoMouseReleased> autoMouseReleased = new ArrayList();
 
-interface AutoSetup { void setup(); }
-interface AutoDraw { void draw(); }
-interface AutoKeyPressed { void keyPressed(); }
-interface AutoKeyReleased { void keyReleased(); }
-interface AutoMousePressed { void mousePressed(); }
-interface AutoMouseReleased { void mouseReleased(); }
+interface Debug { void debug(); String getImplementaciones(); }
+interface AutoSetup extends Debug { void setup(); }
+interface AutoDraw extends Debug { void draw(); }
+interface AutoKeyPressed extends Debug { void keyPressed(); }
+interface AutoKeyReleased extends Debug { void keyReleased(); }
+interface AutoMousePressed extends Debug { void mousePressed(); }
+interface AutoMouseReleased extends Debug { void mouseReleased(); }
 
 Paleta paleta = new Paleta();
 DiccionarioIconos dicIcos = new DiccionarioIconos();
