@@ -17,6 +17,7 @@ class CampoIP implements AutoDraw, AutoKeyPressed, AutoMousePressed {
     autoDraw.add(this);
     autoMousePressed.add(this);
     autoKeyPressed.add(this);
+    debug( true );
   }
 
   void set(ConfiguracionCOD05.ConfigModulo config){
@@ -146,7 +147,7 @@ void digerirPort(){
   void draw() {
     drawIp();
     drawPuerto();
-    debug();
+    debug( false );
   }
   
   void drawIp(){
@@ -176,9 +177,15 @@ void digerirPort(){
     popStyle();
   }
   
+  //Implementaciones Debug
+  void debug( boolean setup ){
+    if( setup ) consola.printlnAlerta( "Construccion -> CampoIP <- Interfaces: " + getImplementaciones() );
+    else consola.println( "CampoIP->Interfaces: " + getImplementaciones() );
+  }
+  /*
   void debug(){
     consola.println( "CampoIP->Interfaces: " + getImplementaciones() );
-  }
+  }*/
   
   String getImplementaciones(){
     return "AutoDraw, AutoKeyPressed, AutoMousePressed";

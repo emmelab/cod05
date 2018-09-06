@@ -8,6 +8,7 @@ class BarraSuperior implements AutoDraw {
     alto = marca.height*1.5;
     margen = alto/2;
     autoDraw.add(this);
+    debug( true );
   }
 
   void draw() {  
@@ -24,11 +25,13 @@ class BarraSuperior implements AutoDraw {
       textSize(27);
       text(oscP5.ip(), margen, alto+48);
       popStyle();
-      debug();
+      debug( false );
   }
   
-  void debug(){
-    consola.println( "BarraSuperior->Interfaces: " + getImplementaciones() );
+  //Implementaciones Debug
+  void debug( boolean setup ){
+    if( setup ) consola.printlnAlerta( "Construccion -> BarraSuperior <- Interfaces: " + getImplementaciones() );
+    else consola.println( "BarraSuperior->Interfaces: " + getImplementaciones() );
   }
   
   String getImplementaciones(){

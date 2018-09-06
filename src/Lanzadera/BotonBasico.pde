@@ -23,6 +23,7 @@ class BotonBasico implements AutoDraw, AutoMousePressed {
     this.col = col;
     autoDraw.add(this);
     autoMousePressed.add(this);
+    debug( true );
   }
 
   void draw() {
@@ -43,7 +44,7 @@ class BotonBasico implements AutoDraw, AutoMousePressed {
       popMatrix();
       popStyle();
     }
-    debug();
+    debug( false );
   }
   
   void mousePressed() {
@@ -57,9 +58,15 @@ class BotonBasico implements AutoDraw, AutoMousePressed {
     return dist(x, y, pos.x, pos.y) < icono.width*escala/2;
   }
   
+  //Implementaciones Debug
+  void debug( boolean setup ){
+    if( setup ) consola.printlnAlerta( "Construccion -> BotonBasico <- Interfaces: " + getImplementaciones() );
+    else consola.println( "BotonBasico->Interfaces: " + getImplementaciones() );
+  }
+  /*
   void debug(){
     consola.println( "BotonBasico->Interfaces: " + getImplementaciones() );
-  }
+  }*/
   
   String getImplementaciones(){
     return "AutoDraw, AutoMousePressed";

@@ -31,6 +31,7 @@ class Interfaz implements AutoSetup, AutoDraw {
     botonPlay.escala = .6f;
     botonPlay.hoverEscala = new TwOutBack().inicializar(.25, 1, 1.1, 0);
     botonPlay.toggleAlfa = new TwOutQuad().inicializar(.25, 255, 25, 0);
+    debug( true );
   }
   void draw() {
     if (introActiva)intro();
@@ -53,7 +54,7 @@ class Interfaz implements AutoSetup, AutoDraw {
         botonPlay.toggle = true;
       }
     } else if (botonPlay.presionado && botonPlay.toggle) ejecutar();
-    debug();
+    debug( false );
   }
 
   void ejecutar() {
@@ -146,9 +147,15 @@ class Interfaz implements AutoSetup, AutoDraw {
     carrete.remotoEncontrado = millis()-controlOsc.ultimoPingCarrete <= pingOff;
   }
   
+      //Implementaciones Debug
+  void debug( boolean setup ){
+    if( setup ) consola.printlnAlerta( "Construccion -> Iconos <- Interfaces: " + getImplementaciones() );
+    else consola.println( "Iconos->Interfaces: " + getImplementaciones() );
+  }
+  /*
   void debug(){
     consola.println( "Interfaz->Interfaces: " + getImplementaciones() );
-  }
+  }*/
   
   String getImplementaciones(){
     return "AutoSetup, AutoDraw";

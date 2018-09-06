@@ -25,6 +25,7 @@ class BotonModulo implements AutoDraw, AutoMousePressed {
     animColor = (new TwOutQuad()).inicializar(.3);
     autoDraw.add(this);
     autoMousePressed.add(this);
+    debug( true );
   }
 
   void set(ConfiguracionCOD05.ConfigModulo config) {
@@ -76,7 +77,7 @@ class BotonModulo implements AutoDraw, AutoMousePressed {
     image(icono, 0, 0);  
     popMatrix();
     popStyle();
-    debug();
+    debug( false );
   }
 
   void aro(float x, float y, float w, float h, float divs, float offset) {
@@ -92,9 +93,15 @@ class BotonModulo implements AutoDraw, AutoMousePressed {
     }
   }
   
+  //Implementaciones Debug
+  void debug( boolean setup ){
+    if( setup ) consola.printlnAlerta( "Construccion -> BotonModulo <- Interfaces: " + getImplementaciones() );
+    else consola.println( "BotonModulo->Interfaces: " + getImplementaciones() );
+  }
+  /*
   void debug(){
     consola.println( "BotonModulo->Interfaces: " + getImplementaciones() );
-  }
+  }*/
   
   String getImplementaciones(){
     return "AutoDraw, AutoMousePressed";

@@ -5,7 +5,7 @@ ArrayList<AutoKeyReleased> autoKeyReleased = new ArrayList();
 ArrayList<AutoMousePressed> autoMousePressed = new ArrayList();
 ArrayList<AutoMouseReleased> autoMouseReleased = new ArrayList();
 
-interface Debug { void debug(); String getImplementaciones(); }
+interface Debug { void debug( boolean setup ); /*String setNombre(); String getNombre();*/ String getImplementaciones(); }
 interface AutoSetup extends Debug { void setup(); }
 interface AutoDraw extends Debug { void draw(); }
 interface AutoKeyPressed extends Debug { void keyPressed(); }

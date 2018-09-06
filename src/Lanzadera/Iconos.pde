@@ -37,7 +37,7 @@ class Iconos implements AutoSetup {
       PImage icono = loadImage("../iconos/"+ preload[i]+".png");         
       iconos.put(preload[i], icono);
     }
-    debug();
+    debug( true );
   }
 
   PImage iconoVacio() {
@@ -92,12 +92,18 @@ class Iconos implements AutoSetup {
         image(icono, x, y);
       }
     }
-    consola.println( "Iconos->Interfaces: " + getImplementaciones() );
+    debug( false );
   }
   
+    //Implementaciones Debug
+  void debug( boolean setup ){
+    if( setup ) consola.printlnAlerta( "Construccion -> Iconos <- Interfaces: " + getImplementaciones() );
+    else consola.println( "Iconos->Interfaces: " + getImplementaciones() );
+  }
+  /*
   void debug(){
     consola.printlnAlerta( "Iconos->Interfaces: " + getImplementaciones() );
-  }
+  }*/
   
   String getImplementaciones(){
     return "AutoSetup";
