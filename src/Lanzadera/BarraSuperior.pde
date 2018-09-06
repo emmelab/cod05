@@ -28,6 +28,12 @@ class BarraSuperior implements AutoDraw {
       debug( false );
   }
   
+  //Implementaciones Nombre
+  String nombre = "<vacio>";
+  void setNombre( String nombre ){
+    this.nombre = nombre;
+  }
+  
   //Implementaciones Debug
   void debug( boolean setup ){
     if( setup ) consola.printlnAlerta( "Construccion -> BarraSuperior <- Interfaces: " + getImplementaciones() );

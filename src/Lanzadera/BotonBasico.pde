@@ -58,6 +58,12 @@ class BotonBasico implements AutoDraw, AutoMousePressed {
     return dist(x, y, pos.x, pos.y) < icono.width*escala/2;
   }
   
+    //Implementaciones Nombre
+  String nombre = "<vacio>";
+  void setNombre( String nombre ){
+    this.nombre = nombre;
+  }
+  
   //Implementaciones Debug
   void debug( boolean setup ){
     if( setup ) consola.printlnAlerta( "Construccion -> BotonBasico <- Interfaces: " + getImplementaciones() );

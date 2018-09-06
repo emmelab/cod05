@@ -5,7 +5,8 @@ ArrayList<AutoKeyReleased> autoKeyReleased = new ArrayList();
 ArrayList<AutoMousePressed> autoMousePressed = new ArrayList();
 ArrayList<AutoMouseReleased> autoMouseReleased = new ArrayList();
 
-interface Debug { void debug( boolean setup ); /*String setNombre(); String getNombre();*/ String getImplementaciones(); }
+interface Nombre { void setNombre( String nombre ); }
+interface Debug extends Nombre{ void debug( boolean setup ); /*String setNombre(); String getNombre();*/ String getImplementaciones(); }
 interface AutoSetup extends Debug { void setup(); }
 interface AutoDraw extends Debug { void draw(); }
 interface AutoKeyPressed extends Debug { void keyPressed(); }
@@ -13,7 +14,14 @@ interface AutoKeyReleased extends Debug { void keyReleased(); }
 interface AutoMousePressed extends Debug { void mousePressed(); }
 interface AutoMouseReleased extends Debug { void mouseReleased(); }
 
-Paleta paleta = new Paleta();
-DiccionarioIconos dicIcos = new DiccionarioIconos();
-Iconos iconos = new Iconos();
-Interfaz interfaz = new Interfaz();
+Paleta paleta;
+DiccionarioIconos dicIcos;
+Iconos iconos;
+Interfaz interfaz;
+
+void iniciarPrincipal(){
+  paleta = new Paleta( "asdasd" );
+  dicIcos = new DiccionarioIconos();
+  iconos = new Iconos();
+  interfaz = new Interfaz();
+}

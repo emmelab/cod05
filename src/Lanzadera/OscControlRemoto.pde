@@ -156,6 +156,13 @@ class ControlOsc implements AutoSetup {
     if (osc != null) osc.send(msjPingCarrete, new NetAddress(ip, modoDummies?puerto:oscP5Port));
   }
   
+    //Implementaciones Nombre
+  String nombre = "<vacio>";
+  void setNombre( String nombre ){
+    this.nombre = nombre;
+    //consola.printlnAlerta( "OSCControlRemoto.Nombre " + nombre, color( 0, 0, 255 ) );
+  }
+  
           //Implementaciones Debug
   void debug( boolean setup ){
     if( setup ) consola.printlnAlerta( "Construccion -> ControlOsc <- Interfaces: " + getImplementaciones() );

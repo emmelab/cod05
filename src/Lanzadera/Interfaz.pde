@@ -147,6 +147,12 @@ class Interfaz implements AutoSetup, AutoDraw {
     carrete.remotoEncontrado = millis()-controlOsc.ultimoPingCarrete <= pingOff;
   }
   
+    //Implementaciones Nombre
+  String nombre = "<vacio>";
+  void setNombre( String nombre ){
+    this.nombre = nombre;
+  }
+  
       //Implementaciones Debug
   void debug( boolean setup ){
     if( setup ) consola.printlnAlerta( "Construccion -> Iconos <- Interfaces: " + getImplementaciones() );

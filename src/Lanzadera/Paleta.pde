@@ -6,6 +6,11 @@ class Paleta implements AutoSetup {
     autoSetup.add(this);
   }
   
+  Paleta(String nombre){
+    autoSetup.add(this);
+    setNombre( nombre );
+  }
+  
   void setup() {
     play = color(#BEBE40);
     inactivo = color(#3E4545);
@@ -16,6 +21,13 @@ class Paleta implements AutoSetup {
     panelSuperior = color(#141516);
     marca = color(#42494A);
     debug( true );
+  }
+  
+    //Implementaciones Nombre
+  String nombre = "<vacio>";
+  void setNombre( String nombre ){
+    this.nombre = nombre;
+    consola.printlnAlerta( "Paleta.Nombre ", color( 0, 0, 255 ) );
   }
   
             //Implementaciones Debug
