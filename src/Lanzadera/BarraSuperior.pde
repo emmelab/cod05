@@ -38,17 +38,6 @@ class BarraSuperior extends Nombre implements AutoDraw {
       debug( false );
   }
   
-  //Implementaciones Nombre
-  /*String nombre = "<vacio>";
-  void setNombre( String nombre ){
-    this.nombre = nombre;
-    consola.printlnAlerta( "BarraSuperior.Nombre: " + this.nombre, color( 0, 0, 255 ) );
-  }
-  
-  String getNombre(){
-    return nombre;
-  }*/
-  
   //Implementaciones Debug
   void debug( boolean setup ){
     if( setup ) consola.printlnAlerta( "Construccion -> BarraSuperior <- Interfaces: " + getImplementaciones() );

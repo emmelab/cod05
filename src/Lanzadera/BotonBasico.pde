@@ -73,7 +73,11 @@ class BotonBasico extends Nombre implements AutoDraw, AutoMousePressed {
   //Implementaciones Debug
   void debug( boolean setup ){
     if( setup ) consola.printlnAlerta( "Construccion -> BotonBasico <- Interfaces: " + getImplementaciones() );
-    else consola.println( "BotonBasico->Interfaces: " + getImplementaciones() );
+    else{
+      consola.println( "BotonBasico->Interfaces: " + getImplementaciones() );
+      consola.println( nombre + ".Over() = " + over(mouseX, mouseY) );
+      consola.println( nombre + ".hoverEscala = " + hoverEscala.valor() );
+    }
   }
   /*
   void debug(){

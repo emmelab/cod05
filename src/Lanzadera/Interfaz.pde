@@ -3,6 +3,7 @@ class Interfaz extends Nombre implements AutoSetup, AutoDraw {
   BotonBasico botonPlay;
   BotonModulo lienzo, observador, carrete;
   InterfazYSensorConexion interfazYSensorConexion;
+  InterfazModoObservador interfazModObs;
   BarraSuperior barraSuperior;
   TwOutQuad animTodoGris;
   Ejecutador ejecutadorLocal;//vive hasta que se mueran sus procesos
@@ -32,6 +33,7 @@ class Interfaz extends Nombre implements AutoSetup, AutoDraw {
       carrete = new BotonModulo(new PVector(width/2+sepHoriz, verti), dicIcos.carrete, paleta.ips[2]);
     }
     interfazYSensorConexion = new InterfazYSensorConexion( "IYSC" );
+    interfazModObs = new InterfazModoObservador( "IMO" );
     barraSuperior = new BarraSuperior( "barraMenu" );
     cargarDatos();
 
@@ -105,6 +107,8 @@ class Interfaz extends Nombre implements AutoSetup, AutoDraw {
   float introTime = 0;
   boolean introActiva = true;
   void intro() {
+    if (interfazModObs.activo) return; 
+    
     float introBotonModuloBase = 2, introBotonModuloSep = .05f;
     if (introCheck(introBotonModuloBase+introBotonModuloSep*0))lienzo.mostrar = true;
     if (introCheck(introBotonModuloBase+introBotonModuloSep*1))observador.mostrar = true;

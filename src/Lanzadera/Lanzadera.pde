@@ -42,7 +42,8 @@ void draw() {
 }
 void keyPressed() {
   if( key == 'c' || key == 'C' ) consola.setDebug( !consola.getDebug() );
-  if(!interfaz.introActiva)for(AutoKeyPressed auto : autoKeyPressed) auto.keyPressed();
+  //if(!interfaz.introActiva)
+    for(AutoKeyPressed auto : autoKeyPressed) auto.keyPressed();
 }
 void keyReleased() {
   if(!interfaz.introActiva)for(AutoKeyReleased auto : autoKeyReleased) auto.keyReleased();

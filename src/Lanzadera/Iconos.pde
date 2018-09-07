@@ -10,6 +10,10 @@ class DiccionarioIconos extends Nombre{
     observador = "observador", 
     carrete = "carrete", 
     lienzo = "lienzo", 
+    fondoIp = "fondo-ip",
+    kinect = "kinect",
+    webcam = "webcam",
+    fondoToggle = "fondo-toggle",
     conexion = "conexion";
     
   DiccionarioIconos( String nombre ){
@@ -78,7 +82,7 @@ class Iconos extends Nombre implements AutoSetup {
       if (icono==null) {
         icono = loadImage("../iconos/"+ nombre+".png");
         if (icono == null) {
-          println(nombre+ " no encontrado");
+          consola.printlnError("Iconos: " + nombre + " no encontrado");
           icono = iconoVacio();
         }
         iconos.put(nombre, icono);
