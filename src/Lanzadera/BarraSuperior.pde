@@ -1,8 +1,18 @@
-class BarraSuperior implements AutoDraw {
+class BarraSuperior extends Nombre implements AutoDraw {
   float margen, alto;
   PImage marca, ayuda;
 
   BarraSuperior() {
+    marca = iconos.get(dicIcos.marca);
+    ayuda = iconos.get(dicIcos.ayuda);
+    alto = marca.height*1.5;
+    margen = alto/2;
+    autoDraw.add(this);
+    debug( true );
+  }
+  
+  BarraSuperior( String nombre ) {
+    setNombre( nombre );
     marca = iconos.get(dicIcos.marca);
     ayuda = iconos.get(dicIcos.ayuda);
     alto = marca.height*1.5;
@@ -29,10 +39,15 @@ class BarraSuperior implements AutoDraw {
   }
   
   //Implementaciones Nombre
-  String nombre = "<vacio>";
+  /*String nombre = "<vacio>";
   void setNombre( String nombre ){
     this.nombre = nombre;
+    consola.printlnAlerta( "BarraSuperior.Nombre: " + this.nombre, color( 0, 0, 255 ) );
   }
+  
+  String getNombre(){
+    return nombre;
+  }*/
   
   //Implementaciones Debug
   void debug( boolean setup ){

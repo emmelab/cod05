@@ -1,4 +1,4 @@
-class BotonModulo implements AutoDraw, AutoMousePressed {
+class BotonModulo extends Nombre implements AutoDraw, AutoMousePressed {
   ConfiguracionCOD05.ConfigModulo config;
   EstadoModulo estado = EstadoModulo.LOCAL;
   boolean mostrar = false, remotoEncontrado = false, panelIPsAbierto = false;
@@ -25,6 +25,7 @@ class BotonModulo implements AutoDraw, AutoMousePressed {
     animColor = (new TwOutQuad()).inicializar(.3);
     autoDraw.add(this);
     autoMousePressed.add(this);
+    setNombre( icono );
     debug( true );
   }
 
@@ -91,12 +92,6 @@ class BotonModulo implements AutoDraw, AutoMousePressed {
         arc(x, y, w, h, salto*(i*2+offset-(negativo?1:0)), salto*(i*2+offset+(negativo?0:1)));
       }
     }
-  }
-  
-    //Implementaciones Nombre
-  String nombre = "<vacio>";
-  void setNombre( String nombre ){
-    this.nombre = nombre;
   }
   
   //Implementaciones Debug

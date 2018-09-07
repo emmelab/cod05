@@ -21,7 +21,6 @@ void settings() {
 }
 
 void setup(){
-  iniciarPrincipal();
   inicializarTipografias(29);
   oscP5 = new OscP5(this,oscP5Port);
   if( paleta != null )for(AutoSetup auto : autoSetup) auto.setup();

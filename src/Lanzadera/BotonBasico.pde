@@ -1,4 +1,4 @@
-class BotonBasico implements AutoDraw, AutoMousePressed {
+class BotonBasico extends Nombre implements AutoDraw, AutoMousePressed {
   PVector pos;
   PImage icono;
   float escala = 0.7;
@@ -23,6 +23,7 @@ class BotonBasico implements AutoDraw, AutoMousePressed {
     this.col = col;
     autoDraw.add(this);
     autoMousePressed.add(this);
+    setNombre( icono );
     debug( true );
   }
 
@@ -58,11 +59,16 @@ class BotonBasico implements AutoDraw, AutoMousePressed {
     return dist(x, y, pos.x, pos.y) < icono.width*escala/2;
   }
   
-    //Implementaciones Nombre
+  /*  //Implementaciones Nombre
   String nombre = "<vacio>";
   void setNombre( String nombre ){
     this.nombre = nombre;
+    consola.printlnAlerta( "BotonBasico.Nombre: " + this.nombre, color( 0, 0, 255 ) );
   }
+    
+  String getNombre(){
+    return nombre;
+  }*/
   
   //Implementaciones Debug
   void debug( boolean setup ){

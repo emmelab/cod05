@@ -1,4 +1,4 @@
-class DiccionarioIconos {
+class DiccionarioIconos extends Nombre{
   String
     aroCerrado = "aro-cerrado", 
     aroAbierto = "aro-abierto", 
@@ -11,9 +11,13 @@ class DiccionarioIconos {
     carrete = "carrete", 
     lienzo = "lienzo", 
     conexion = "conexion";
+    
+  DiccionarioIconos( String nombre ){
+    setNombre( nombre );
+  }
 }
 
-class Iconos implements AutoSetup {
+class Iconos extends Nombre implements AutoSetup {
   PImage iconoVacio_ref;
   HashMap<String, PImage> iconos;
 
@@ -31,6 +35,12 @@ class Iconos implements AutoSetup {
   Iconos() {
     autoSetup.add(this);
   }
+  
+  Iconos( String nombre ) {
+    autoSetup.add(this);
+    setNombre( nombre );
+  }
+  
   void setup() {
     iconos = new HashMap<String, PImage>();
     for (int i=0; i<preload.length; i++) {
@@ -93,12 +103,6 @@ class Iconos implements AutoSetup {
       }
     }
     debug( false );
-  }
-  
-    //Implementaciones Nombre
-  String nombre = "<vacio>";
-  void setNombre( String nombre ){
-    this.nombre = nombre;
   }
   
     //Implementaciones Debug

@@ -1,4 +1,4 @@
-class Interfaz implements AutoSetup, AutoDraw {
+class Interfaz extends Nombre implements AutoSetup, AutoDraw {
   ConfiguracionCOD05 config;
   BotonBasico botonPlay;
   BotonModulo lienzo, observador, carrete;
@@ -15,6 +15,14 @@ class Interfaz implements AutoSetup, AutoDraw {
     autoDraw.add(this);
     animTodoGris = (TwOutQuad)(new TwOutQuad()).inicializar(.9, 0, 3);
   }
+  
+  Interfaz( String nombre ) {
+    autoSetup.add(this);
+    autoDraw.add(this);
+    animTodoGris = (TwOutQuad)(new TwOutQuad()).inicializar(.9, 0, 3);
+    setNombre( nombre );
+  }
+  
   void setup() {
     {
       float verti = height/2;
@@ -23,8 +31,8 @@ class Interfaz implements AutoSetup, AutoDraw {
       observador = new BotonModulo(new PVector(width/2, verti), dicIcos.observador, paleta.ips[1]);
       carrete = new BotonModulo(new PVector(width/2+sepHoriz, verti), dicIcos.carrete, paleta.ips[2]);
     }
-    interfazYSensorConexion = new InterfazYSensorConexion();
-    barraSuperior = new BarraSuperior();
+    interfazYSensorConexion = new InterfazYSensorConexion( "IYSC" );
+    barraSuperior = new BarraSuperior( "barraMenu" );
     cargarDatos();
 
     botonPlay = new BotonBasico(90, height-90, 0, "play", paleta.play);
@@ -147,16 +155,10 @@ class Interfaz implements AutoSetup, AutoDraw {
     carrete.remotoEncontrado = millis()-controlOsc.ultimoPingCarrete <= pingOff;
   }
   
-    //Implementaciones Nombre
-  String nombre = "<vacio>";
-  void setNombre( String nombre ){
-    this.nombre = nombre;
-  }
-  
       //Implementaciones Debug
   void debug( boolean setup ){
-    if( setup ) consola.printlnAlerta( "Construccion -> Iconos <- Interfaces: " + getImplementaciones() );
-    else consola.println( "Iconos->Interfaces: " + getImplementaciones() );
+    if( setup ) consola.printlnAlerta( "Construccion -> Interfaz <- Interfaces: " + getImplementaciones() );
+    else consola.println( "Interfaz->Interfaces: " + getImplementaciones() );
   }
   /*
   void debug(){

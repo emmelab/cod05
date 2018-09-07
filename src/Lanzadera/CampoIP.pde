@@ -1,4 +1,4 @@
-class CampoIP implements AutoDraw, AutoKeyPressed, AutoMousePressed {
+class CampoIP extends Nombre implements AutoDraw, AutoKeyPressed, AutoMousePressed {
   ConfiguracionCOD05.ConfigModulo config;
   boolean focus = false, focusPort = false, borrarTodo = true;
   PVector pos, tam, posInputPuerto,tamInputPuerto;
@@ -175,12 +175,6 @@ void digerirPort(){
     text(text + (focus && frameCount%60<30?"|":""), 0, -textAscent()/6);
     popMatrix();
     popStyle();
-  }
-  
-    //Implementaciones Nombre
-  String nombre = "<vacio>";
-  void setNombre( String nombre ){
-    this.nombre = nombre;
   }
   
   //Implementaciones Debug

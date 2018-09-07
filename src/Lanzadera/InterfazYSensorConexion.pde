@@ -13,7 +13,7 @@ void oscStatus(int estado) {
  println(msj);
  }*/
 
-class InterfazYSensorConexion implements AutoDraw {
+class InterfazYSensorConexion extends Nombre implements AutoDraw {
   ConfiguracionCOD05 config;
   TwOutQuad animacion;
   TwInOutBack tweenPanel;
@@ -35,6 +35,15 @@ class InterfazYSensorConexion implements AutoDraw {
   PVector ejeMasMenos;
 
   InterfazYSensorConexion() {
+    construir();
+  }
+  
+  InterfazYSensorConexion( String nombre ) {
+    setNombre( nombre );
+    construir();
+  }
+  
+  void construir(){
     autoDraw.add(this);
     iconoConexion = iconos.get(dicIcos.conexion);
     //if (this.iconoConexion == null) this.iconoConexion = iconos.iconoVacio();
@@ -49,9 +58,13 @@ class InterfazYSensorConexion implements AutoDraw {
     float xBase = width/2-anchoCampoIP/2;
     posYBase = new float[]{ tamPanelInferior/2-altoCampoIP*2, tamPanelInferior/2-altoCampoIP*.5, tamPanelInferior/2+altoCampoIP*1 };
     lienzo = new CampoIP(xBase, posYBase[0], anchoCampoIP, altoCampoIP, paleta.ips[0], .4f);
+    lienzo.setNombre( "campoIP_lienzo" );
     observador = new CampoIP(xBase, posYBase[1], anchoCampoIP, altoCampoIP, paleta.ips[1], .4f);
+    observador.setNombre( "campoIP_observador" );
     carrete = new CampoIP(xBase, posYBase[2], anchoCampoIP, altoCampoIP, paleta.ips[2], .4f);
+    carrete.setNombre( "campoIP_carrete" );
   }
+  
   void draw() {
     boolean sinConexion = oscP5.ip().equals(ipLocalHost);
     pushStyle();
@@ -115,17 +128,12 @@ class InterfazYSensorConexion implements AutoDraw {
     carrete.pos.y = posYBase[2]+offsetPanel;
   }
   
-    //Implementaciones Nombre
-  String nombre = "<vacio>";
-  void setNombre( String nombre ){
-    this.nombre = nombre;
-  }
-  
         //Implementaciones Debug
   void debug( boolean setup ){
     if( setup ) consola.printlnAlerta( "Construccion -> InterfazYSensorConexion <- Interfaces: " + getImplementaciones() );
     else consola.println( "InterfazYSensorConexion->Interfaces: " + getImplementaciones() );
   }
+    
   /*
   void debug(){
     consola.println( "InterfazYSensorConexion->Interfaces: " + getImplementaciones() );

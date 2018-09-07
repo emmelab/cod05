@@ -160,7 +160,11 @@ class ControlOsc implements AutoSetup {
   String nombre = "<vacio>";
   void setNombre( String nombre ){
     this.nombre = nombre;
-    //consola.printlnAlerta( "OSCControlRemoto.Nombre " + nombre, color( 0, 0, 255 ) );
+    consola.printlnAlerta( "OSCControlRemoto.Nombre: " + nombre, color( 0, 0, 255 ) );//consola.printlnAlerta( "OSCControlRemoto.Nombre " + nombre, color( 0, 0, 255 ) );
+  }
+    
+  String getNombre(){
+    return nombre;
   }
   
           //Implementaciones Debug
