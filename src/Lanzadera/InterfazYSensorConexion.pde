@@ -102,12 +102,13 @@ class InterfazYSensorConexion implements AutoDraw {
     menos.pos.set(ejeMasMenos.x+ejeMasMenos.z*cos(menos.pos.z), ejeMasMenos.y+ejeMasMenos.z*sin(menos.pos.z));
     mas.pos.set(ejeMasMenos.x+ejeMasMenos.z*cos(mas.pos.z), ejeMasMenos.y+ejeMasMenos.z*sin(mas.pos.z));
 
-    /*//----- :D
-     if (interfaz.todoLocal) {
-     mas.dibujar = false;
-     } else {
-     mas.dibujar = true;
-     }*/
+    if (interfaz.todoLocal) {
+      mas.setAutoActivo( false );
+      menos.setAutoActivo( false );
+    } else {
+      mas.setAutoActivo( true );
+      menos.setAutoActivo( true );
+    }
 
     if (menos.presionado || mas.presionado) {
       visible( !visible() );

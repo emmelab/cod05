@@ -1,4 +1,4 @@
-class BotonModulo implements AutoDraw, AutoMousePressed {
+class BotonModulo extends Auto implements AutoDraw, AutoMousePressed {
   ConfiguracionCOD05.ConfigModulo config;
   EstadoModulo estado = EstadoModulo.LOCAL;
   boolean mostrar = false, remotoEncontrado = false, panelIPsAbierto = false;
@@ -33,6 +33,7 @@ class BotonModulo implements AutoDraw, AutoMousePressed {
   }
 
   void mousePressed() {
+    if( !autoActivo ) return;
     if (dist(pos.x, pos.y, mouseX, mouseY) < icono.width/2) {
       if (estado == EstadoModulo.APAGADO) estado = EstadoModulo.LOCAL;
       else if (estado == EstadoModulo.LOCAL) estado = panelIPsAbierto ? EstadoModulo.REMOTO : EstadoModulo.APAGADO;
