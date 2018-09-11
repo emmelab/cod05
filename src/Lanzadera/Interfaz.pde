@@ -1,4 +1,10 @@
 class Interfaz extends Nombre implements AutoSetup, AutoDraw {
+  
+  String estado;
+  static final String
+  ESTADO_MODO_OBSERVADOR = "MODO OBSERVADOR",
+  ESTADO_MODO_CONFIGURACION = "MODO CONFIGURACION";
+  
   ConfiguracionCOD05 config;
   BotonBasico botonPlay;
   BotonModulo lienzo, observador, carrete;
@@ -15,6 +21,7 @@ class Interfaz extends Nombre implements AutoSetup, AutoDraw {
     autoSetup.add(this);
     autoDraw.add(this);
     animTodoGris = (TwOutQuad)(new TwOutQuad()).inicializar(.9, 0, 3);
+    estado = ESTADO_MODO_OBSERVADOR;
   }
   
   Interfaz( String nombre ) {
