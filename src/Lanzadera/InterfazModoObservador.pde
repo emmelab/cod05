@@ -1,5 +1,5 @@
-class InterfazModoObservador extends Nombre implements AutoDraw, AutoKeyPressed {
-  boolean activo = true;
+class InterfazModoObservador extends Auto implements AutoDraw, AutoKeyPressed {
+  //boolean activo = true;
   PImage icoCam,icoKin,fondoToggle;
   
   BotonBasico botonCam, botonKin;
@@ -7,6 +7,7 @@ class InterfazModoObservador extends Nombre implements AutoDraw, AutoKeyPressed 
   InterfazModoObservador( String nombre ) {
     autoDraw.add(this);
     autoKeyPressed.add( this );
+    autoActivo = true;
     
     fondoToggle = iconos.get(dicIcos.fondoToggle);
     icoCam = iconos.get(dicIcos.webcam);
@@ -19,19 +20,20 @@ class InterfazModoObservador extends Nombre implements AutoDraw, AutoKeyPressed 
     botonCam.escala = 1.0f;
     botonCam.hoverEscala = new TwOutBack().inicializar(.25, 1, 1.1, 0);
     botonCam.toggleAlfa = new TwOutQuad().inicializar(.25, 255, 25, 0);
+    botonCam.setAutoActivo( true );
     
     botonKin = new BotonBasico( width*5.5/8, height*0.5, 0, dicIcos.kinect, color( 255 ) );
     botonKin.escala = 1.0f;
     botonKin.hoverEscala = new TwOutBack().inicializar(.25, 1, 1.1, 0);
     botonKin.toggleAlfa = new TwOutQuad().inicializar(.25, 255, 25, 0);
-    
+    botonKin.setAutoActivo( true );
     
     setNombre( nombre );
     debug( true );
   }
   
   void draw() {
-    if (activo) {
+    if ( autoActivo ) {
       imageMode(CENTER);
       noStroke();
       fill(paleta.panelSuperior);
@@ -44,17 +46,23 @@ class InterfazModoObservador extends Nombre implements AutoDraw, AutoKeyPressed 
       //image(fondoToggle,width/2,height/2);
       
       if( botonCam.toggle ){
-        activo = false;
+        setAutoActivo( false );
       }else if( botonKin.toggle ){
-        activo = false;
+        setAutoActivo( false );
       }
       
     }
     debug( false );
   }
   
+  void setAutoActivo( boolean autoActivo ){
+    super.setAutoActivo( autoActivo );
+    botonCam.setAutoActivo( autoActivo );
+    botonKin.setAutoActivo( autoActivo );
+  }
+  
   void keyPressed(){
-    if( key == 'q' || key == 'Q' ) activo = false;
+    if( key == 'q' || key == 'Q' ) autoActivo = false;
   }
   
     //Implementaciones Debug

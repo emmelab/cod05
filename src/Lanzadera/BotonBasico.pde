@@ -1,4 +1,4 @@
-class BotonBasico extends Nombre implements AutoDraw, AutoMousePressed {
+class BotonBasico extends Auto implements AutoDraw, AutoMousePressed {
   PVector pos;
   PImage icono;
   float escala = 0.7;
@@ -8,7 +8,7 @@ class BotonBasico extends Nombre implements AutoDraw, AutoMousePressed {
   //--- solo dibuje el mas si algunas de las cosas no esta conectada como local...
   //--- ara que que sean faciles de encontrar todo lo que hice que tenga uqe ver con esto que espero no sea mucho
   //--- todo lo voy a comentar con un :D .... 
-  boolean dibujar = true;
+  //boolean dibujar = true;
 
   Tweener hoverEscala = new Tweener().inicializar(1, 1, 1, 1);
   Tweener toggleAlfa = new Tweener().inicializar(.5, 200, 255, 0);
@@ -28,7 +28,7 @@ class BotonBasico extends Nombre implements AutoDraw, AutoMousePressed {
   }
 
   void draw() {
-    if (dibujar) {
+    if ( autoActivo ) {
       boolean over = over(mouseX, mouseY);
       hoverEscala.actualizar(over?dt:-dt);
       toggleAlfa.actualizar(toggle?dt:-dt);
@@ -49,6 +49,7 @@ class BotonBasico extends Nombre implements AutoDraw, AutoMousePressed {
   }
   
   void mousePressed() {
+    if( !autoActivo ) return;
     if (over(mouseX, mouseY)) {
       presionado = true;
       toggle = !toggle;

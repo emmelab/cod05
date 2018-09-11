@@ -114,7 +114,7 @@ class Interfaz extends Nombre implements AutoSetup, AutoDraw {
   float introTime = 0;
   boolean introActiva = true;
   void intro() {
-    if (interfazModObs.activo) return; 
+    if (interfazModObs.autoActivo) return; 
     
     float introBotonModuloBase = 2, introBotonModuloSep = .05f;
     if (introCheck(introBotonModuloBase+introBotonModuloSep*0))lienzo.mostrar = true;
@@ -122,7 +122,10 @@ class Interfaz extends Nombre implements AutoSetup, AutoDraw {
     if (introCheck(introBotonModuloBase+introBotonModuloSep*2))carrete.mostrar = true;
 
     introTime += dt;
-    if (introTime > introBotonModuloBase+introBotonModuloSep*2) introActiva = false;
+    if (introTime > introBotonModuloBase+introBotonModuloSep*2){
+      introActiva = false;
+      botonPlay.autoActivo = lienzo.autoActivo = observador.autoActivo = carrete.autoActivo = true;
+    }
   }
   boolean introCheck(float t) {
     return introTime < t && introTime+dt >= t;

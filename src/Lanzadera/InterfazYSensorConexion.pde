@@ -102,9 +102,11 @@ class InterfazYSensorConexion extends Nombre implements AutoDraw {
 
     //----- :D
     if (interfaz.todoLocal) {
-      mas.dibujar = false;
+      mas.setAutoActivo( false );
+      menos.setAutoActivo( false );
     } else {
-      mas.dibujar = true;
+      mas.setAutoActivo( true );
+      menos.setAutoActivo( true );
     }
 
     if (menos.presionado || mas.presionado) {
