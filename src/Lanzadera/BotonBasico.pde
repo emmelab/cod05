@@ -52,6 +52,7 @@ class BotonBasico extends Nombre implements AutoDraw, AutoMousePressed {
     if (over(mouseX, mouseY)) {
       presionado = true;
       toggle = !toggle;
+      consola.printlnAlerta( getNombre() + ".toggle = " + toggle );
     }
   }
 

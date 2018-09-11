@@ -251,7 +251,7 @@ public final class Consola{
     }
     
     public void ejecutar(){
-      //tiempo += reloj.getDeltaMillis();
+      tiempo += reloj.getDeltaMillis();
       if( estado == ESTADO_MOSTRAR && tiempo > TIEMPO_MOSTRAR ){
         estado = ESTADO_DESAPARECER;
         tiempo = 0;

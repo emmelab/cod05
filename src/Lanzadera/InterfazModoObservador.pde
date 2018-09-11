@@ -42,6 +42,13 @@ class InterfazModoObservador extends Nombre implements AutoDraw, AutoKeyPressed 
       //image(icoKin,width*5.5/8,height/2);
       //ellipse(width/4,height/2,icoCam.width-1,icoCam.height-1);
       //image(fondoToggle,width/2,height/2);
+      
+      if( botonCam.toggle ){
+        activo = false;
+      }else if( botonKin.toggle ){
+        activo = false;
+      }
+      
     }
     debug( false );
   }

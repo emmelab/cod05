@@ -49,7 +49,8 @@ void keyReleased() {
   if(!interfaz.introActiva)for(AutoKeyReleased auto : autoKeyReleased) auto.keyReleased();
 }
 void mousePressed() {
-  if(!interfaz.introActiva)for(AutoMousePressed auto : autoMousePressed) auto.mousePressed();
+  //if(!interfaz.introActiva)
+  for(AutoMousePressed auto : autoMousePressed) auto.mousePressed();
 }
 void mouseReleased() {
   if(!interfaz.introActiva)for(AutoMouseReleased auto : autoMouseReleased) auto.mouseReleased();
