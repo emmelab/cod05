@@ -3,6 +3,7 @@ class InterfazModoObservador extends Auto implements AutoDraw {
   PImage icoCam,icoKin,fondoToggle;
   
   BotonBasico botonCam, botonKin;
+  ConfiguracionCOD05 config;
   
   InterfazModoObservador() {
     autoDraw.add(this);
@@ -15,18 +16,22 @@ class InterfazModoObservador extends Auto implements AutoDraw {
     icoKin.resize(icoKin.width*3/4,icoKin.height*3/4);
     fondoToggle.resize(fondoToggle.width*3/4,fondoToggle.height*3/4);
     
-    botonCam = new BotonBasico( width*2.5/8, height*0.5, 0, dicIcos.webcam, color( 255 ) );
+    botonCam = new BotonBasico( width*2.5/8, height*0.5, 0, dicIcos.webcam, paleta.inactivo );
     botonCam.escala = 1.0f;
     botonCam.hoverEscala = new TwOutBack().inicializar(.25, 1, 1.1, 0);
     botonCam.toggleAlfa = new TwOutQuad().inicializar(.25, 255, 25, 0);
     botonCam.setAutoActivo( true );
     
-    botonKin = new BotonBasico( width*5.5/8, height*0.5, 0, dicIcos.kinect, color( 255 ) );
+    botonKin = new BotonBasico( width*5.5/8, height*0.5, 0, dicIcos.kinect, paleta.inactivo );
     botonKin.escala = 1.0f;
     botonKin.hoverEscala = new TwOutBack().inicializar(.25, 1, 1.1, 0);
     botonKin.toggleAlfa = new TwOutQuad().inicializar(.25, 255, 25, 0);
     botonKin.setAutoActivo( true );
-    
+
+  }
+  
+  void set( ConfiguracionCOD05 config ){
+    this.config = config;
   }
   
   void draw() {
@@ -44,8 +49,10 @@ class InterfazModoObservador extends Auto implements AutoDraw {
       
       if( botonCam.toggle ){
         setAutoActivo( false );
+        config.modoObservador = ModoObservador.WEBCAM;
       }else if( botonKin.toggle ){
         setAutoActivo( false );
+        config.modoObservador = ModoObservador.KINECT;
       }
       
     }

@@ -55,6 +55,7 @@ class Interfaz implements AutoSetup, AutoDraw {
         botonPlay.toggle = true;
       }
     } else if (botonPlay.presionado && botonPlay.toggle) ejecutar();
+    consola.println( "config.modoObservador: " + config.modoObservador );
   }
 
   void ejecutar() {
@@ -71,6 +72,7 @@ class Interfaz implements AutoSetup, AutoDraw {
     if (xmlConfig != null) xmlConfig = xmlConfig.getChild(xmlTagPanel);
 
     config.cargar(xmlConfig);
+    interfazModObs.set( config );
     lienzo.set(config.lienzo);
     observador.set(config.observador);
     carrete.set(config.carrete);

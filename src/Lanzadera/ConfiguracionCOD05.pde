@@ -1,7 +1,10 @@
 //v 07/09/2017
 String archivoConfigXML = "../configcod05.xml";
-String xmlTagPanel = "panel", xmlTagEjecucion = "ejecucion";
+String xmlTagModo = "modo", xmlTagPanel = "panel", xmlTagEjecucion = "ejecucion";
 
+enum ModoObservador{
+  WEBCAM, KINECT
+}
 enum EstadoModulo {
   APAGADO, LOCAL, REMOTO
 }
@@ -11,6 +14,7 @@ int EstadoModuloToInt(EstadoModulo estado) {
 };
 
 class ConfiguracionCOD05 {
+  ModoObservador modoObservador;
   ConfigModulo lienzo, observador, carrete;
   boolean panelConexiones = false;
 
