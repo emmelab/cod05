@@ -21,6 +21,7 @@ class InterfazYSensorConexion implements AutoDraw {
   //String iconoConexion;
 
   boolean visible() {
+    if( interfaz.introActiva ) return false;
     if (config==null)return false;
     return config.panelConexiones;
   }
@@ -91,7 +92,7 @@ class InterfazYSensorConexion implements AutoDraw {
     lienzo.set(config.lienzo);
     observador.set(config.observador);
     carrete.set(config.carrete);
-    //visible( config.panelConexiones );
+    visible( false );
   }
 
   void panelInferior() {
