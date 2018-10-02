@@ -77,12 +77,18 @@ void ejecutarLocales() {
   void ejecutarObservador() {
     consola.printlnAlerta( "Vamos que intento correr el observadorr!!" );
     if (modoUtileria) {
-      observador=launch( templateLanzador.replace(ejecutarKeyword, observadorUtileria));
+      if( config.modoObservador == ModoObservador.KINECT )
+        observador=launch( templateLanzador.replace(ejecutarKeyword, observadorUtileria));
+      else
+        observador=launch( templateLanzador.replace(ejecutarKeyword, observadorBasicoUtileria));
       /*PAppConsola cons = new PAppConsola();
        PApplet.runSketch(new String[]{"PAppConsola"},cons);
        cons.pasarStream(observador);*/
     } else {
-      observador=launch( templateLanzador.replace(ejecutarKeyword, observadorReal));
+      if( config.modoObservador == ModoObservador.KINECT )
+        observador=launch( templateLanzador.replace(ejecutarKeyword, observadorReal));
+      else
+        observador=launch( templateLanzador.replace(ejecutarKeyword, observadorBasicoReal));
       /*PAppConsola cons = new PAppConsola();
        PApplet.runSketch(new String[]{"PAppConsola"},cons);
        cons.pasarStream(observador);*/

@@ -68,6 +68,7 @@ class ConfiguracionCOD05 {
   XML guardar(String nombre) {
     XML xml = new XML(nombre);
     xml.setInt("panelConexiones", panelConexiones?1:0);
+    xml.setString( "modo", modoObservador.toString() );
     for (ConfigModulo cm : new ConfigModulo[]{lienzo, observador, carrete}) {
       xml.addChild(cm.generar());
     }
