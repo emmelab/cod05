@@ -1,439 +1,493 @@
-class Consola {
-  Modos modos;
-  ColeccionCategorias cC;
-  //ColeccionEstimulos cE;
-  ColeccionOpciones cO;
-  ColeccionMaquinarias cM;
-  Monitor monitor;
+/* Consola v1.22 14/08/2017
+ * Nuevo: Nuevo color alerta, nuevo metodo printlnError() color rojo;
+ * Hernán GM - hernangonzalezmoreno@gmail.com
+*/
 
-  float centroX = bdd.ruedaX;
-  float centroY = bdd.ruedaY;
-  float tam = bdd.ruedaDiametro;
-
-  String[] datosDeSistema_nombresCategorias;
-  String[] datosDeSistema_nombresModificadores;
-  String[] datosDeSistema_nombresModificadoresExistentes;
-  String[] datosDeSistema_nombresOpciones;
- // String[] datosDeSistema_nombresEstimulos;
-  String[] datosDeSistema_nombresMaquinarias;
-
-  boolean[]datosDeAPI_opcionesDeNavegacion;
-
-  int cerrado=0;
-  int nivel=0;
-  int eje=0;
-
-  int limiteSelector;
-  int selector;
-
-  boolean dosNivelesDeSeleccion;
-
-  PVector cursor = new PVector();
-
-
-
-  Consola() {
-    modos = new Modos();
-    modos.inicializar(new PVector(centroX, centroY), tam);
-    cC = new ColeccionCategorias();
-    cO = new ColeccionOpciones();
-  // cE = new ColeccionEstimulos();
-    cM = new ColeccionMaquinarias();    
-    cC.inicializar(datosDeSistema_nombresCategorias, datosDeAPI_opcionesDeNavegacion, datosDeSistema_nombresModificadores, 
-    datosDeSistema_nombresModificadoresExistentes);
-    cO.inicializar(datosDeSistema_nombresOpciones);    
-   // cE.inicializar(datosDeSistema_nombresEstimulos);    
-    cM.inicializar(datosDeSistema_nombresMaquinarias);    
-    monitor = new Monitor();
+public final class Consola{
+  
+  private String texto;
+  private ArrayList<Alerta> alertas = new ArrayList<Alerta>();
+  private color colorTexto, colorAlerta;
+  private int tamanoTexto, tamanoAlerta;
+  private boolean debug;
+  
+  private boolean verFps, verDatos, verAlertas;
+  
+  private static final float LEADIN = 1.5; //--- NUEVO!
+  
+  public Consola() {
+    texto = "";
+    colorTexto = color( #000000 );//color( 255 );
+    colorAlerta = color(175, 194, 43);//#CC9900//#FF0000
+    tamanoTexto = int( height * 0.12 ); //int( height * 0.023 ); //tamanoTexto = 20;
+    tamanoAlerta = int( height * 0.12 ); //int( height * 0.023 ); //tamanoAlerta = 20;
+    
+    debug = verFps = verDatos = verAlertas = true;
+  }
+  
+  //--------------------------------------- METODOS PUBLICOS
+  
+  //GETERS AND SETERS
+  public void setDebug( boolean debug ){
+    this.debug = debug;
+  }
+  
+  public void setVerFps( boolean verFps ){
+    this.verFps = verFps;
+  }
+  
+  public void setVerDatos( boolean verDatos ){
+    this.verDatos = verDatos;
+  }
+  
+  public void setVerAlertas( boolean verAlertas ){
+    this.verAlertas = verAlertas;
+  }
+  
+  public boolean getDebug(){
+    return debug;
   }
 
-  Consola(color[][] paleta_) { 
-
-    modos = new Modos(paleta_, new PVector(centroX, centroY), tam);
-    cC = new ColeccionCategorias(paleta_, new PVector(centroX, centroY), tam);
-    cO = new ColeccionOpciones(paleta_, new PVector(centroX, centroY), tam);
-  //  cE = new ColeccionEstimulos(paleta_, new PVector(centroX, centroY), tam);
-    cM = new ColeccionMaquinarias(paleta_, tam);
-    cC.inicializar(datosDeSistema_nombresCategorias, datosDeAPI_opcionesDeNavegacion, datosDeSistema_nombresModificadores, 
-    datosDeSistema_nombresModificadoresExistentes);
-    cO.inicializar(datosDeSistema_nombresOpciones);    
-   // cE.inicializar(datosDeSistema_nombresEstimulos);    
-    cM.inicializar(datosDeSistema_nombresMaquinarias);    
-    monitor = new Monitor(paleta_, new PVector(centroX, centroY), tam);
+  public boolean getVerFps(){
+    return verFps;
   }
 
-
-  void ejecutar() {
-    base();
-    if (modos.getModo().equals(ESPERA)) {
-      //mandarMensaje("/holi...ten un buen dia");
-      monitor.dibujar(cerrado, nivel, eje/*,width/2,height/2*/);
-    } else if (modos.getModo().equals(AGREGAR)) {       
-      monitor.dibujar(cerrado, nivel, eje);
-      cC.dibujarCategoria();
-    } else if (modos.getModo().equals(ELIMINAR)) {      
-      monitor.dibujar(cerrado, nivel, eje);
-      cC.dibujarCategoria();
-    //} else if (modos.getModo().equals(ESTIMULOS)) {     
-      /* int contadorSeleccionEstimulo = cC.getContadorSeleccionEstimulo(cursor);//limites 0,400
-       monitor.dibujar(cerrado, nivel, eje, contadorSeleccionEstimulo);       
-       fill(255);
-       ellipse(cursor.x, cursor.y, 10, 10);      
-       if (cE.getSeleccionarEstimulo()) {
-       botonesAccionesN2();
-       mandarMensaje("/pedir/estimulos/totales");
-       }
-       cE.dibujar();*/
-    } else if (modos.getModo().equals(OPCIONES)) {
-      monitor.dibujar(cerrado, nivel, eje);
-      cO.dibujar();
-    } else if (modos.getModo().equals(MAQUINARIAS)) {
-      monitor.dibujar(cerrado, nivel, eje);
-      cC.dibujarCategoria();
-    }
-    modos.ejecutar();
-
-    if (conectadoConSistema) { //conectado con sistema es una variable global que posdria paserle como variable
-      cM.dibujar();
-    }
-
-    if (bdd.interaccionConMouse) {
-      mouse();
-    }
+  public boolean getVerDatos(){
+    return verDatos;
   }
 
-  void setCursor(float x, float y) {
-    cursor.set(x, y);
+  public boolean getVerAlertas(){
+    return verAlertas;
   }
-
-  void actualizarIconos(int cerrado_, int nivel_, int eje_) {
-    cerrado = cerrado_;
-    nivel = nivel_;
-    eje = eje_;
+  //--------
+  
+  public void println( String texto ){
+    this.texto += texto + "\n";
   }
-
-  void activarAnadir() {
-    modos.setModo(AGREGAR);
-    limitarSelector(); 
-    //botonesAccionesN1();
+  
+  public void printlnAlerta( String alerta ){
+    alertas.add( new Alerta( alerta ) );
+    System.out.println( alerta );
   }
-  void activarQuitar() {
-    modos.setModo(ELIMINAR); 
-    limitarSelector();
-    // botonesAccionesN1();
+  
+  public void printlnAlerta( String alerta, color colorPersonalizado ){
+    alertas.add( new Alerta( alerta, colorPersonalizado ) );
+    System.out.println( alerta );
   }
-
-  void activarOpciones() {
-    modos.setModo(OPCIONES); 
-    limitarSelector();
-    // botonesAccionesN1();
+  
+  public void printlnError( String alerta ){
+    alertas.add( new Alerta( alerta, color( #FF0000 ) ) );
+    System.err.println( alerta );
   }
- /* void activarEstimulos() {
-    modos.setModo(ESTIMULOS); 
-    limitarSelector();
-    //  botonesAccionesN1();
-  }*/
-  void activarEspera() {
-    modos.setModo(ESPERA); 
-    limitarSelector();
-    // botonesAccionesN1();
+  
+  public void ejecutar(){
+    
+    if( !verDatos ) texto = "";
+    if( verFps ) texto = "fps: " + nf( frameRate, 0, 2 ) + "\n" + texto;
+    
+    if( debug ) ejecutarDebug();
+    else ejecutarNoDebug();
+    texto = "";
   }
-  void activarMaquinarias() {
-    modos.setModo(MAQUINARIAS); 
-    limitarSelector();
-    // botonesAccionesN1();
+  
+  //--------------------------------------- METODOS PRIVADOS
+  
+  private void ejecutarDebug(){
+    pushStyle();
+      
+      textAlign( LEFT, TOP );
+      textSize( tamanoTexto );
+      textLeading( tamanoTexto * LEADIN ); 
+      
+      noStroke();
+      rectMode( CORNER );
+      
+      //NUEVO rectangulo negro de fondo
+
+      fill( 255 );
+      int desde = 0, hasta = 0, iteracion = 0;
+      while( texto.indexOf( "\n", desde ) > 0 ){
+
+        hasta = texto.indexOf( "\n", desde );
+        String aux = texto.substring( desde, hasta );
+        
+        rect( 0, iteracion * (tamanoTexto * LEADIN), textWidth( aux ) + 3, tamanoTexto * ( LEADIN * 1.1666666 ) );
+        
+        desde = hasta + 1;
+        iteracion++;
+      }
+      
+      //
+      
+      fill( colorTexto );
+      text( texto, 0, 3 );
+      if( !texto.equals("") ) System.out.println( texto );
+      
+      textAlign( RIGHT, BOTTOM );
+      textSize( tamanoAlerta );
+      imprimirAlertas( verAlertas );
+      
+    popStyle();
   }
-
-  void aumentoSelector() {
-    if (!modos.getModo().equals(ESPERA)) {     
-      selector++;
-      revisarSensible();
-    }
+  
+  private void ejecutarNoDebug(){
+    if( !texto.equals("") ) System.out.println( texto );
+    imprimirAlertas( false );
   }
-
-  void decrementoSelector() {
-    if (!modos.getModo().equals(ESPERA)) {     
-      selector--;
-      revisarSensible();
-    }
-  }
-
-  void revisarSensible() {    
-    selector = (selector+limiteSelector)%limiteSelector;
-    selector = int(constrain(selector, 0, limiteSelector));
-    if (modos.getModo().equals(AGREGAR)) {     
-      cC.setSensible(selector);
-      cM.setSensible(0);
-      modos.setIconoCentral(cC.getSensible(selector), cC.getColorSensible(selector));
-    } else if (modos.getModo().equals(ELIMINAR)) {       
-      cC.setSensible(selector);
-      cM.setSensible(0);
-      modos.setIconoCentral(cC.getSensible(selector), cC.getColorSensible(selector));
-   // } else if (modos.getModo().equals(ESTIMULOS)) {
-      //cM.setSensible(0);
-    } else if (modos.getModo().equals(OPCIONES)) {
-      cO.setSensible(selector);
-      cM.setSensible(0);
-      modos.setIconoCentral(cO.getSensible(selector), cC.getColorSensible(selector));
-    } /*else if (modos.getModo().equals(OPCIONES)) {
-     cC.setSensible(selector);
-     cM.setSensible(0);
-     modos.setIconoCentral(cC.getSensible(selector),cC.getColorSensible(selector));
-     }*/
-    else if (modos.getModo().equals(MAQUINARIAS)) {
-      cM.setSensible(selector);
-      modos.setIconoCentral(cM.getSensible(selector), cM.getColorSensible(selector));
-    }
-  }
-
-
-
-  boolean seDetuboElMouse=false;
-  boolean seMueveElMouse=false;
-  void mouse() {
-    cC.mouse();  
-
-    if (mouseX != pmouseX) {
-      seDetuboElMouse = false;
-      seMueveElMouse = true;
-    }
-
-    if (seMueveElMouse && !seDetuboElMouse && mouseX == pmouseX) {
-      seDetuboElMouse = true;
-      seMueveElMouse = false;
-    }
-    if (seDetuboElMouse) {
-      if (!(modos.getModo().equals(ELIMINAR)) && !(modos.getModo().equals(ESPERA)) ) {
-        Modificador modSeleccionado = cC.getSensibleMouse_modificador();    
-        modos.setIconoCentral(modSeleccionado, cC.getColorSensibleMouse());
-        if ( modSeleccionado!=null) {
-          if (modSeleccionado.mods>0) {
-            activarQuitar();
-          }
+  
+  private void imprimirAlertas( boolean debug ){
+    
+    float posY = tamanoAlerta + tamanoAlerta * (LEADIN * 0.16666666) ;//0.25
+    
+    for( int i = alertas.size() - 1; i >= 0; i-- ){
+      
+      Alerta a = alertas.get( i );
+      a.ejecutar();
+      
+      if( a.getEstado() == Alerta.ESTADO_ELIMINAR ){
+        alertas.remove( i );
+      }else if( debug ){
+        
+        //------ NUEVO rectangulo negro de fondo
+        
+        if( a.getEstado() == Alerta.ESTADO_MOSTRAR )
+          fill( 0 );
+        else
+          fill( 0, map( a.getTiempo(), 0, Alerta.TIEMPO_DESAPARECER, 255, 0 ) );
+        
+        rect( width - textWidth( a.getAlerta() ) - 5, posY- tamanoAlerta * ( LEADIN * 0.875 ), textWidth( a.getAlerta() ) + 5, tamanoAlerta * LEADIN );
+        
+        //------
+        
+        color auxColorAlerta = a.isPersonalizado() ? a.getColorPersonalizado() : colorAlerta ;
+        if( a.getEstado() == Alerta.ESTADO_MOSTRAR )
+          fill( auxColorAlerta );
+        else
+          fill( auxColorAlerta, map( a.getTiempo(), 0, Alerta.TIEMPO_DESAPARECER, 255, 0 ) );
+        
+        text( a.getAlerta(), width, posY );
+        posY += tamanoAlerta * LEADIN;
+        
+        if( posY > height && i - 1 >= 0 ){
+          removerAlertasFueraDePantalla( i - 1 );
+          return;
         }
+        
       }
-      if (!(modos.getModo().equals(AGREGAR)) && !(modos.getModo().equals(ESPERA)) ) {
-        Modificador modSeleccionado = cC.getSensibleMouse_modificador();   
-        modos.setIconoCentral(modSeleccionado, cC.getColorSensibleMouse()); 
-        if ( modSeleccionado!=null) {
-          if (modSeleccionado.mods<1) {
-            activarAnadir();
-          }
-        }
+      
+    }//end for
+    
+  }
+  
+  private void removerAlertasFueraDePantalla( int desde ){
+    for( int i = desde; i >= 0; i-- )
+      alertas.remove( i );
+  }
+  
+  //clase interna y miembro
+  public class Alerta{
+    
+    private String alerta;
+    private color colorPersonalizado;
+    private boolean personalizado;
+    
+    private int estado;
+    public static final int
+    ESTADO_MOSTRAR = 0,
+    ESTADO_DESAPARECER = 1,
+    ESTADO_ELIMINAR = 2;
+    
+    private int tiempo;
+    public static final int
+    TIEMPO_MOSTRAR = 5000,//3000
+    TIEMPO_DESAPARECER = 2000;
+    
+    
+    //------------------------------ CONSTRUCTORES
+    
+    public Alerta( String alerta ){
+      this.alerta = alerta;
+      estado = ESTADO_MOSTRAR;
+    }
+    
+    public Alerta( String alerta, color colorPersonalizado ){
+      this.alerta = alerta;
+      this.colorPersonalizado = colorPersonalizado;
+      personalizado = true;
+      estado = ESTADO_MOSTRAR;
+    }
+    
+    //------------------------------ METODOS PUBLICOS
+    
+    public String getAlerta(){
+      return alerta;
+    }
+    
+    public int getEstado(){
+      return estado;
+    }
+    
+    public int getTiempo(){
+      return tiempo;
+    }
+    
+    public boolean isPersonalizado(){
+      return personalizado;
+    }
+    
+    public color getColorPersonalizado(){
+      return colorPersonalizado;
+    }
+    
+    public void ejecutar(){
+      tiempo += reloj.getDeltaMillis();
+      if( estado == ESTADO_MOSTRAR && tiempo > TIEMPO_MOSTRAR ){
+        estado = ESTADO_DESAPARECER;
+        tiempo = 0;
+      }else if( estado == ESTADO_DESAPARECER && tiempo > TIEMPO_DESAPARECER ){
+        estado = ESTADO_ELIMINAR;
       }
     }
-    seDetuboElMouse = false;
+    
   }
-
-  void mousePressed() {   
-    String nombreModSeleccionado = cC.getSensibleMouse();    
-    if (nombreModSeleccionado != null) {
-      if (modos.getModo().equals(AGREGAR)) {
-        if (esOpcionDeNavegacion(nombreModSeleccionado)) {
-          activarNavegacion(nombreModSeleccionado);
-        } else {
-          OscMessage mensajeModificadores;
-          mensajeModificadores = new OscMessage("/agregar/modificadores");
-          mensajeModificadores.add(nombreModSeleccionado); 
-          oscP5.send(mensajeModificadores, sistema);
-        }
-      } else if (modos.getModo().equals(ELIMINAR)) {
-        if (esOpcionDeNavegacion(nombreModSeleccionado)) {
-          activarNavegacion(nombreModSeleccionado);
-        } else {        
-          int cantModSeleccionado = cC.getSensibleMouse_modificador().getCant();
-          OscMessage mensajeModificadores;
-          mensajeModificadores = new OscMessage("/quitar/modificadores");
-          mensajeModificadores.add(nombreModSeleccionado+"_"+(cantModSeleccionado-1));           
-          oscP5.send(mensajeModificadores, sistema);
-        }
-      }
-    }
-    //-------Para que cada vez que se preciona el mouse se revise el estado de 
-    //-------los modificadores
-    seDetuboElMouse = true;
-  }
-
-  void botonesAccionesN2() {
-    if (modos.getModo().equals(AGREGAR)) {
-      String nombreModSeleccionado = cC.getSensible(selector);
-      if (esOpcionDeNavegacion(nombreModSeleccionado)) {
-        activarNavegacion(nombreModSeleccionado);
-      } else {
-        OscMessage mensajeModificadores;
-        mensajeModificadores = new OscMessage("/agregar/modificadores");
-        mensajeModificadores.add(nombreModSeleccionado); 
-        oscP5.send(mensajeModificadores, sistema);
-      }
-    } else if (modos.getModo().equals(ELIMINAR)) {
-      String nombreModSeleccionado = cC.getSensible(selector);
-      if (esOpcionDeNavegacion(nombreModSeleccionado)) {
-        activarNavegacion(nombreModSeleccionado);
-      } else {        
-        int cantModSeleccionado = cC.getModSensible(selector).getCant();
-        OscMessage mensajeModificadores;
-        mensajeModificadores = new OscMessage("/quitar/modificadores");
-        mensajeModificadores.add(nombreModSeleccionado+"_"+(cantModSeleccionado-1));           
-        oscP5.send(mensajeModificadores, sistema);
-      }
-   // } else if (modos.getModo().equals(ESTIMULOS)) {
-      /*OscMessage mensajeOpciones;
-       mensajeOpciones = new OscMessage("/seleccionar/estimulo");
-       // mensajeOpciones.add(nombreModSeleccionado);           
-       oscP5.send(mensajeOpciones, sistema);*/
-    } else if (modos.getModo().equals(OPCIONES)) {
-      String nombreModSeleccionado = cO.getSensible(selector);
-      OscMessage mensajeOpciones;
-      mensajeOpciones = new OscMessage("/accion/opciones");
-      mensajeOpciones.add(nombreModSeleccionado);           
-      oscP5.send(mensajeOpciones, sistema);
-    } else if (modos.getModo().equals(MAQUINARIAS)) {
-      String nombreMaqSeleccionado = cM.getSensible(selector);
-      OscMessage mensajeOpciones;
-      mensajeOpciones = new OscMessage("/set/maquinaria");
-      mensajeOpciones.add(nombreMaqSeleccionado);           
-      oscP5.send(mensajeOpciones, sistema);
-      activarAnadir();
-    }
-
-    // activarEspera();
-  }
-
-  boolean esOpcionDeNavegacion(String nombre) {
-    boolean navegable = false;
-    for (int i=0; i<opcionesDeNavegacion.length; i++) {
-      if (nombre.equals(opcionesDeNavegacion[i]))
-        navegable = true;
-    }
-    return navegable;
-  }
-
-
-  void activarNavegacion(String aDonde) {
-    if (aDonde.equals(MAQUINARIAS)) {
-      activarMaquinarias();
-    } else if (aDonde.equals(OPCIONES)) {
-      activarOpciones();
-    }
-  }
-
-
-  void mandarMensaje(String mensaje) {   
-    OscMessage mensajeModificadores;
-    mensajeModificadores = new OscMessage(mensaje);
-    oscP5.send(mensajeModificadores, sistema);
-  }
-
-  void limitarSelector() {
-    if (modos.getModo().equals(ESPERA)) {
-      limiteSelector = 0; //cambiar con no se nada supongo
-    } else if (modos.getModo().equals(AGREGAR)) {
-      limiteSelector = datosDeSistema_nombresModificadores.length; //cambiar con no se nada supongo
-    } else if (modos.getModo().equals(ELIMINAR)) {
-      limiteSelector = datosDeSistema_nombresModificadores.length; //cambiar con no se nada supongo
-   // } else if (modos.getModo().equals(ESTIMULOS)) {
-     // limiteSelector = datosDeSistema_nombresEstimulos.length; //cambiar con no se nada supongo
-    } else if (modos.getModo().equals(OPCIONES)) {
-      limiteSelector = datosDeSistema_nombresOpciones.length; //cambiar con no se nada supongo
-    } else if (modos.getModo().equals(MAQUINARIAS)) {
-      limiteSelector = datosDeSistema_nombresMaquinarias.length; //cambiar con no se nada supongo
-    }
-  }
-
-  String[] opcionesDeNavegacion = {
-    MAQUINARIAS
-  } 
-  ;
-  void renovarDatosCategorias( ArrayList<String>nombres_, ArrayList<String>nombresCategorias_, ArrayList<String>nombresExistentes_) {
-
-    dosNivelesDeSeleccion = true;
-    int c = (nombres_.size()+opcionesDeNavegacion.length);
-    int ce = nombresExistentes_.size();
-
-    datosDeSistema_nombresCategorias = new String[c];
-    datosDeSistema_nombresModificadores  = new String[c];
-    datosDeAPI_opcionesDeNavegacion = new boolean[c];
-    datosDeSistema_nombresModificadoresExistentes  = new String[ce];
-
-    for (int i=0; i<opcionesDeNavegacion.length; i++) {
-      datosDeSistema_nombresModificadores[i] = opcionesDeNavegacion[i];
-      datosDeSistema_nombresCategorias[i] = opcionesDeNavegacion[i];
-      datosDeAPI_opcionesDeNavegacion[i] = true;
-    }
-
-    for (int i=opcionesDeNavegacion.length; i<c; i++) {
-      println(i-opcionesDeNavegacion.length);
-      datosDeSistema_nombresModificadores[i] = (String)nombres_.get(i-opcionesDeNavegacion.length);
-      datosDeSistema_nombresCategorias[i] = (String)nombresCategorias_.get(i-opcionesDeNavegacion.length);
-      datosDeAPI_opcionesDeNavegacion[i] = false;
-    }
-
-    for (int i=0; i<ce; i++) {
-      String[] n = split(nombresExistentes_.get(i), "_");
-      datosDeSistema_nombresModificadoresExistentes[i] = n[0];
-    }
-
-    cC.inicializar(datosDeSistema_nombresCategorias, datosDeAPI_opcionesDeNavegacion, datosDeSistema_nombresModificadores, 
-    datosDeSistema_nombresModificadoresExistentes);
-
-    limitarSelector();
-  }
-
-  /*void renovarDatosEstimulos( ArrayList<String>nombres_) {
-
-    int c = nombres_.size();
-  //  datosDeSistema_nombresEstimulos  = new String[c];
-    for (int i=0; i<c; i++) {
-      datosDeSistema_nombresEstimulos[i] = (String)nombres_.get(i);
-    }
-
-    cE.inicializar(datosDeSistema_nombresEstimulos);
-
-    limitarSelector();
-  }*/
-
-  void renovarDatosOpciones( ArrayList<String>nombres_) {
-
-    int c = nombres_.size();
-    datosDeSistema_nombresOpciones  = new String[c];
-    for (int i=0; i<c; i++) {
-      datosDeSistema_nombresOpciones[i] = (String)nombres_.get(i);
-    }
-
-    cO.inicializar(datosDeSistema_nombresOpciones);
-
-    limitarSelector();
-  }
-
-  void renovarDatosMaquinarias( ArrayList<String>nombres_) {
-
-    int c = nombres_.size();
-    datosDeSistema_nombresMaquinarias  = new String[c];
-    for (int i=0; i<c; i++) {
-      datosDeSistema_nombresMaquinarias[i] = (String)nombres_.get(i);
-      println( datosDeSistema_nombresMaquinarias[i]);
-    }
-
-    cM.inicializar(datosDeSistema_nombresMaquinarias);
-
-    limitarSelector();
-    println();
-  }
-
-  void agregarMod(String cual) {
-    cC.agregar(cual);
-  }
-  void quitarMod(String cual) {
-
-    cC.quitar(cual);
-  }
-
-  void base() {
-    noStroke();
-    fill(paleta[1][0]);
-    rect(0, 0, width, height);
-    float tam_ = tam*350/100;
-    fill(paleta[1][1]);
-    ellipse(centroX, centroY, tam_, tam_);
-  }
+  
 }
+
+//Version vieja
+/*public final class Consola {
+
+  private String texto;
+  private ArrayList<Alerta> alertas = new ArrayList<Alerta>();
+  private color colorTexto, colorAlerta, colorSuperAlerta;
+  private int tamanoTexto, tamanoAlerta;
+  private boolean debug;
+
+  private boolean verFps, verDatos, verAlertas;
+
+  private static final float LEADIN = 1.5; //--- NUEVO!
+
+  public Consola() {
+    texto = "";
+    colorTexto = color( #000000 );//color( 255 );
+    colorAlerta = color(175, 194, 43);//#FF0000
+    tamanoTexto = int( height * 0.12 ); //int( height * 0.023 ); //tamanoTexto = 20;
+    tamanoAlerta = int( height * 0.12 ); //int( height * 0.023 ); //tamanoAlerta = 20;
+
+    debug = verFps = verDatos = verAlertas = true;
+  }
+  
+  public Consola( boolean verFps ) {
+    texto = "";
+    colorTexto = color( #000000 );//color( 255 );
+    colorAlerta = color(175, 194, 43);//#FF0000
+    tamanoTexto = int( height * 0.12 ); //int( height * 0.023 ); //tamanoTexto = 20;
+    tamanoAlerta = int( height * 0.12 ); //int( height * 0.023 ); //tamanoAlerta = 20;
+    
+    debug = verDatos = verAlertas = true;
+    this.verFps = verFps;
+  }
+
+  //--------------------------------------- METODOS PUBLICOS
+
+  //GETERS AND SETERS
+  public void setDebug( boolean debug ) {
+    this.debug = debug;
+  }
+
+  public void setVerFps( boolean verFps ) {
+    this.verFps = verFps;
+  }
+
+  public void setVerDatos( boolean verDatos ) {
+    this.verDatos = verDatos;
+  }
+
+  public void setVerAlertas( boolean verAlertas ) {
+    this.verAlertas = verAlertas;
+  }
+
+  public boolean getDebug() {
+    return debug;
+  }
+
+  public boolean getVerFps() {
+    return verFps;
+  }
+
+  public boolean getVerDatos() {
+    return verDatos;
+  }
+
+  public boolean getVerAlertas() {
+    return verAlertas;
+  }
+  //--------
+
+  public void println( String texto ) {
+    this.texto += texto + "\n";
+  }
+
+  public void printlnAlerta( String alerta ) {
+    alertas.add( new Alerta( alerta ) );
+    System.out.println( alerta );
+  }
+
+  public void printlnAlerta( String alerta, color c ) {
+    alertas.add( new Alerta( alerta, c ) );
+    System.out.println( alerta );
+  }
+
+  public void ejecutar() {
+
+    if ( !verDatos ) texto = "";
+    if ( verFps ) texto = "fps: " + nf( frameRate, 0, 2 ) + "\n" + texto;
+
+    if ( debug ) ejecutarDebug();
+    else ejecutarNoDebug();
+    texto = "";
+  }
+
+  //--------------------------------------- METODOS PRIVADOS
+
+  private void ejecutarDebug() {
+    pushStyle();
+
+    textAlign( LEFT, TOP );
+    textSize( tamanoTexto );
+    textLeading( tamanoTexto * LEADIN ); 
+
+    noStroke();
+
+    //NUEVO rectangulo negro de fondo
+
+    fill( 255 );
+    int desde = 0, hasta = 0, iteracion = 0;
+    while ( texto.indexOf( "\n", desde ) > 0 ) {
+
+      hasta = texto.indexOf( "\n", desde );
+      String aux = texto.substring( desde, hasta );
+
+      rect( 0, iteracion * (tamanoTexto * LEADIN), textWidth( aux ) + 3, tamanoTexto * ( LEADIN * 1.1666666 ) );
+
+      desde = hasta + 1;
+      iteracion++;
+    }
+
+    //
+
+    fill( colorTexto );
+    text( texto, 0, 3 );
+    if ( !texto.equals("") ) System.out.println( texto );
+
+    textAlign( RIGHT, BOTTOM );
+    textSize( tamanoAlerta );
+    imprimirAlertas( verAlertas );
+
+    popStyle();
+  }
+
+  private void ejecutarNoDebug() {
+    if ( !texto.equals("") ) System.out.println( texto );
+    imprimirAlertas( false );
+  }
+
+  private void imprimirAlertas( boolean debug ) {
+
+    float posY = tamanoAlerta + tamanoAlerta * (LEADIN * 0.16666666) ;//0.25
+
+    for ( int i = alertas.size() - 1; i >= 0; i-- ) {
+
+      Alerta a = alertas.get( i );
+      a.ejecutar();
+
+      if ( a.getEstado() == Alerta.ESTADO_ELIMINAR ) {
+        alertas.remove( i );
+      } else if ( debug ) {
+
+        //------ NUEVO rectangulo negro de fondo
+
+        if ( a.getEstado() == Alerta.ESTADO_MOSTRAR )
+          fill( 0 );
+        else
+          fill( 0, map( a.getTiempo(), 0, Alerta.TIEMPO_DESAPARECER, 255, 0 ) );
+
+        rect( width - textWidth( a.getAlerta() ) - 5, posY- tamanoAlerta * ( LEADIN * 0.875 ), textWidth( a.getAlerta() ) + 5, tamanoAlerta * LEADIN );
+
+        //------
+        color colorTexto = a.tengoColor?a.m_color:colorAlerta;
+        if ( a.getEstado() == Alerta.ESTADO_MOSTRAR ) {
+          fill( colorTexto );
+        } else {
+          fill( colorTexto, map( a.getTiempo(), 0, Alerta.TIEMPO_DESAPARECER, 255, 0 ) );
+        }
+        text( a.getAlerta(), width, posY );
+        posY += tamanoAlerta * LEADIN;
+
+        if ( posY > height && i - 1 >= 0 ) {
+          removerAlertasFueraDePantalla( i - 1 );
+          return;
+        }
+      }
+    }//end for
+  }
+
+  private void removerAlertasFueraDePantalla( int desde ) {
+    for ( int i = desde; i >= 0; i-- )
+      alertas.remove( i );
+  }
+
+  //clase interna y miembro
+  public class Alerta {
+
+    private String alerta;
+    color m_color;
+    boolean tengoColor;
+    private int estado;
+    public static final int
+      ESTADO_MOSTRAR = 0, 
+      ESTADO_DESAPARECER = 1, 
+      ESTADO_ELIMINAR = 2;
+
+    private int tiempo;
+    public static final int
+      TIEMPO_MOSTRAR = 5000, //3000
+      TIEMPO_DESAPARECER = 2000;
+
+    public Alerta( String alerta ) {
+      this.alerta = alerta;
+      estado = ESTADO_MOSTRAR;
+      tengoColor = false;
+    }
+
+    public Alerta( String alerta, color c ) {
+      this.alerta = alerta;
+      m_color = c;
+      estado = ESTADO_MOSTRAR;
+      tengoColor = true;
+    }
+
+    //------------------------------ METODOS PUBLICOS
+
+    public String getAlerta() {
+      return alerta;
+    }
+
+    public int getEstado() {
+      return estado;
+    }
+
+    public int getTiempo() {
+      return tiempo;
+    }
+
+    public void ejecutar() {
+      tiempo += reloj.getDeltaMillis();
+      if ( estado == ESTADO_MOSTRAR && tiempo > TIEMPO_MOSTRAR ) {
+        estado = ESTADO_DESAPARECER;
+        tiempo = 0;
+      } else if ( estado == ESTADO_DESAPARECER && tiempo > TIEMPO_DESAPARECER ) {
+        estado = ESTADO_ELIMINAR;
+      }
+    }
+  }
+}*/

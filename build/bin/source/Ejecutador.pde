@@ -10,11 +10,13 @@ class Ejecutador {
   String dirReal = sketchPath(""), //sketchPath("..\\lib\\*"),
     lienzoReal = "Lienzo", 
     observadorReal = "cd Observador ^& Observador", 
+    observadorBasicoReal = "ObservadorBasico",
     carreteReal = "Carrete";
 
   String dirUtileria = sketchPath("..\\modulosDeUtileria\\lib\\*"), 
     lienzoUtileria = "dummyLienzo", 
     observadorUtileria = "dummyObservador", 
+    observadorBasicoUtileria = "dummyObservadorBasico",
     carreteUtileria = "dummyCarrete";
 
   String ejecutarKeyword = "%ejec";
@@ -58,30 +60,6 @@ void ejecutarLocales() {
   if (config.observador.estado == EstadoModulo.LOCAL) ejecutarObservador();
   if (config.carrete.estado == EstadoModulo.LOCAL) ejecutarCarrete();
 }
-  /*void ejecutarLocales() {
-    //consolaDebug.printlnAlerta( "" + templateLanzador.replace(ejecutarKeyword, observadorReal) );
-    if (modoUtileria) {
-      if (config.lienzo.estado == EstadoModulo.LOCAL) {
-        lienzo=launch( templateLanzador.replace(ejecutarKeyword, lienzoUtileria));
-      }
-      if (config.observador.estado == EstadoModulo.LOCAL) {
-        observador=launch( templateLanzador.replace(ejecutarKeyword, observadorUtileria));
-      }
-      if (config.carrete.estado == EstadoModulo.LOCAL) {
-        carrete=launch( templateLanzador.replace(ejecutarKeyword, carreteUtileria));
-      }
-    } else {
-      if (config.lienzo.estado == EstadoModulo.LOCAL) {
-        lienzo=launch( templateLanzador.replace(ejecutarKeyword, lienzoReal));
-      }
-      if (config.observador.estado == EstadoModulo.LOCAL) {
-        observador = launch( templateLanzador.replace(ejecutarKeyword, observadorReal));
-      }
-      if (config.carrete.estado == EstadoModulo.LOCAL) {
-        carrete=launch( templateLanzador.replace(ejecutarKeyword, carreteReal));
-      }
-    }
-  }*/
 
   void ejecutarLienzo() {
     if (modoUtileria) {
@@ -97,14 +75,20 @@ void ejecutarLocales() {
     }
   }
   void ejecutarObservador() {
-    consolaDebug.printlnAlerta( "Vamos que intento correr el observadorr!!" );
+    consola.printlnAlerta( "Vamos que intento correr el observadorr!!" );
     if (modoUtileria) {
-      observador=launch( templateLanzador.replace(ejecutarKeyword, observadorUtileria));
+      if( config.modoObservador == ModoObservador.KINECT )
+        observador=launch( templateLanzador.replace(ejecutarKeyword, observadorUtileria));
+      else
+        observador=launch( templateLanzador.replace(ejecutarKeyword, observadorBasicoUtileria));
       /*PAppConsola cons = new PAppConsola();
        PApplet.runSketch(new String[]{"PAppConsola"},cons);
        cons.pasarStream(observador);*/
     } else {
-      observador=launch( templateLanzador.replace(ejecutarKeyword, observadorReal));
+      if( config.modoObservador == ModoObservador.KINECT )
+        observador=launch( templateLanzador.replace(ejecutarKeyword, observadorReal));
+      else
+        observador=launch( templateLanzador.replace(ejecutarKeyword, observadorBasicoReal));
       /*PAppConsola cons = new PAppConsola();
        PApplet.runSketch(new String[]{"PAppConsola"},cons);
        cons.pasarStream(observador);*/

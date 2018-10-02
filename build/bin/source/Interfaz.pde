@@ -3,6 +3,7 @@ class Interfaz implements AutoSetup, AutoDraw {
   BotonBasico botonPlay;
   BotonModulo lienzo, observador, carrete;
   InterfazYSensorConexion interfazYSensorConexion;
+  InterfazModoObservador interfazModObs;
   BarraSuperior barraSuperior;
   TwOutQuad animTodoGris;
   Ejecutador ejecutadorLocal;//vive hasta que se mueran sus procesos
@@ -24,6 +25,7 @@ class Interfaz implements AutoSetup, AutoDraw {
       carrete = new BotonModulo(new PVector(width/2+sepHoriz, verti), dicIcos.carrete, paleta.ips[2]);
     }
     interfazYSensorConexion = new InterfazYSensorConexion();
+    interfazModObs = new InterfazModoObservador();
     barraSuperior = new BarraSuperior();
     cargarDatos();
 
@@ -53,6 +55,7 @@ class Interfaz implements AutoSetup, AutoDraw {
         botonPlay.toggle = true;
       }
     } else if (botonPlay.presionado && botonPlay.toggle) ejecutar();
+    consola.println( "config.modoObservador: " + config.modoObservador );
   }
 
   void ejecutar() {
@@ -68,12 +71,8 @@ class Interfaz implements AutoSetup, AutoDraw {
     if (new File(sketchPath(archivoConfigXML)).exists()) xmlConfig = loadXML( archivoConfigXML );
     if (xmlConfig != null) xmlConfig = xmlConfig.getChild(xmlTagPanel);
 
-    //config.cargar(xmlConfig);
-    //-------- para cargar local
-    //--- :D esto no tien que ver con le cambio feo de el boton basico peor igual lo comento
-    //---- para que siempre empiece en localhost y se vea como en la documentacion
-    //---- comente el cargar con el xml y cree en metodo que crea los campos pero con info de local host
-    config.cargar_local();
+    config.cargar(xmlConfig);
+    interfazModObs.set( config );
     lienzo.set(config.lienzo);
     observador.set(config.observador);
     carrete.set(config.carrete);
@@ -95,21 +94,26 @@ class Interfaz implements AutoSetup, AutoDraw {
   float introTime = 0;
   boolean introActiva = true;
   void intro() {
+    if (interfazModObs.autoActivo) return;
+    
     float introBotonModuloBase = 2, introBotonModuloSep = .05f;
     if (introCheck(introBotonModuloBase+introBotonModuloSep*0))lienzo.mostrar = true;
     if (introCheck(introBotonModuloBase+introBotonModuloSep*1))observador.mostrar = true;
     if (introCheck(introBotonModuloBase+introBotonModuloSep*2))carrete.mostrar = true;
 
     introTime += dt;
-    if (introTime > introBotonModuloBase+introBotonModuloSep*2) introActiva = false;
+    if (introTime > introBotonModuloBase+introBotonModuloSep*2){
+      introActiva = false;
+      botonPlay.autoActivo = lienzo.autoActivo = observador.autoActivo = carrete.autoActivo = true;
+    }
   }
   boolean introCheck(float t) {
     return introTime < t && introTime+dt >= t;
   }
 
   void grisPorTodoLocal() {
-    carrete.panelIPsAbierto = observador.panelIPsAbierto = lienzo.panelIPsAbierto = interfazYSensorConexion.visible;
-    todoLocal = todoLocal && !interfazYSensorConexion.visible;
+    carrete.panelIPsAbierto = observador.panelIPsAbierto = lienzo.panelIPsAbierto = interfazYSensorConexion.visible();
+    todoLocal = todoLocal && !interfazYSensorConexion.visible();
     animTodoGris.actualizar(todoLocal?dt:-dt);
     carrete.todoGris = constrain(animTodoGris.valor()-2, 0, 1);
     observador.todoGris = constrain(animTodoGris.valor()-1, 0, 1);
@@ -139,6 +143,10 @@ class Interfaz implements AutoSetup, AutoDraw {
         }
       }
     }
+
+    if (interfazYSensorConexion.lienzo.focus) controlOsc.ultimoPingLienzo = 0;
+    if (interfazYSensorConexion.observador.focus) controlOsc.ultimoPingObservador = 0;
+    if (interfazYSensorConexion.carrete.focus) controlOsc.ultimoPingCarrete = 0;
 
     lienzo.remotoEncontrado = millis()-controlOsc.ultimoPingLienzo <= pingOff;
     observador.remotoEncontrado = millis()-controlOsc.ultimoPingObservador <= pingOff;

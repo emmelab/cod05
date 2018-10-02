@@ -9,7 +9,11 @@ class DiccionarioIconos {
     ayuda = "ayuda", 
     observador = "observador", 
     carrete = "carrete", 
-    lienzo = "lienzo", 
+    lienzo = "lienzo",  
+    fondoIp = "fondo-ip",
+    kinect = "kinect",
+    webcam = "webcam",
+    fondoToggle = "fondo-toggle",
     conexion = "conexion";
 }
 
