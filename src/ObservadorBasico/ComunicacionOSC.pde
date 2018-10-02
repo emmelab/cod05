@@ -51,6 +51,7 @@ public class ComunicacionOSC {
 
   //----- HACIA LA API
   public void enviarMensajesAPI( UsuarioDesequilibrio uDeseq, UsuarioNivel uNivel, UsuarioCerrado uCerrado ) {
+    if( millis() < 10000 ) return;
     if (uNivel.entroAlto) enviarMensaje("/nivel", 0);
     else if (uNivel.entroMedio) enviarMensaje("/nivel", 1);
     else if (uNivel.entroBajo) enviarMensaje("/nivel", 2);
