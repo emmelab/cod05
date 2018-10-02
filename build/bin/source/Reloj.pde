@@ -1,17 +1,19 @@
-public class Reloj {
-
+public class Reloj{
+  
   private int millisActual, millisAnterior, deltaMillis;
-
-  public Reloj() {
+  
+  public Reloj(){
+    
   }
-
-  public int getDeltaMillis() {
+  
+  public int getDeltaMillis(){
     return deltaMillis;
   }
-
-  public void actualizar() {
+  
+  public void actualizar(){
     millisAnterior = millisActual;
     millisActual = millis();
     deltaMillis = millisActual - millisAnterior;
   }
+  
 }
