@@ -10,11 +10,13 @@ class Ejecutador {
   String dirReal = sketchPath(""), //sketchPath("..\\lib\\*"),
     lienzoReal = "Lienzo", 
     observadorReal = "cd Observador ^& Observador", 
+    observadorBasicoReal = "ObservadorBasico",
     carreteReal = "Carrete";
 
   String dirUtileria = sketchPath("..\\modulosDeUtileria\\lib\\*"), 
     lienzoUtileria = "dummyLienzo", 
     observadorUtileria = "dummyObservador", 
+    observadorBasicoUtileria = "dummyObservadorBasico",
     carreteUtileria = "dummyCarrete";
 
   String ejecutarKeyword = "%ejec";

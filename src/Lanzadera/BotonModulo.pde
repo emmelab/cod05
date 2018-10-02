@@ -29,7 +29,7 @@ class BotonModulo extends Auto implements AutoDraw, AutoMousePressed {
 
   void set(ConfiguracionCOD05.ConfigModulo config) {
     this.config = config;
-    estado = config.estado;
+    estado = config.estado;//-*-*-*-*-*-*-*-*
   }
 
   void mousePressed() {

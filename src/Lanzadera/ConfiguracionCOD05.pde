@@ -60,7 +60,7 @@ class ConfiguracionCOD05 {
       XML[] configs = xml.getChildren("ConfigModulo");
       for (ConfigModulo cm : new ConfigModulo[]{lienzo, observador, carrete}) {
         for (XML cxml : configs) {
-          if (cm.id.equals(cxml.getString("id", ""))) cm.cargar(cxml);
+          if (cm.id.equals(cxml.getString("id", ""))) cm.cargar(cxml);//-*-*-*-*-*-*-*-*
         }
       }
     }
