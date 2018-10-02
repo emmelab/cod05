@@ -1,3 +1,7 @@
+float umbralEje = 10f;
+float umbralNivel = 0.6f;
+float umbralCerrado = 0.2;
+
 class UsuarioNivel {
   boolean entroAlto;
   boolean entroMedio;

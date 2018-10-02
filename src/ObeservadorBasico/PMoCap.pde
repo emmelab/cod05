@@ -91,15 +91,15 @@ class PMoCap {
   int fotogramasRetardo;
   float blend;
   //UI
-  UI ui;
+  //-_-//UI ui;
   //-------------------------------
   //constructor de la clase
   PMoCap(PApplet p5, int ancho_, int alto_, float umbral_, int fotogramasRetardo_, /*boolean comparaConFondo_,*/ int convolucion_) {
     convolucion = convolucion_;
 
 
-    ui = new UI(p5, width-150, 0, 20);
-    ui.crearSlider("convolucion", 3, 10, convolucion_);
+    //-_-//ui = new UI(p5, width-150, 0, 20);
+    //-_-//ui.crearSlider("convolucion", 3, 10, convolucion_);
     //se inician las propiedades con los parametros
     //comparaConFondo = comparaConFondo_;
     ancho = ancho_;
@@ -107,9 +107,9 @@ class PMoCap {
     largo = ancho*alto;
 
     umbral = umbral_;
-    ui.crearSlider("umbral", 0, 255, umbral_);
+    //-_-//ui.crearSlider("umbral", 0, 255, umbral_);
     fotogramasRetardo = fotogramasRetardo_;
-    ui.crearSlider("fotogramasRetardo", 1, 120, fotogramasRetardo_);
+    //-_-//ui.crearSlider("fotogramasRetardo", 1, 120, fotogramasRetardo_);
     //indica que aun no hay ningún fondo captado
     fondoTomado = false;
 
@@ -120,14 +120,16 @@ class PMoCap {
     fondoFijo = createImage( ancho, alto, RGB );
     substraccion = createImage( ancho, alto, RGB );
     bitonal = createImage( ancho, alto, RGB );
+    
+    //blend = fotogramasRetardo_;
+    blend = 0.2;
+    //-_-//ui.crearSlider("blend", 0, 0.2, fotogramasRetardo_);
 
-    ui.crearSlider("blend", 0, 0.2, fotogramasRetardo_);
-
-    ui.cp5.addButton("nuevofondo")
+    //-_-//ui.cp5.addButton("nuevofondo")
       //.setValue(0)
-      .setPosition(width-150, height-100)
-      .setSize(100, 19)
-      ;
+      //.setPosition(width-150, height-100)
+      //.setSize(100, 19)
+      //;
   }
 
 
@@ -139,12 +141,15 @@ class PMoCap {
   }
 
   void actualizar() {
+    if (convolucion%2==0)
+      convolucion++;
+    /*//-_-//
     convolucion = int(ui.cp5.getController("convolucion").getValue());
     if (convolucion%2==0)
       convolucion++;
     fotogramasRetardo = int(ui.cp5.getController("fotogramasRetardo").getValue());
     umbral = int(ui.cp5.getController("umbral").getValue());
-    blend = ui.cp5.getController("blend").getValue();
+    blend = ui.cp5.getController("blend").getValue();*/
   }
 
   float cont = 3;
