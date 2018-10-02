@@ -77,11 +77,12 @@ class ControlOsc implements AutoSetup {
       else configRemota.carrete.estado = EstadoModulo.REMOTO;
     }
   }
-  void responderEstablecerEstados(int lienzo, int observador, int carrete) {
+  void responderEstablecerEstados(int lienzo, int observador, int carrete, int modo_observador ) {
     if (configRemota == null) configRemota = new ConfiguracionCOD05();
     configRemota.lienzo.estado = EstadoModuloList[lienzo];
     configRemota.observador.estado = EstadoModuloList[observador];
     configRemota.carrete.estado = EstadoModuloList[carrete];
+    configRemota.modoObservador = modo_observador==0?ModoObservador.WEBCAM:ModoObservador.KINECT;
   }
 
   void ejecutarRemotos(ConfiguracionCOD05 config) {
@@ -97,7 +98,8 @@ class ControlOsc implements AutoSetup {
         OscMessage msj = new OscMessage(establecerEstados)
           .add(EstadoModuloToInt(config.lienzo.estado))
           .add(EstadoModuloToInt(config.observador.estado))
-          .add(EstadoModuloToInt(config.carrete.estado));
+          .add(EstadoModuloToInt(config.carrete.estado))
+          .add(config.modoObservador==ModoObservador.WEBCAM?0:1);
         osc.send( msj, destino);
         println(establecerEstados, msj, destino);
         msj = new OscMessage(establecerIPs)
