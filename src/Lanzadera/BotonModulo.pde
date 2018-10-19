@@ -12,7 +12,7 @@ class BotonModulo extends Auto implements AutoDraw, AutoMousePressed {
   float escala = 0.6f;
   BotonModulo(PVector pos, String icono, color col) {
     this.pos = pos;
-    setIcono( icono );
+    setIcono( icono, 0.6 );
     this.aroCerrado = iconos.get(dicIcos.aroCerrado);
     this.aroAbierto = iconos.get(dicIcos.aroAbierto);
     this.colEncendido = col;
@@ -30,7 +30,8 @@ class BotonModulo extends Auto implements AutoDraw, AutoMousePressed {
     animColor = (new TwOutQuad()).inicializar(.3);
   }
   
-  void setIcono( String icono ){
+  void setIcono( String icono, float escala ){
+    this.escala = escala;
     this.icono = iconos.get(icono);
     if (this.icono == null) this.icono = iconos.iconoVacio();
     iniciarTweeners();
