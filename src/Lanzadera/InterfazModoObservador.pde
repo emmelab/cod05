@@ -34,6 +34,12 @@ class InterfazModoObservador extends Auto implements AutoDraw {
     this.config = config;
   }
   
+  void reset(){
+    botonCam.toggle = false;
+    botonKin.toggle = false;
+    setAutoActivo( true );
+  }
+  
   void draw() {
     if ( autoActivo ) {
       imageMode(CENTER);
@@ -44,10 +50,12 @@ class InterfazModoObservador extends Auto implements AutoDraw {
       
       if( botonCam.toggle ){
         setAutoActivo( false );
+        interfaz.barraSuperior.botonAtras.setAutoActivo( true );
         config.modoObservador = ModoObservador.WEBCAM;
         interfaz.observador.setIcono( dicIcos.webcam, 0.84 );
       }else if( botonKin.toggle ){
         setAutoActivo( false );
+        interfaz.barraSuperior.botonAtras.setAutoActivo( true );
         config.modoObservador = ModoObservador.KINECT;
         interfaz.observador.setIcono( dicIcos.kinect, 0.84 );
       }

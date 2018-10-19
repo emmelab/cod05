@@ -110,6 +110,15 @@ class Interfaz implements AutoSetup, AutoDraw {
   boolean introCheck(float t) {
     return introTime < t && introTime+dt >= t;
   }
+  
+  void resetIntro(){
+    introTime = 0;
+    introActiva = true;
+    botonPlay.autoActivo = lienzo.autoActivo = observador.autoActivo = carrete.autoActivo = false;
+    lienzo.mostrar = observador.mostrar = carrete.mostrar = false;
+    lienzo.iniciarTweeners(); observador.iniciarTweeners(); carrete.iniciarTweeners();
+    interfazModObs.reset();
+  }
 
   void grisPorTodoLocal() {
     carrete.panelIPsAbierto = observador.panelIPsAbierto = lienzo.panelIPsAbierto = interfazYSensorConexion.visible();

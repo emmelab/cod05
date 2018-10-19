@@ -10,7 +10,6 @@ class DiccionarioIconos {
     observador = "observador", 
     carrete = "carrete", 
     lienzo = "lienzo",  
-    fondoIp = "fondo-ip",
     kinect = "kinect",
     webcam = "webcam",
     fondoToggle = "fondo-toggle",
