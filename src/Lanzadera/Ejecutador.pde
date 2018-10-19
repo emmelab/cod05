@@ -36,7 +36,8 @@ class Ejecutador {
     }
     this.modoUtileria = modoUtileria;
     if (modoUtileria)templateLanzador = "\""+javaPath+"\\bin\\java\" -cp "+dirUtileria+" "+ejecutarKeyword ;
-    else templateLanzador = "start cmd /k echo off ^& "+dirReal.substring(0, dirReal.indexOf(':')+1)+" ^& cd \"" + dirReal+"\" ^& "+ejecutarKeyword + " ^& echo \"iniciando "+ejecutarKeyword+"\"";
+    //cmd /k -> deja la terminal abierta para debuguear, cmd /c cierra la terminal
+    else templateLanzador = "start cmd /c echo off ^& "+dirReal.substring(0, dirReal.indexOf(':')+1)+" ^& cd \"" + dirReal+"\" ^& "+ejecutarKeyword + " ^& echo \"iniciando "+ejecutarKeyword+"\"";
   }
 
   boolean enEjecucion() {
