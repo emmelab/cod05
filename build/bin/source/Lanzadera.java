@@ -571,7 +571,7 @@ class ConfiguracionCOD05 {
     public XML generar() {
       XML xml = new XML("ConfigModulo");
       xml.setString("id", id);
-      xml.setString("ip", ip);
+      xml.setString("ip", estado==EstadoModulo.LOCAL? oscP5.ip() : ip );
       xml.setInt("puerto", puerto);
       xml.setInt("estado", EstadoModuloToInt(estado));
       return xml;
