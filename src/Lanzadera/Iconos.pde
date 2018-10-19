@@ -25,6 +25,8 @@ class Iconos implements AutoSetup {
     dicIcos.lienzo, 
     dicIcos.carrete, 
     dicIcos.observador, 
+    dicIcos.webcam, 
+    dicIcos.kinect, 
     dicIcos.play, 
     dicIcos.aroCerrado, 
     dicIcos.aroAbierto,
