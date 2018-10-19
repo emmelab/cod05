@@ -17,12 +17,16 @@ class Motor{
   
   private PGraphics espacio3D;
   private boolean dibujarEspacio3D;
+  private float camaraZ;
   
   private HashMap<Integer, Usuario> usuarios = new HashMap <Integer, Usuario> ();
   
   public int[] tiposDeJoint;
   public int[][] paresDeJoints;
   public String[] nombreDeJoint;
+  
+  private final float FACTOR_VENTANA = 0.8;
+  private final int VENTANA_POSICION_Y;
   
   public Motor( PApplet p5 ){
     
@@ -55,6 +59,8 @@ class Motor{
     
     }
     
+    VENTANA_POSICION_Y = ( kinect.isInit() )? 84 + round( ( height - 84 - kinect.userImage().height * FACTOR_VENTANA ) * 0.5 ) : 0 ;
+    
   }
   
   //---------------------------------------- METODOS PUBLICOS
@@ -66,6 +72,7 @@ class Motor{
       setDibujarEspacio3D( true );
     else
       setDibujarEspacio3D( false );
+    guiP5.actualizarColorPestanas();
     print( "Estado: " + this.estado );
     println( " -> " + NOMBRE_ESTADO[ this.estado ] );
   }
@@ -76,6 +83,10 @@ class Motor{
   
   public int getEstado(){
     return estado;
+  }
+  
+  public GuiP5 getGuiP5(){
+    return guiP5;
   }
   //----
   
@@ -89,18 +100,20 @@ class Motor{
   }
   
   public void ejecutar(){
+    
+    background( paleta.grisFondo );
+    
     if( kinect.isInit() ){
-      kinect.update();
-      background( #222222 );
+      guiP5.ejecutar( estado );
+      kinect.update(); 
       if( dibujarEspacio3D ) actualizarEspacio3D();
       actualizarUsuarios();
       if( dibujarEspacio3D ) espacio3D.endDraw();
       dibujarCamaraKinect();
     }else{
-      background( #222222 );
-      fill( 255 );
-      textSize( height * 0.04 );
-      text( "Kinect no se pudo iniciar.\nAsegurase de que este conectada y reinicie el programa.", 20, height * 0.4 );
+      fill( paleta.blanco );
+      textSize( height * 0.035 );
+      text( "Kinect no se pudo iniciar.\nAsegúrese de que esté conectada y reinicie el programa.", 20, height * 0.43 );
     }
   }
   
@@ -150,24 +163,26 @@ class Motor{
   
   private void iniciarEspacio3D(){
     espacio3D = createGraphics( kinect.depthImage().width, kinect.depthImage().height, P3D );
+    camaraZ = ((espacio3D.height/2.0) / tan(PI*60.0/360.0));
     espacio3D.beginDraw();
     espacio3D.translate(width/2, height/2, 0);
     //espacio3D.lights();// esto moverlo al loop cuando sepa donde queda lindo y prolijito xD
     espacio3D.rotateX(PI);
     espacio3D.translate(0, 0, -1000);
     espacio3D.translate(0, 0, width*2);
+    espacio3D.sphereDetail( 5 );
     espacio3D.endDraw();
   }
   
   
   private void actualizarEspacio3D(){
     espacio3D.beginDraw();
-      espacio3D.background( #777777 );
-      
+      espacio3D.background( paleta.grisClaro );
+      espacio3D.perspective( PI/3.0, espacio3D.width/espacio3D.height, camaraZ/10.0, camaraZ*25.0 );
       espacio3D.translate(width/2, height/2, 0);
       espacio3D.lights();
       espacio3D.rotateX(PI);
-      espacio3D.translate(0, 0, -1000);
+      espacio3D.translate(0, 0, -1000 );
       espacio3D.translate(0, 0, width*2);
             
   }
@@ -225,9 +240,9 @@ class Motor{
   private void desequilibrio( Usuario usuario ) {
     
     UsuarioDesequilibrio unUDesiq = usuario.getDesequilibrio();
-    
-    dibujarDebugDesequilibrio( unUDesiq, p5.g, 50, kinect.depthHeight()*0.1, 
-    kinect.depthWidth(), kinect.depthHeight());
+
+    dibujarDebugDesequilibrio( unUDesiq, p5.g, width*0.5 - kinect.userImage().width * 0.5 * FACTOR_VENTANA, VENTANA_POSICION_Y * 0.8, 
+    kinect.depthWidth() * FACTOR_VENTANA, kinect.depthHeight() * FACTOR_VENTANA );
     
   }
   
@@ -277,6 +292,7 @@ class Motor{
   }
   
   private void dibujarCamaraKinect(){
+    
     if( estado == CAMARA_COMUN ){
       
       pushMatrix();
@@ -285,19 +301,19 @@ class Motor{
         int escalaY = ( comunicacionOSC.getInvertidoEjeY() )? -1 : 1;
         
         scale( escalaX, escalaY );
+                
+        float posX = ( escalaX == 1 )? width * 0.315 : -width * 0.315 - kinect.userImage().width * FACTOR_VENTANA ;
+        float posY = ( escalaY == 1 )? VENTANA_POSICION_Y : -VENTANA_POSICION_Y - kinect.userImage().height * FACTOR_VENTANA ;
         
-        int posX = ( escalaX == 1 )? 0 : -kinect.userImage().width ;
-        int posY = ( escalaY == 1 )? 50 : -50 - kinect.userImage().height ;
-        
-        image( kinect.userImage(), posX, posY );
+        image( kinect.userImage(), posX, posY, kinect.userImage().width * FACTOR_VENTANA, kinect.userImage().height * FACTOR_VENTANA);
         
       popMatrix();
       
     }
     
     else if( dibujarEspacio3D ){
-      image( espacio3D, width*0.5 - espacio3D.width*0.5, height*0.5 - espacio3D.height*0.5 );
-      image(kinect.userImage(), 0, 20, kinect.depthWidth()/3, kinect.depthHeight()/3);
+      image( espacio3D, width*0.5 - espacio3D.width * 0.5 * FACTOR_VENTANA, VENTANA_POSICION_Y * 0.8, espacio3D.width * FACTOR_VENTANA, espacio3D.height * FACTOR_VENTANA );
+      image(kinect.userImage(), width*0.5 - espacio3D.width * 0.5 * FACTOR_VENTANA, VENTANA_POSICION_Y * 0.8, kinect.depthWidth() * 0.25, kinect.depthHeight() * 0.25);
     }
   }
   

@@ -43,6 +43,11 @@ public class UsuarioDesequilibrio {
     umbralMaximo = PApplet.constrain( _umbralMaximo, umbralMenor, MAXIMO_VALOR_UMBRAL );
   }
   
+  public static void setUmbrales( float _umbralMenor, float _umbralMaximo ){
+    umbralMenor = _umbralMenor;
+    umbralMaximo = _umbralMaximo;
+  }
+  
   public static float getUmbralMenor(){
     return umbralMenor;
   }

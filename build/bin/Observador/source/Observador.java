@@ -22,6 +22,7 @@ public class Observador extends PApplet {
 
 
 ComunicacionOSC comunicacionOSC;
+Paleta paleta;
 Motor motor;
 
 int estabilidadGeneral = 6;
@@ -30,6 +31,7 @@ public void setup(){
   size( 800, 600, P2D );
   
   comunicacionOSC = new ComunicacionOSC( this );
+  paleta = new Paleta();
   motor = new Motor(this);
 
 }
@@ -344,21 +346,49 @@ class GuiCerrado{
     
     factorCerrado = guiP5.addSlider( "sliderFactorCerrado" )
                           .setBroadcast(false)
-                          .setLabel( "Factor\nUmbral" )
+                          .setLabel( "Umbral cerrado" )
                           .setSize( 300, 20 )
-                          .setPosition( width * 0.5f, height - 50 )
+                          .setPosition( width*0.5f - 256, height - 70 )
                           .setRange( 0, 5 )
                           .setValue( UsuarioCerrado.getFactorUmbral() )
                           .setSliderMode(Slider.FLEXIBLE)
                           .setBroadcast(true)
                           .moveTo( pestana )
                           ;    
+     
+     factorCerrado.getCaptionLabel().align(ControlP5.LEFT, ControlP5.BOTTOM_OUTSIDE).setPaddingY(15);
+     
+     guiP5.addButton( "resetCerrado" )
+     //primero que nada desactivo el "desencadenamiento de enventos"
+     .setBroadcast(false)
+     .setLabel( "Reestablecer" )
+     .setWidth( 100 )
+     .setHeight( 20 )
+     .setPosition( width * 0.5f + 156, height - 70 )
+     //una vez configurado todo, vuelvo a activar el "desencadenamiento de enventos"
+     .setBroadcast(true)
+     .moveTo( pestana );
+     
   }
 }
 
 public void sliderFactorCerrado( float factor ){
   UsuarioCerrado.setFactorUmbral( factor );
   saveDatosXML();
+}
+
+public void resetCerrado(){
+  XML xml = loadXML( "DefaultUmbrales.xml" );
+  XML hijo = xml.getChild( "UsuarioCerrado" );
+  if( hijo != null ){
+    
+    float factorUmbralCerrado = hijo.getFloat("factorUmbral");
+    UsuarioCerrado.setFactorUmbral( factorUmbralCerrado );
+
+    motor.getGuiP5().get( Slider.class, "sliderFactorCerrado" ).setValue( UsuarioCerrado.getFactorUmbral() );
+    
+    saveDatosXML();
+  }  
 }
 class GuiDesequilibrio{
   
@@ -369,17 +399,46 @@ class GuiDesequilibrio{
     umbralesDesequilibrio = guiP5.addRange( "umbralesDesequilibrio" )
                             //primero que nada desactivo el "desencadenamiento de enventos"
                             .setBroadcast(false)
-                            .setLabel( "Umbral menor y mayor" )
-                            .setPosition( width*0.05f, height - 50 )
+                            .setLabel( "Umbrales de desequilibrio" )
+                            .setPosition( width*0.5f - 256, height - 70 )
                             .setSize( 300, 20 )
                             .setRange( 0, UsuarioDesequilibrio.MAXIMO_VALOR_UMBRAL )
                             .setRangeValues( UsuarioDesequilibrio.getUmbralMenor(), UsuarioDesequilibrio.getUmbralMaximo() )
                             //una vez configurado todo, vuelvo a activar el "desencadenamiento de enventos"
                             .setBroadcast(true)
                             .moveTo( pestana );
+                            
+    umbralesDesequilibrio.getCaptionLabel().align(ControlP5.LEFT, ControlP5.BOTTOM_OUTSIDE).setPaddingY(15);
+    
+    guiP5.addButton( "resetDesequilibrio" )
+     //primero que nada desactivo el "desencadenamiento de enventos"
+     .setBroadcast(false)
+     .setLabel( "Reestablecer" )
+     .setWidth( 100 )
+     .setHeight( 20 )
+     .setPosition( width * 0.5f + 156, height - 70 )
+     //una vez configurado todo, vuelvo a activar el "desencadenamiento de enventos"
+     .setBroadcast(true)
+     .moveTo( pestana );
     
   }
   
+}
+
+public void resetDesequilibrio(){
+  XML xml = loadXML( "DefaultUmbrales.xml" );
+  XML hijo = xml.getChild( "UsuarioDesequilibrio" );
+  if( hijo != null ){
+    
+    float factorUmbralBajo = hijo.getFloat("factorUmbralBajo");
+    float factorUmbralAlto = hijo.getFloat("factorUmbralAlto");    
+    
+    UsuarioDesequilibrio.setUmbrales( factorUmbralBajo, factorUmbralAlto );
+    
+    motor.getGuiP5().get( Range.class, "umbralesDesequilibrio" ).setRangeValues( UsuarioDesequilibrio.getUmbralMenor(), UsuarioDesequilibrio.getUmbralMaximo() );
+    
+    saveDatosXML();
+  }  
 }
 class GuiNivel{
   
@@ -387,20 +446,53 @@ class GuiNivel{
       guiP5.addRange( "umbralesNivel" )
             //primero que nada desactivo el "desencadenamiento de enventos"
             .setBroadcast(false)
-            .setLabel( "Factor umbral bajo y alto" )
-            .setPosition( width*0.1f, height - 50 )
+            .setLabel( "Factor nivel bajo y alto" )
+            .setPosition( width*0.5f - 256, height - 70 )
             .setSize( 300, 20 )
             .setRange( 0, 1 )
             .setRangeValues( UsuarioNivel.getFactorUmbralBajo(), UsuarioNivel.getFactorUmbralAlto() )
             //una vez configurado todo, vuelvo a activar el "desencadenamiento de enventos"
             .setBroadcast(true)
             .moveTo( pestana );
+            
+      guiP5.getController("umbralesNivel").getCaptionLabel().align(ControlP5.LEFT, ControlP5.BOTTOM_OUTSIDE).setPaddingY(15);
+      
+      guiP5.addButton( "resetNivel" )
+      //primero que nada desactivo el "desencadenamiento de enventos"
+      .setBroadcast(false)
+      .setLabel( "Reestablecer" )
+      .setWidth( 100 )
+      .setHeight( 20 )
+      .setPosition( width * 0.5f + 156, height - 70 )
+      //una vez configurado todo, vuelvo a activar el "desencadenamiento de enventos"
+      .setBroadcast(true)
+      .moveTo( pestana );
+      
   }
   
 }
 
+public void resetNivel(){
+  XML xml = loadXML( "DefaultUmbrales.xml" );
+  XML hijo = xml.getChild( "UsuarioNivel" );
+  if( hijo != null ){
+    
+    float factorUmbralBajo = hijo.getFloat("factorUmbralBajo");
+    float factorUmbralAlto = hijo.getFloat("factorUmbralAlto");
+    
+    UsuarioNivel.setUmbrales( factorUmbralBajo, factorUmbralAlto );
+
+    motor.getGuiP5().get( Range.class, "umbralesNivel" ).setRangeValues( UsuarioNivel.getFactorUmbralBajo(), UsuarioNivel.getFactorUmbralAlto() );
+    
+    saveDatosXML();
+  }  
+}
+
 
 class GuiP5 extends ControlP5{
+  
+  final String titulo = "CONFIGURADOR DEL OBSERVADOR";
+  final PImage logoCOD05, logoObservador;
   
   //HashMap<String, Tab> pestanas = new HashMap<String, Tab>();
   
@@ -411,17 +503,32 @@ class GuiP5 extends ControlP5{
   public GuiP5( PApplet p5, String[] pestanas ){
     super( p5 );
     
+    logoCOD05 = loadImage( "logoCOD05.png" );
+    logoObservador = loadImage( "observador.png" );
+    logoObservador.resize( round( logoObservador.width * 0.45f ), round( logoObservador.height * 0.45f ) );
+    
     PFont fuente = loadFont( "MyriadPro-Regular-14.vlw" );
     setFont( fuente );
+    textFont( fuente );
+    setColorCaptionLabel( paleta.blanco );
     
+    controlWindow.setPositionOfTabs( (int) controlWindow.getPositionOfTabs()[ 0 ], 42 );
+
     //------------ PESTANAS
     for( int i = 1; i < pestanas.length; i++ ){
       addTab( pestanas[ i ] )
       .activateEvent( true )
       .setId( i )
       .setWidth( (width / pestanas.length) - 5 )
+      .setHeight( 42 )
       .getCaptionLabel().alignX( ControlP5.CENTER )
       ;
+      
+      ControllerGroup<Tab> grupo = ( ControllerGroup<Tab> ) getTab( pestanas[ i ] );
+      grupo.setColorBackground( paleta.grisClaro );
+      grupo.setColorActive( paleta.amarillo );
+      grupo.setColorForeground( paleta.negro ); 
+      
     }
     
     Tab t = getTab("default");
@@ -429,29 +536,32 @@ class GuiP5 extends ControlP5{
     t.activateEvent( true );
     t.setId( 0 );
     t.setWidth( width / pestanas.length );
+    t.setHeight( 42 );
     t.getCaptionLabel().alignX( ControlP5.CENTER );
+    
+    ControllerGroup<Tab> grupo = ( ControllerGroup<Tab> ) getTab("default");
+    grupo.setColorBackground( paleta.grisClaro );
+    grupo.setColorActive( paleta.amarillo );
+    grupo.setColorForeground( paleta.negro ); 
+    grupo.getCaptionLabel().setColor( paleta.negro );
     //------------
     
     //PESTANA 0 - DEFAULT CAMARA COMUN
-    
-    addTextlabel("espejo")
-    .setText("Espejo hacia\nCod05Mundo")
-    .setPosition( width - 150, height * 0.5f - 75 )
-    .setHeight( 150 );
-
     addToggle("espejoEjeX")
-     .setPosition(width - 150, height * 0.5f - 25)
+     .setPosition( 75, 84 + (height - 84) * 0.65f - 25 )
      .setSize(20,20)
      .setValue( comunicacionOSC.getInvertidoEjeX() )
      .setLabel( "Espejo eje X" )
+     .setColorForeground( paleta.grisClaro ) 
      .getCaptionLabel().alignX( ControlP5.LEFT ).alignY( ControlP5.CENTER ).toUpperCase( false ).setPaddingX( 30 )
      ;
      
      addToggle("espejoEjeY")
-     .setPosition(width - 150, height * 0.5f + 25)
+     .setPosition( 75, 84 + (height - 84) * 0.65f + 25 )
      .setSize(20,20)
      .setValue( comunicacionOSC.getInvertidoEjeY() )
      .setLabel( "Espejo eje Y" )
+     .setColorForeground( paleta.grisClaro ) 
      .getCaptionLabel().alignX( ControlP5.LEFT ).alignY( ControlP5.CENTER ).toUpperCase( false ).setPaddingX( 30 )
      ;
     
@@ -477,6 +587,54 @@ class GuiP5 extends ControlP5{
     }else{
       getTab( "default" ).bringToFront();
     }
+    actualizarColorPestanas();
+  }
+  
+  public void actualizarColorPestanas(){
+    
+    ControllerList listaPestanas = controlWindow.getTabs();
+    
+    for( int i = 0; i < listaPestanas.size(); i++ ){
+      Tab t = (Tab) listaPestanas.get( i );
+      if( t.isActive() ) t.getCaptionLabel().setColor( paleta.negro );
+      else t.getCaptionLabel().setColor( paleta.blanco );
+    }
+
+  }
+  
+  public void ejecutar( int estado ){
+    pushStyle();
+    
+    fill( paleta.negro );
+    noStroke();
+    rect( 0, 0, width, 42 );
+    
+    image( logoCOD05, 21, 0 );
+    
+    fill( paleta.grisClaro );//grisFondo
+    textAlign( CENTER, CENTER );
+    text( titulo, width * 0.5f, 21 );
+    
+    fill( paleta.grisClaro );
+    rect( 0, 42, width, 42 );
+    
+    if( estado == Motor.CAMARA_COMUN ){
+      fill( paleta.negro );
+      rect( width * 0.05f, 84 + ( (height - 84) * 0.2f ), width * 0.215f, (height - 84) * 0.6f );
+      
+      fill( paleta.blanco );
+      textAlign( CENTER, CENTER );
+      text( "Espejar hacia\nCOD05 Lienzo", width * 0.1575f, 84 + ( (height - 84) * 0.525f ) );
+      
+      imageMode( CENTER );
+      image( logoObservador, width * 0.1575f, 84 + ( (height - 84) * 0.25f ) + logoObservador.height * 0.5f );
+      
+    }else if( estado == Motor.DEBUG_DESEQUILIBRIO ){
+      fill( paleta.grisClaro );
+      rect( 144, 120, 512, 384 );
+    }
+    
+    popStyle();
   }
  
 }
@@ -537,6 +695,9 @@ class Motor{
   public int[][] paresDeJoints;
   public String[] nombreDeJoint;
   
+  private final float FACTOR_VENTANA = 0.8f;
+  private final int VENTANA_POSICION_Y;
+  
   public Motor( PApplet p5 ){
     
     this.p5 = p5;
@@ -568,6 +729,8 @@ class Motor{
     
     }
     
+    VENTANA_POSICION_Y = ( kinect.isInit() )? 84 + round( ( height - 84 - kinect.userImage().height * FACTOR_VENTANA ) * 0.5f ) : 0 ;
+    
   }
   
   //---------------------------------------- METODOS PUBLICOS
@@ -579,6 +742,7 @@ class Motor{
       setDibujarEspacio3D( true );
     else
       setDibujarEspacio3D( false );
+    guiP5.actualizarColorPestanas();
     print( "Estado: " + this.estado );
     println( " -> " + NOMBRE_ESTADO[ this.estado ] );
   }
@@ -589,6 +753,10 @@ class Motor{
   
   public int getEstado(){
     return estado;
+  }
+  
+  public GuiP5 getGuiP5(){
+    return guiP5;
   }
   //----
   
@@ -602,18 +770,20 @@ class Motor{
   }
   
   public void ejecutar(){
+    
+    background( paleta.grisFondo );
+    
     if( kinect.isInit() ){
-      kinect.update();
-      background( 0xff222222 );
+      guiP5.ejecutar( estado );
+      kinect.update(); 
       if( dibujarEspacio3D ) actualizarEspacio3D();
       actualizarUsuarios();
       if( dibujarEspacio3D ) espacio3D.endDraw();
       dibujarCamaraKinect();
     }else{
-      background( 0xff222222 );
-      fill( 255 );
-      textSize( height * 0.04f );
-      text( "Kinect no se pudo iniciar.\nAsegurase de que este conectada y reinicie el programa.", 20, height * 0.4f );
+      fill( paleta.blanco );
+      textSize( height * 0.035f );
+      text( "Kinect no se pudo iniciar.\nAseg\u00farese de que est\u00e9 conectada y reinicie el programa.", 20, height * 0.43f );
     }
   }
   
@@ -675,7 +845,7 @@ class Motor{
   
   private void actualizarEspacio3D(){
     espacio3D.beginDraw();
-      espacio3D.background( 0xff777777 );
+      espacio3D.background( paleta.grisClaro );
       
       espacio3D.translate(width/2, height/2, 0);
       espacio3D.lights();
@@ -738,9 +908,9 @@ class Motor{
   private void desequilibrio( Usuario usuario ) {
     
     UsuarioDesequilibrio unUDesiq = usuario.getDesequilibrio();
-    
-    dibujarDebugDesequilibrio( unUDesiq, p5.g, 50, kinect.depthHeight()*0.1f, 
-    kinect.depthWidth(), kinect.depthHeight());
+
+    dibujarDebugDesequilibrio( unUDesiq, p5.g, width*0.5f - kinect.userImage().width * 0.5f * FACTOR_VENTANA, VENTANA_POSICION_Y * 0.8f, 
+    kinect.depthWidth() * FACTOR_VENTANA, kinect.depthHeight() * FACTOR_VENTANA );
     
   }
   
@@ -790,6 +960,7 @@ class Motor{
   }
   
   private void dibujarCamaraKinect(){
+    
     if( estado == CAMARA_COMUN ){
       
       pushMatrix();
@@ -798,22 +969,35 @@ class Motor{
         int escalaY = ( comunicacionOSC.getInvertidoEjeY() )? -1 : 1;
         
         scale( escalaX, escalaY );
+                
+        float posX = ( escalaX == 1 )? width * 0.315f : -width * 0.315f - kinect.userImage().width * FACTOR_VENTANA ;
+        float posY = ( escalaY == 1 )? VENTANA_POSICION_Y : -VENTANA_POSICION_Y - kinect.userImage().height * FACTOR_VENTANA ;
         
-        int posX = ( escalaX == 1 )? 0 : -kinect.userImage().width ;
-        int posY = ( escalaY == 1 )? 50 : -50 - kinect.userImage().height ;
-        
-        image( kinect.userImage(), posX, posY );
+        image( kinect.userImage(), posX, posY, kinect.userImage().width * FACTOR_VENTANA, kinect.userImage().height * FACTOR_VENTANA);
         
       popMatrix();
       
     }
     
     else if( dibujarEspacio3D ){
-      image( espacio3D, width*0.5f - espacio3D.width*0.5f, height*0.5f - espacio3D.height*0.5f );
-      image(kinect.userImage(), 0, 20, kinect.depthWidth()/3, kinect.depthHeight()/3);
+      image( espacio3D, width*0.5f - espacio3D.width * 0.5f * FACTOR_VENTANA, VENTANA_POSICION_Y * 0.8f, espacio3D.width * FACTOR_VENTANA, espacio3D.height * FACTOR_VENTANA );
+      image(kinect.userImage(), width*0.5f - espacio3D.width * 0.5f * FACTOR_VENTANA, VENTANA_POSICION_Y * 0.8f, kinect.depthWidth() * 0.25f, kinect.depthHeight() * 0.25f);
     }
   }
   
+}
+class Paleta{
+  
+  final int amarillo, rojo, grisFondo, grisClaro, negro, blanco;
+  
+  Paleta(){
+    amarillo = color( 0xffBDBD3F );
+    rojo = color( 0xffDF564C );
+    grisFondo = color( 0xff272B2D );
+    grisClaro = color( 0xff3A3D40 );
+    negro = color( 0xff141516 );
+    blanco = color( 0xffCCCCCC );
+  }
 }
 public void saveDatosXML(){
   String baseXML = "<UsuarioUmbrales></UsuarioUmbrales>";

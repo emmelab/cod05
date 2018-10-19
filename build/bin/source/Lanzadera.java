@@ -33,11 +33,15 @@ PFont openSans_Light;
 int oscP5Port = 12000;
 OscP5 oscP5;
 
+Reloj reloj = new Reloj();
+Consola consola = new Consola();
+
 public void settings() {
   size( 800, 600 );
 }
 
 public void setup(){
+  consola.setDebug( false );
   inicializarTipografias(29);
   oscP5 = new OscP5(this,oscP5Port);
   for(AutoSetup auto : autoSetup) auto.setup();
@@ -50,11 +54,12 @@ public void inicializarTipografias(float textSize){
 }
 
 public void draw() {
+  reloj.actualizar();
   dt = (millis()-lt)/1000f;
   lt = millis();
     background(paleta.fondo);
   for(AutoDraw auto : autoDraw) auto.draw();
-  consolaDebug();
+  consola.ejecutar();
 }
 public void keyPressed() {
   if(!interfaz.introActiva)for(AutoKeyPressed auto : autoKeyPressed) auto.keyPressed();
@@ -63,11 +68,32 @@ public void keyReleased() {
   if(!interfaz.introActiva)for(AutoKeyReleased auto : autoKeyReleased) auto.keyReleased();
 }
 public void mousePressed() {
-  if(!interfaz.introActiva)for(AutoMousePressed auto : autoMousePressed) auto.mousePressed();
+  //if(!interfaz.introActiva)
+    for(AutoMousePressed auto : autoMousePressed) auto.mousePressed();
 }
 public void mouseReleased() {
   if(!interfaz.introActiva)for(AutoMouseReleased auto : autoMouseReleased) auto.mouseReleased();
 }
+abstract class Nombre{
+  String nombre;
+  public void setNombre( String nombre ){
+    this.nombre = nombre;
+    //consola.printlnAlerta( getClass() + ".Nombre = " + nombre, color( 0,255, 224 ) );
+  }
+  public String getNombre(){
+    return nombre;
+  }
+}
+
+abstract class Auto extends Nombre { 
+  boolean autoActivo; 
+  public void setAutoActivo( boolean autoActivo ){ 
+    this.autoActivo = autoActivo; 
+  } 
+  public boolean getAutoActivo(){ 
+    return autoActivo; 
+  } 
+} 
 ArrayList<AutoSetup> autoSetup = new ArrayList();
 ArrayList<AutoDraw> autoDraw = new ArrayList();
 ArrayList<AutoKeyPressed> autoKeyPressed = new ArrayList();
@@ -89,12 +115,14 @@ Interfaz interfaz = new Interfaz();
 class BarraSuperior implements AutoDraw {
   float margen, alto;
   PImage marca, ayuda;
+  BotonAtras botonAtras;
 
   BarraSuperior() {
     marca = iconos.get(dicIcos.marca);
     ayuda = iconos.get(dicIcos.ayuda);
     alto = marca.height*1.5f;
     margen = alto/2;
+    botonAtras = new BotonAtras( "< Atrás", margen + marca.width, alto - margen*0.74f, 20 );
     autoDraw.add(this);
   }
 
@@ -107,24 +135,60 @@ class BarraSuperior implements AutoDraw {
       rect(0, 0, width, alto);
       image(marca, marca.width/2+ margen/2, margen);
       image(ayuda, width - ayuda.width/2 - margen/2, margen);
-      //fill(paleta.ips[0]);
-      fill(paleta.marca);
-      textSize(27);
-      text(oscP5.ip(), margen, alto+48);
+      
+      botonAtras.dibujar( paleta.inactivo );
+      
+      textSize(20);
+      fill(paleta.inactivo);
+      String textIP = "IP: " + oscP5.ip();
+      text( textIP, width - margen * 1.1f - ayuda.width - textWidth( textIP ), alto - margen * 0.74f );
+      
       popStyle();   
   }
+  
+  class BotonAtras extends Auto implements AutoMousePressed{
+    
+    String text;
+    int tamanoTexto;
+    int x, y;
+    int anchoTexto;
+    boolean activo;
+    
+    BotonAtras( String text, float x, float y, int tamanoTexto ){
+      this.text = text;
+      this.x = round( x );
+      this.y = round( y );
+      this.tamanoTexto = tamanoTexto;
+      pushStyle();textSize( tamanoTexto );
+      anchoTexto = ceil(textWidth( text ));popStyle();
+      setNombre( "botonAtras" );
+      autoMousePressed.add(this);
+    }
+    
+    public void dibujar( int col ){
+      if( !autoActivo ) return;
+      fill( col );
+      textSize( tamanoTexto );
+      text( text, this.x, this.y );
+    }
+    
+    public void mousePressed(){
+      if( !autoActivo ) return;
+      if( mouseX > x && mouseX < x + anchoTexto ){
+        if( mouseY>y-tamanoTexto && mouseY<y ){
+          interfaz.resetIntro();
+          setAutoActivo( false );
+        }
+      }
+    }
+    
+  }//end BotonAtras
+  
 }
-class BotonBasico implements AutoDraw, AutoMousePressed {
+class BotonBasico extends Auto implements AutoDraw, AutoMousePressed {
   PVector pos;
   PImage icono;
   float escala = 0.7f;
-
-  //--- este cambio seguramente no te agrade pero era el hardcode del momento.... xD
-  //--- lo comento asi e enteras... lo que hago es crear esta variable para que la interfaz y sensor de conexion
-  //--- solo dibuje el mas si algunas de las cosas no esta conectada como local...
-  //--- ara que que sean faciles de encontrar todo lo que hice que tenga uqe ver con esto que espero no sea mucho
-  //--- todo lo voy a comentar con un :D .... 
-  boolean dibujar = true;
 
   Tweener hoverEscala = new Tweener().inicializar(1, 1, 1, 1);
   Tweener toggleAlfa = new Tweener().inicializar(.5f, 200, 255, 0);
@@ -142,7 +206,7 @@ class BotonBasico implements AutoDraw, AutoMousePressed {
   }
 
   public void draw() {
-    if (dibujar) {
+    if ( autoActivo ) {
       boolean over = over(mouseX, mouseY);
       hoverEscala.actualizar(over?dt:-dt);
       toggleAlfa.actualizar(toggle?dt:-dt);
@@ -161,6 +225,7 @@ class BotonBasico implements AutoDraw, AutoMousePressed {
     }
   }
   public void mousePressed() {
+    if( !autoActivo ) return;
     if (over(mouseX, mouseY)) {
       presionado = true;
       toggle = !toggle;
@@ -171,7 +236,7 @@ class BotonBasico implements AutoDraw, AutoMousePressed {
     return dist(x, y, pos.x, pos.y) < icono.width*escala/2;
   }
 }
-class BotonModulo implements AutoDraw, AutoMousePressed {
+class BotonModulo extends Auto implements AutoDraw, AutoMousePressed {
   ConfiguracionCOD05.ConfigModulo config;
   EstadoModulo estado = EstadoModulo.LOCAL;
   boolean mostrar = false, remotoEncontrado = false, panelIPsAbierto = false;
@@ -185,31 +250,42 @@ class BotonModulo implements AutoDraw, AutoMousePressed {
   float escala = 0.6f;
   BotonModulo(PVector pos, String icono, int col) {
     this.pos = pos;
-    this.icono = iconos.get(icono);
+    setIcono( icono, 0.6f );
     this.aroCerrado = iconos.get(dicIcos.aroCerrado);
     this.aroAbierto = iconos.get(dicIcos.aroAbierto);
-    if (this.icono == null) this.icono = iconos.iconoVacio();
     this.colEncendido = col;
     this.colApagado = color(red(col)*.299f+green(col)*.587f+blue(col)*.144f);
+    iniciarTweeners();
+    autoDraw.add(this);
+    autoMousePressed.add(this);
+  }
+  
+  public void iniciarTweeners(){
     animAlfa = (new TwOutQuad()).inicializar(.5f, 0, 255);
     animAro = (new TwOutBack()).inicializar(.5f, this.icono.width*.8f, this.icono.width*1.2f, .5f);
     animAroConectado = (new TwOutBack()).inicializar(animAro);
     animPos = (new TwOutBack()).inicializar(.3f, pos.y-100, pos.y);
     animColor = (new TwOutQuad()).inicializar(.3f);
-    autoDraw.add(this);
-    autoMousePressed.add(this);
+  }
+  
+  public void setIcono( String icono, float escala ){
+    this.escala = escala;
+    this.icono = iconos.get(icono);
+    if (this.icono == null) this.icono = iconos.iconoVacio();
+    iniciarTweeners();
   }
 
   public void set(ConfiguracionCOD05.ConfigModulo config) {
     this.config = config;
-    estado = config.estado;
+    estado = config.estado;//-*-*-*-*-*-*-*-*
   }
 
   public void mousePressed() {
+    if( !autoActivo ) return;
     if (dist(pos.x, pos.y, mouseX, mouseY) < icono.width/2) {
       if (estado == EstadoModulo.APAGADO) estado = EstadoModulo.LOCAL;
       else if (estado == EstadoModulo.LOCAL) estado = panelIPsAbierto ? EstadoModulo.REMOTO : EstadoModulo.APAGADO;
-      else if (estado == EstadoModulo.REMOTO) estado = EstadoModulo.APAGADO;
+      else if (estado == EstadoModulo.REMOTO) estado = panelIPsAbierto? EstadoModulo.APAGADO : EstadoModulo.LOCAL;
       if (config!=null)config.estado = estado;
     }
   }
@@ -416,9 +492,16 @@ public void digerirPort(){
   
   public void drawIp(){
     drawGeneric(focus,pos,tam,"999.999.999.999",ipInput);
+    if (config.estado != EstadoModulo.REMOTO) {
+    ipInput = "127.0.0.1";
+    focus = false;
+    }
   }
   public void drawPuerto(){
     drawGeneric(focusPort,PVector.add(pos,posInputPuerto),tamInputPuerto,"65535",portInput);
+    if (focusPort && config.estado == EstadoModulo.APAGADO) {
+    focusPort = false;
+    }
   }
   public void drawGeneric(boolean focus, PVector pos, PVector tam, String tamRefText, String text){
     pushStyle();
@@ -428,7 +511,7 @@ public void digerirPort(){
       noFill();
     } else {
       noStroke();
-      fill(col);
+      fill(config.estado==EstadoModulo.APAGADO? paleta.inactivo:col);
     }
     translate(pos.x, pos.y);
     rect(0, 0, tam.x, tam.y);
@@ -441,10 +524,13 @@ public void digerirPort(){
     popStyle();
   }
 }
-//v 22/06/2017
+//v 07/09/2017
 String archivoConfigXML = "../configcod05.xml";
-String xmlTagPanel = "panel", xmlTagEjecucion = "ejecucion";
+String xmlTagModo = "modo", xmlTagPanel = "panel", xmlTagEjecucion = "ejecucion";
 
+enum ModoObservador{
+  WEBCAM, KINECT
+}
 enum EstadoModulo {
   APAGADO, LOCAL, REMOTO
 }
@@ -454,6 +540,7 @@ public int EstadoModuloToInt(EstadoModulo estado) {
 };
 
 class ConfiguracionCOD05 {
+  ModoObservador modoObservador;
   ConfigModulo lienzo, observador, carrete;
   boolean panelConexiones = false;
 
@@ -484,7 +571,7 @@ class ConfiguracionCOD05 {
     public XML generar() {
       XML xml = new XML("ConfigModulo");
       xml.setString("id", id);
-      xml.setString("ip", ip);
+      xml.setString("ip", estado==EstadoModulo.LOCAL? oscP5.ip() : ip );
       xml.setInt("puerto", puerto);
       xml.setInt("estado", EstadoModuloToInt(estado));
       return xml;
@@ -499,61 +586,305 @@ class ConfiguracionCOD05 {
       XML[] configs = xml.getChildren("ConfigModulo");
       for (ConfigModulo cm : new ConfigModulo[]{lienzo, observador, carrete}) {
         for (XML cxml : configs) {
-          if (cm.id.equals(cxml.getString("id", ""))) cm.cargar(cxml);
+          if (cm.id.equals(cxml.getString("id", ""))) cm.cargar(cxml);//-*-*-*-*-*-*-*-*
         }
       }
     }
   }
-  public void cargar_local() {
-    if (lienzo==null)lienzo = new ConfigModulo().Iniciar("lienzo", 12010);
-    if (observador==null)observador = new ConfigModulo().Iniciar("observador", 12020);
-    if (carrete==null)carrete = new ConfigModulo().Iniciar("carrete", 12030);
-  }
   public XML guardar(String nombre) {
     XML xml = new XML(nombre);
     xml.setInt("panelConexiones", panelConexiones?1:0);
+    xml.setString( "modo", modoObservador.toString() );
     for (ConfigModulo cm : new ConfigModulo[]{lienzo, observador, carrete}) {
       xml.addChild(cm.generar());
     }
     return xml;
   }
 }
-Reloj reloj = new Reloj();
-ConsolaDebug consolaDebug = new ConsolaDebug( false );
+/* Consola v1.22 14/08/2017
+ * Nuevo: Nuevo color alerta, nuevo metodo printlnError() color rojo;
+ * Hernán GM - hernangonzalezmoreno@gmail.com
+*/
 
-public void consolaDebug() {
-  reloj.actualizar();
-  consolaDebug.ejecutar();
+public final class Consola{
+  
+  private String texto;
+  private ArrayList<Alerta> alertas = new ArrayList<Alerta>();
+  private int colorTexto, colorAlerta;
+  private int tamanoTexto, tamanoAlerta;
+  private boolean debug;
+  
+  private boolean verFps, verDatos, verAlertas;
+  
+  private static final float LEADIN = 1.5f; //--- NUEVO!
+  
+  public Consola() {
+    texto = "";
+    colorTexto = color( 0xff000000 );//color( 255 );
+    colorAlerta = color(175, 194, 43);//#CC9900//#FF0000
+    tamanoTexto = PApplet.parseInt( height * 0.12f ); //int( height * 0.023 ); //tamanoTexto = 20;
+    tamanoAlerta = PApplet.parseInt( height * 0.12f ); //int( height * 0.023 ); //tamanoAlerta = 20;
+    
+    debug = verFps = verDatos = verAlertas = true;
+  }
+  
+  //--------------------------------------- METODOS PUBLICOS
+  
+  //GETERS AND SETERS
+  public void setDebug( boolean debug ){
+    this.debug = debug;
+  }
+  
+  public void setVerFps( boolean verFps ){
+    this.verFps = verFps;
+  }
+  
+  public void setVerDatos( boolean verDatos ){
+    this.verDatos = verDatos;
+  }
+  
+  public void setVerAlertas( boolean verAlertas ){
+    this.verAlertas = verAlertas;
+  }
+  
+  public boolean getDebug(){
+    return debug;
+  }
+
+  public boolean getVerFps(){
+    return verFps;
+  }
+
+  public boolean getVerDatos(){
+    return verDatos;
+  }
+
+  public boolean getVerAlertas(){
+    return verAlertas;
+  }
+  //--------
+  
+  public void println( String texto ){
+    this.texto += texto + "\n";
+  }
+  
+  public void printlnAlerta( String alerta ){
+    alertas.add( new Alerta( alerta ) );
+    System.out.println( alerta );
+  }
+  
+  public void printlnAlerta( String alerta, int colorPersonalizado ){
+    alertas.add( new Alerta( alerta, colorPersonalizado ) );
+    System.out.println( alerta );
+  }
+  
+  public void printlnError( String alerta ){
+    alertas.add( new Alerta( alerta, color( 0xffFF0000 ) ) );
+    System.err.println( alerta );
+  }
+  
+  public void ejecutar(){
+    
+    if( !verDatos ) texto = "";
+    if( verFps ) texto = "fps: " + nf( frameRate, 0, 2 ) + "\n" + texto;
+    
+    if( debug ) ejecutarDebug();
+    else ejecutarNoDebug();
+    texto = "";
+  }
+  
+  //--------------------------------------- METODOS PRIVADOS
+  
+  private void ejecutarDebug(){
+    pushStyle();
+      
+      textAlign( LEFT, TOP );
+      textSize( tamanoTexto );
+      textLeading( tamanoTexto * LEADIN ); 
+      
+      noStroke();
+      rectMode( CORNER );
+      
+      //NUEVO rectangulo negro de fondo
+
+      fill( 255 );
+      int desde = 0, hasta = 0, iteracion = 0;
+      while( texto.indexOf( "\n", desde ) > 0 ){
+
+        hasta = texto.indexOf( "\n", desde );
+        String aux = texto.substring( desde, hasta );
+        
+        rect( 0, iteracion * (tamanoTexto * LEADIN), textWidth( aux ) + 3, tamanoTexto * ( LEADIN * 1.1666666f ) );
+        
+        desde = hasta + 1;
+        iteracion++;
+      }
+      
+      //
+      
+      fill( colorTexto );
+      text( texto, 0, 3 );
+      if( !texto.equals("") ) System.out.println( texto );
+      
+      textAlign( RIGHT, BOTTOM );
+      textSize( tamanoAlerta );
+      imprimirAlertas( verAlertas );
+      
+    popStyle();
+  }
+  
+  private void ejecutarNoDebug(){
+    if( !texto.equals("") ) System.out.println( texto );
+    imprimirAlertas( false );
+  }
+  
+  private void imprimirAlertas( boolean debug ){
+    
+    float posY = tamanoAlerta + tamanoAlerta * (LEADIN * 0.16666666f) ;//0.25
+    
+    for( int i = alertas.size() - 1; i >= 0; i-- ){
+      
+      Alerta a = alertas.get( i );
+      a.ejecutar();
+      
+      if( a.getEstado() == Alerta.ESTADO_ELIMINAR ){
+        alertas.remove( i );
+      }else if( debug ){
+        
+        //------ NUEVO rectangulo negro de fondo
+        
+        if( a.getEstado() == Alerta.ESTADO_MOSTRAR )
+          fill( 0 );
+        else
+          fill( 0, map( a.getTiempo(), 0, Alerta.TIEMPO_DESAPARECER, 255, 0 ) );
+        
+        rect( width - textWidth( a.getAlerta() ) - 5, posY- tamanoAlerta * ( LEADIN * 0.875f ), textWidth( a.getAlerta() ) + 5, tamanoAlerta * LEADIN );
+        
+        //------
+        
+        int auxColorAlerta = a.isPersonalizado() ? a.getColorPersonalizado() : colorAlerta ;
+        if( a.getEstado() == Alerta.ESTADO_MOSTRAR )
+          fill( auxColorAlerta );
+        else
+          fill( auxColorAlerta, map( a.getTiempo(), 0, Alerta.TIEMPO_DESAPARECER, 255, 0 ) );
+        
+        text( a.getAlerta(), width, posY );
+        posY += tamanoAlerta * LEADIN;
+        
+        if( posY > height && i - 1 >= 0 ){
+          removerAlertasFueraDePantalla( i - 1 );
+          return;
+        }
+        
+      }
+      
+    }//end for
+    
+  }
+  
+  private void removerAlertasFueraDePantalla( int desde ){
+    for( int i = desde; i >= 0; i-- )
+      alertas.remove( i );
+  }
+  
+  //clase interna y miembro
+  public class Alerta{
+    
+    private String alerta;
+    private int colorPersonalizado;
+    private boolean personalizado;
+    
+    private int estado;
+    public static final int
+    ESTADO_MOSTRAR = 0,
+    ESTADO_DESAPARECER = 1,
+    ESTADO_ELIMINAR = 2;
+    
+    private int tiempo;
+    public static final int
+    TIEMPO_MOSTRAR = 5000,//3000
+    TIEMPO_DESAPARECER = 2000;
+    
+    
+    //------------------------------ CONSTRUCTORES
+    
+    public Alerta( String alerta ){
+      this.alerta = alerta;
+      estado = ESTADO_MOSTRAR;
+    }
+    
+    public Alerta( String alerta, int colorPersonalizado ){
+      this.alerta = alerta;
+      this.colorPersonalizado = colorPersonalizado;
+      personalizado = true;
+      estado = ESTADO_MOSTRAR;
+    }
+    
+    //------------------------------ METODOS PUBLICOS
+    
+    public String getAlerta(){
+      return alerta;
+    }
+    
+    public int getEstado(){
+      return estado;
+    }
+    
+    public int getTiempo(){
+      return tiempo;
+    }
+    
+    public boolean isPersonalizado(){
+      return personalizado;
+    }
+    
+    public int getColorPersonalizado(){
+      return colorPersonalizado;
+    }
+    
+    public void ejecutar(){
+      tiempo += reloj.getDeltaMillis();
+      if( estado == ESTADO_MOSTRAR && tiempo > TIEMPO_MOSTRAR ){
+        estado = ESTADO_DESAPARECER;
+        tiempo = 0;
+      }else if( estado == ESTADO_DESAPARECER && tiempo > TIEMPO_DESAPARECER ){
+        estado = ESTADO_ELIMINAR;
+      }
+    }
+    
+  }
+  
 }
 
-public final class ConsolaDebug {
+//Version vieja
+/*public final class Consola {
 
   private String texto;
   private ArrayList<Alerta> alertas = new ArrayList<Alerta>();
-  private int colorTexto, colorAlerta, colorSuperAlerta;
+  private color colorTexto, colorAlerta, colorSuperAlerta;
   private int tamanoTexto, tamanoAlerta;
   private boolean debug;
 
   private boolean verFps, verDatos, verAlertas;
 
-  private static final float LEADIN = 1.5f; //--- NUEVO!
+  private static final float LEADIN = 1.5; //--- NUEVO!
 
-  public ConsolaDebug() {
+  public Consola() {
     texto = "";
-    colorTexto = color( 0xff000000 );//color( 255 );
+    colorTexto = color( #000000 );//color( 255 );
     colorAlerta = color(175, 194, 43);//#FF0000
-    tamanoTexto = PApplet.parseInt( height * 0.12f ); //int( height * 0.023 ); //tamanoTexto = 20;
-    tamanoAlerta = PApplet.parseInt( height * 0.12f ); //int( height * 0.023 ); //tamanoAlerta = 20;
+    tamanoTexto = int( height * 0.12 ); //int( height * 0.023 ); //tamanoTexto = 20;
+    tamanoAlerta = int( height * 0.12 ); //int( height * 0.023 ); //tamanoAlerta = 20;
 
     debug = verFps = verDatos = verAlertas = true;
   }
   
-  public ConsolaDebug( boolean verFps ) {
+  public Consola( boolean verFps ) {
     texto = "";
-    colorTexto = color( 0xff000000 );//color( 255 );
+    colorTexto = color( #000000 );//color( 255 );
     colorAlerta = color(175, 194, 43);//#FF0000
-    tamanoTexto = PApplet.parseInt( height * 0.12f ); //int( height * 0.023 ); //tamanoTexto = 20;
-    tamanoAlerta = PApplet.parseInt( height * 0.12f ); //int( height * 0.023 ); //tamanoAlerta = 20;
+    tamanoTexto = int( height * 0.12 ); //int( height * 0.023 ); //tamanoTexto = 20;
+    tamanoAlerta = int( height * 0.12 ); //int( height * 0.023 ); //tamanoAlerta = 20;
     
     debug = verDatos = verAlertas = true;
     this.verFps = verFps;
@@ -604,7 +935,7 @@ public final class ConsolaDebug {
     System.out.println( alerta );
   }
 
-  public void printlnAlerta( String alerta, int c ) {
+  public void printlnAlerta( String alerta, color c ) {
     alertas.add( new Alerta( alerta, c ) );
     System.out.println( alerta );
   }
@@ -639,7 +970,7 @@ public final class ConsolaDebug {
       hasta = texto.indexOf( "\n", desde );
       String aux = texto.substring( desde, hasta );
 
-      rect( 0, iteracion * (tamanoTexto * LEADIN), textWidth( aux ) + 3, tamanoTexto * ( LEADIN * 1.1666666f ) );
+      rect( 0, iteracion * (tamanoTexto * LEADIN), textWidth( aux ) + 3, tamanoTexto * ( LEADIN * 1.1666666 ) );
 
       desde = hasta + 1;
       iteracion++;
@@ -665,7 +996,7 @@ public final class ConsolaDebug {
 
   private void imprimirAlertas( boolean debug ) {
 
-    float posY = tamanoAlerta + tamanoAlerta * (LEADIN * 0.16666666f) ;//0.25
+    float posY = tamanoAlerta + tamanoAlerta * (LEADIN * 0.16666666) ;//0.25
 
     for ( int i = alertas.size() - 1; i >= 0; i-- ) {
 
@@ -683,10 +1014,10 @@ public final class ConsolaDebug {
         else
           fill( 0, map( a.getTiempo(), 0, Alerta.TIEMPO_DESAPARECER, 255, 0 ) );
 
-        rect( width - textWidth( a.getAlerta() ) - 5, posY- tamanoAlerta * ( LEADIN * 0.875f ), textWidth( a.getAlerta() ) + 5, tamanoAlerta * LEADIN );
+        rect( width - textWidth( a.getAlerta() ) - 5, posY- tamanoAlerta * ( LEADIN * 0.875 ), textWidth( a.getAlerta() ) + 5, tamanoAlerta * LEADIN );
 
         //------
-        int colorTexto = a.tengoColor?a.m_color:colorAlerta;
+        color colorTexto = a.tengoColor?a.m_color:colorAlerta;
         if ( a.getEstado() == Alerta.ESTADO_MOSTRAR ) {
           fill( colorTexto );
         } else {
@@ -712,7 +1043,7 @@ public final class ConsolaDebug {
   public class Alerta {
 
     private String alerta;
-    int m_color;
+    color m_color;
     boolean tengoColor;
     private int estado;
     public static final int
@@ -731,7 +1062,7 @@ public final class ConsolaDebug {
       tengoColor = false;
     }
 
-    public Alerta( String alerta, int c ) {
+    public Alerta( String alerta, color c ) {
       this.alerta = alerta;
       m_color = c;
       estado = ESTADO_MOSTRAR;
@@ -762,25 +1093,7 @@ public final class ConsolaDebug {
       }
     }
   }
-}
-
-public class Reloj {
-
-  private int millisActual, millisAnterior, deltaMillis;
-
-  public Reloj() {
-  }
-
-  public int getDeltaMillis() {
-    return deltaMillis;
-  }
-
-  public void actualizar() {
-    millisAnterior = millisActual;
-    millisActual = millis();
-    deltaMillis = millisActual - millisAnterior;
-  }
-}
+}*/
 class Ejecutador {
   ConfiguracionCOD05 config;
   boolean modoUtileria;
@@ -793,11 +1106,13 @@ class Ejecutador {
   String dirReal = sketchPath(""), //sketchPath("..\\lib\\*"),
     lienzoReal = "Lienzo", 
     observadorReal = "cd Observador ^& Observador", 
+    observadorBasicoReal = "ObservadorBasico",
     carreteReal = "Carrete";
 
   String dirUtileria = sketchPath("..\\modulosDeUtileria\\lib\\*"), 
     lienzoUtileria = "dummyLienzo", 
     observadorUtileria = "dummyObservador", 
+    observadorBasicoUtileria = "dummyObservadorBasico",
     carreteUtileria = "dummyCarrete";
 
   String ejecutarKeyword = "%ejec";
@@ -817,7 +1132,8 @@ class Ejecutador {
     }
     this.modoUtileria = modoUtileria;
     if (modoUtileria)templateLanzador = "\""+javaPath+"\\bin\\java\" -cp "+dirUtileria+" "+ejecutarKeyword ;
-    else templateLanzador = "start cmd /k echo off ^& "+dirReal.substring(0, dirReal.indexOf(':')+1)+" ^& cd \"" + dirReal+"\" ^& "+ejecutarKeyword + " ^& echo \"iniciando "+ejecutarKeyword+"\"";
+    //cmd /k -> deja la terminal abierta para debuguear, cmd /c cierra la terminal
+    else templateLanzador = "start cmd /c echo off ^& "+dirReal.substring(0, dirReal.indexOf(':')+1)+" ^& cd \"" + dirReal+"\" ^& "+ejecutarKeyword + " ^& echo \"iniciando "+ejecutarKeyword+"\"";
   }
 
   public boolean enEjecucion() {
@@ -841,30 +1157,6 @@ public void ejecutarLocales() {
   if (config.observador.estado == EstadoModulo.LOCAL) ejecutarObservador();
   if (config.carrete.estado == EstadoModulo.LOCAL) ejecutarCarrete();
 }
-  /*void ejecutarLocales() {
-    //consolaDebug.printlnAlerta( "" + templateLanzador.replace(ejecutarKeyword, observadorReal) );
-    if (modoUtileria) {
-      if (config.lienzo.estado == EstadoModulo.LOCAL) {
-        lienzo=launch( templateLanzador.replace(ejecutarKeyword, lienzoUtileria));
-      }
-      if (config.observador.estado == EstadoModulo.LOCAL) {
-        observador=launch( templateLanzador.replace(ejecutarKeyword, observadorUtileria));
-      }
-      if (config.carrete.estado == EstadoModulo.LOCAL) {
-        carrete=launch( templateLanzador.replace(ejecutarKeyword, carreteUtileria));
-      }
-    } else {
-      if (config.lienzo.estado == EstadoModulo.LOCAL) {
-        lienzo=launch( templateLanzador.replace(ejecutarKeyword, lienzoReal));
-      }
-      if (config.observador.estado == EstadoModulo.LOCAL) {
-        observador = launch( templateLanzador.replace(ejecutarKeyword, observadorReal));
-      }
-      if (config.carrete.estado == EstadoModulo.LOCAL) {
-        carrete=launch( templateLanzador.replace(ejecutarKeyword, carreteReal));
-      }
-    }
-  }*/
 
   public void ejecutarLienzo() {
     if (modoUtileria) {
@@ -880,14 +1172,20 @@ public void ejecutarLocales() {
     }
   }
   public void ejecutarObservador() {
-    consolaDebug.printlnAlerta( "Vamos que intento correr el observadorr!!" );
+    consola.printlnAlerta( "Vamos que intento correr el observadorr!!" );
     if (modoUtileria) {
-      observador=launch( templateLanzador.replace(ejecutarKeyword, observadorUtileria));
+      if( config.modoObservador == ModoObservador.KINECT )
+        observador=launch( templateLanzador.replace(ejecutarKeyword, observadorUtileria));
+      else
+        observador=launch( templateLanzador.replace(ejecutarKeyword, observadorBasicoUtileria));
       /*PAppConsola cons = new PAppConsola();
        PApplet.runSketch(new String[]{"PAppConsola"},cons);
        cons.pasarStream(observador);*/
     } else {
-      observador=launch( templateLanzador.replace(ejecutarKeyword, observadorReal));
+      if( config.modoObservador == ModoObservador.KINECT )
+        observador=launch( templateLanzador.replace(ejecutarKeyword, observadorReal));
+      else
+        observador=launch( templateLanzador.replace(ejecutarKeyword, observadorBasicoReal));
       /*PAppConsola cons = new PAppConsola();
        PApplet.runSketch(new String[]{"PAppConsola"},cons);
        cons.pasarStream(observador);*/
@@ -918,7 +1216,10 @@ class DiccionarioIconos {
     ayuda = "ayuda", 
     observador = "observador", 
     carrete = "carrete", 
-    lienzo = "lienzo", 
+    lienzo = "lienzo",  
+    kinect = "kinect",
+    webcam = "webcam",
+    fondoToggle = "fondo-toggle",
     conexion = "conexion";
 }
 
@@ -930,6 +1231,8 @@ class Iconos implements AutoSetup {
     dicIcos.lienzo, 
     dicIcos.carrete, 
     dicIcos.observador, 
+    dicIcos.webcam, 
+    dicIcos.kinect, 
     dicIcos.play, 
     dicIcos.aroCerrado, 
     dicIcos.aroAbierto,
@@ -1007,6 +1310,7 @@ class Interfaz implements AutoSetup, AutoDraw {
   BotonBasico botonPlay;
   BotonModulo lienzo, observador, carrete;
   InterfazYSensorConexion interfazYSensorConexion;
+  InterfazModoObservador interfazModObs;
   BarraSuperior barraSuperior;
   TwOutQuad animTodoGris;
   Ejecutador ejecutadorLocal;//vive hasta que se mueran sus procesos
@@ -1028,6 +1332,7 @@ class Interfaz implements AutoSetup, AutoDraw {
       carrete = new BotonModulo(new PVector(width/2+sepHoriz, verti), dicIcos.carrete, paleta.ips[2]);
     }
     interfazYSensorConexion = new InterfazYSensorConexion();
+    interfazModObs = new InterfazModoObservador();
     barraSuperior = new BarraSuperior();
     cargarDatos();
 
@@ -1057,6 +1362,7 @@ class Interfaz implements AutoSetup, AutoDraw {
         botonPlay.toggle = true;
       }
     } else if (botonPlay.presionado && botonPlay.toggle) ejecutar();
+    consola.println( "config.modoObservador: " + config.modoObservador );
   }
 
   public void ejecutar() {
@@ -1072,12 +1378,8 @@ class Interfaz implements AutoSetup, AutoDraw {
     if (new File(sketchPath(archivoConfigXML)).exists()) xmlConfig = loadXML( archivoConfigXML );
     if (xmlConfig != null) xmlConfig = xmlConfig.getChild(xmlTagPanel);
 
-    //config.cargar(xmlConfig);
-    //-------- para cargar local
-    //--- :D esto no tien que ver con le cambio feo de el boton basico peor igual lo comento
-    //---- para que siempre empiece en localhost y se vea como en la documentacion
-    //---- comente el cargar con el xml y cree en metodo que crea los campos pero con info de local host
-    config.cargar_local();
+    config.cargar(xmlConfig);
+    interfazModObs.set( config );
     lienzo.set(config.lienzo);
     observador.set(config.observador);
     carrete.set(config.carrete);
@@ -1099,21 +1401,35 @@ class Interfaz implements AutoSetup, AutoDraw {
   float introTime = 0;
   boolean introActiva = true;
   public void intro() {
+    if (interfazModObs.autoActivo) return;
+    
     float introBotonModuloBase = 2, introBotonModuloSep = .05f;
     if (introCheck(introBotonModuloBase+introBotonModuloSep*0))lienzo.mostrar = true;
     if (introCheck(introBotonModuloBase+introBotonModuloSep*1))observador.mostrar = true;
     if (introCheck(introBotonModuloBase+introBotonModuloSep*2))carrete.mostrar = true;
 
     introTime += dt;
-    if (introTime > introBotonModuloBase+introBotonModuloSep*2) introActiva = false;
+    if (introTime > introBotonModuloBase+introBotonModuloSep*2){
+      introActiva = false;
+      botonPlay.autoActivo = lienzo.autoActivo = observador.autoActivo = carrete.autoActivo = true;
+    }
   }
   public boolean introCheck(float t) {
     return introTime < t && introTime+dt >= t;
   }
+  
+  public void resetIntro(){
+    introTime = 0;
+    introActiva = true;
+    botonPlay.autoActivo = lienzo.autoActivo = observador.autoActivo = carrete.autoActivo = false;
+    lienzo.mostrar = observador.mostrar = carrete.mostrar = false;
+    lienzo.iniciarTweeners(); observador.iniciarTweeners(); carrete.iniciarTweeners();
+    interfazModObs.reset();
+  }
 
   public void grisPorTodoLocal() {
-    carrete.panelIPsAbierto = observador.panelIPsAbierto = lienzo.panelIPsAbierto = interfazYSensorConexion.visible;
-    todoLocal = todoLocal && !interfazYSensorConexion.visible;
+    carrete.panelIPsAbierto = observador.panelIPsAbierto = lienzo.panelIPsAbierto = interfazYSensorConexion.visible();
+    todoLocal = todoLocal && !interfazYSensorConexion.visible();
     animTodoGris.actualizar(todoLocal?dt:-dt);
     carrete.todoGris = constrain(animTodoGris.valor()-2, 0, 1);
     observador.todoGris = constrain(animTodoGris.valor()-1, 0, 1);
@@ -1144,10 +1460,87 @@ class Interfaz implements AutoSetup, AutoDraw {
       }
     }
 
+    if (interfazYSensorConexion.lienzo.focus) controlOsc.ultimoPingLienzo = 0;
+    if (interfazYSensorConexion.observador.focus) controlOsc.ultimoPingObservador = 0;
+    if (interfazYSensorConexion.carrete.focus) controlOsc.ultimoPingCarrete = 0;
+
     lienzo.remotoEncontrado = millis()-controlOsc.ultimoPingLienzo <= pingOff;
     observador.remotoEncontrado = millis()-controlOsc.ultimoPingObservador <= pingOff;
     carrete.remotoEncontrado = millis()-controlOsc.ultimoPingCarrete <= pingOff;
   }
+}
+class InterfazModoObservador extends Auto implements AutoDraw {
+  //boolean activo = true;
+  PImage icoCam,icoKin,fondoToggle;
+  
+  BotonBasico botonCam, botonKin;
+  ConfiguracionCOD05 config;
+  
+  InterfazModoObservador() {
+    autoDraw.add(this);
+    autoActivo = true;
+    
+    fondoToggle = iconos.get(dicIcos.fondoToggle);
+    icoCam = iconos.get(dicIcos.webcam);
+    icoKin = iconos.get(dicIcos.kinect);
+    icoCam.resize(icoCam.width*3/4,icoCam.height*3/4);
+    icoKin.resize(icoKin.width*3/4,icoKin.height*3/4);
+    fondoToggle.resize(fondoToggle.width*3/4,fondoToggle.height*3/4);
+    
+    botonCam = new BotonBasico( width*0.4f, height*0.5f, 0, dicIcos.webcam, paleta.inactivo );
+    botonCam.escala = 1.0f;
+    botonCam.hoverEscala = new TwOutBack().inicializar(.25f, 1, 1.1f, 0);
+    botonCam.toggleAlfa = new TwOutQuad().inicializar(.25f, 255, 25, 0);
+    botonCam.setAutoActivo( true );
+    
+    botonKin = new BotonBasico( width*0.6f, height*0.5f, 0, dicIcos.kinect, paleta.inactivo );
+    botonKin.escala = 1.0f;
+    botonKin.hoverEscala = new TwOutBack().inicializar(.25f, 1, 1.1f, 0);
+    botonKin.toggleAlfa = new TwOutQuad().inicializar(.25f, 255, 25, 0);
+    botonKin.setAutoActivo( true );
+
+  }
+  
+  public void set( ConfiguracionCOD05 config ){
+    this.config = config;
+  }
+  
+  public void reset(){
+    botonCam.toggle = false;
+    botonKin.toggle = false;
+    setAutoActivo( true );
+  }
+  
+  public void draw() {
+    if ( autoActivo ) {
+      imageMode(CENTER);
+      noStroke();
+      fill(paleta.panelSuperior);
+      ellipse( botonCam.pos.x, botonCam.pos.y, icoCam.width*botonCam.escala, icoCam.height*botonCam.escala );
+      ellipse( botonKin.pos.x, botonCam.pos.y, icoKin.width*botonKin.escala, icoKin.height*botonKin.escala );
+      
+      if( botonCam.toggle ){
+        setAutoActivo( false );
+        interfaz.barraSuperior.botonAtras.setAutoActivo( true );
+        config.modoObservador = ModoObservador.WEBCAM;
+        interfaz.observador.setIcono( dicIcos.webcam, 0.84f );
+      }else if( botonKin.toggle ){
+        setAutoActivo( false );
+        interfaz.barraSuperior.botonAtras.setAutoActivo( true );
+        config.modoObservador = ModoObservador.KINECT;
+        interfaz.observador.setIcono( dicIcos.kinect, 0.84f );
+      }
+      
+    }
+    
+  }
+  
+  public void setAutoActivo( boolean autoActivo ){
+    super.setAutoActivo( autoActivo );
+    botonCam.setAutoActivo( autoActivo );
+    botonKin.setAutoActivo( autoActivo );
+  }
+  
 }
 //void reintentarConexion
 
@@ -1170,7 +1563,16 @@ class InterfazYSensorConexion implements AutoDraw {
   TwInOutBack tweenPanel;
   PImage iconoConexion;
   //String iconoConexion;
-  boolean visible = false;
+
+  public boolean visible() {
+    if( interfaz.introActiva ) return false;
+    if (config==null)return false;
+    return config.panelConexiones;
+  }
+  public boolean visible(boolean valor) {
+    if (config==null)return valor;
+    else return (config.panelConexiones=valor);
+  }
 
   boolean reintantando;
   final String ipLocalHost = "127.0.0.1";
@@ -1185,7 +1587,7 @@ class InterfazYSensorConexion implements AutoDraw {
   BotonBasico mas, menos;
   PVector ejeMasMenos;
 
-  InterfazYSensorConexion() {
+  InterfazYSensorConexion() {    
     autoDraw.add(this);
     iconoConexion = iconos.get(dicIcos.conexion);
     //if (this.iconoConexion == null) this.iconoConexion = iconos.iconoVacio();
@@ -1204,7 +1606,7 @@ class InterfazYSensorConexion implements AutoDraw {
     carrete = new CampoIP(xBase, posYBase[2], anchoCampoIP, altoCampoIP, paleta.ips[2], .4f);
   }
   public void draw() {
-    boolean sinConexion = oscP5.ip().equals(ipLocalHost);
+    /*boolean sinConexion = oscP5.ip().equals(ipLocalHost);
     pushStyle();
     if (sinConexion)
     {
@@ -1214,11 +1616,19 @@ class InterfazYSensorConexion implements AutoDraw {
       textSize(16);
       text("Sin Conexion (posiblemente)", 12, 8);
     }
-    popStyle();
+    popStyle();*/
     panelInferior();
 
-    observador.col = (lienzo.ip .equals( observador.ip) ) ? paleta.ips[0] : paleta.ips[1];
-    carrete.col = (observador.ip .equals( carrete.ip) ) ? observador.col : (lienzo.ip .equals( carrete.ip) ) ? lienzo.col : paleta.ips[2];
+    if (tweenPanel.estado==tweenPanel.duracion || visible()) {
+      observador.col = (lienzo.ip .equals( observador.ip) ) ? paleta.ips[0] : paleta.ips[1];
+      carrete.col = (observador.ip .equals( carrete.ip) ) ? observador.col : (lienzo.ip .equals( carrete.ip) ) ? lienzo.col : paleta.ips[2];
+    } else if(tweenPanel.estado==0){
+      observador.col = carrete.col = lienzo.col = paleta.ips[0];
+    }else{
+      observador.col = lerpColor(paleta.ips[0],observador.col,tweenPanel.estado/tweenPanel.duracion);
+      carrete.col = lerpColor(paleta.ips[0],carrete.col,tweenPanel.estado/tweenPanel.duracion);
+      lienzo.col = lerpColor(paleta.ips[0],lienzo.col,tweenPanel.estado/tweenPanel.duracion);
+    }
   }
 
   public void setConfig(ConfiguracionCOD05 config) {
@@ -1226,27 +1636,27 @@ class InterfazYSensorConexion implements AutoDraw {
     lienzo.set(config.lienzo);
     observador.set(config.observador);
     carrete.set(config.carrete);
-    visible = config.panelConexiones;
+    visible( false );
   }
 
   public void panelInferior() {
-    tweenPanel.actualizar(visible?dt:-dt);
+    tweenPanel.actualizar(visible()?dt:-dt);
 
     menos.pos.z = tweenPanel.valor()*HALF_PI+HALF_PI;
     mas.pos.z = menos.pos.z+HALF_PI;
     menos.pos.set(ejeMasMenos.x+ejeMasMenos.z*cos(menos.pos.z), ejeMasMenos.y+ejeMasMenos.z*sin(menos.pos.z));
     mas.pos.set(ejeMasMenos.x+ejeMasMenos.z*cos(mas.pos.z), ejeMasMenos.y+ejeMasMenos.z*sin(mas.pos.z));
 
-    //----- :D
     if (interfaz.todoLocal) {
-      mas.dibujar = false;
+      mas.setAutoActivo( false );
+      menos.setAutoActivo( false );
     } else {
-      mas.dibujar = true;
+      mas.setAutoActivo( true );
+      menos.setAutoActivo( true );
     }
 
     if (menos.presionado || mas.presionado) {
-      visible = !visible;
-      config.panelConexiones = visible;
+      visible( !visible() );
     }
 
     float offsetPanel = height-tweenPanel.valor()*tamPanelInferior;
@@ -1344,11 +1754,12 @@ class ControlOsc implements AutoSetup {
       else configRemota.carrete.estado = EstadoModulo.REMOTO;
     }
   }
-  public void responderEstablecerEstados(int lienzo, int observador, int carrete) {
+  public void responderEstablecerEstados(int lienzo, int observador, int carrete, int modo_observador ) {
     if (configRemota == null) configRemota = new ConfiguracionCOD05();
     configRemota.lienzo.estado = EstadoModuloList[lienzo];
     configRemota.observador.estado = EstadoModuloList[observador];
     configRemota.carrete.estado = EstadoModuloList[carrete];
+    configRemota.modoObservador = modo_observador==0?ModoObservador.WEBCAM:ModoObservador.KINECT;
   }
 
   public void ejecutarRemotos(ConfiguracionCOD05 config) {
@@ -1364,13 +1775,14 @@ class ControlOsc implements AutoSetup {
         OscMessage msj = new OscMessage(establecerEstados)
           .add(EstadoModuloToInt(config.lienzo.estado))
           .add(EstadoModuloToInt(config.observador.estado))
-          .add(EstadoModuloToInt(config.carrete.estado));
+          .add(EstadoModuloToInt(config.carrete.estado))
+          .add(config.modoObservador==ModoObservador.WEBCAM?0:1);
         osc.send( msj, destino);
         println(establecerEstados, msj, destino);
         msj = new OscMessage(establecerIPs)
-          .add(config.lienzo.ip).add(config.lienzo.puerto)
-          .add(config.observador.ip).add(config.observador.puerto)
-          .add(config.carrete.ip).add(config.carrete.puerto);
+          .add(config.lienzo.estado == EstadoModulo.LOCAL?oscP5.ip():config.lienzo.ip).add(config.lienzo.puerto)
+          .add(config.observador.estado == EstadoModulo.LOCAL?oscP5.ip():config.observador.ip).add(config.observador.puerto)
+          .add(config.carrete.estado == EstadoModulo.LOCAL?oscP5.ip():config.carrete.ip).add(config.carrete.puerto);
         osc.send( msj, destino);
         println(establecerIPs, msj, destino);
         osc.send(new OscMessage(lanzar).add(moduloID), destino);
@@ -1522,6 +1934,23 @@ class Paleta implements AutoSetup {
     fondo = color(0xff1A1D1E);
     panelSuperior = color(0xff141516);
     marca = color(0xff42494A);
+  }
+}
+public class Reloj {
+
+  private int millisActual, millisAnterior, deltaMillis;
+
+  public Reloj() {
+  }
+
+  public int getDeltaMillis() {
+    return deltaMillis;
+  }
+
+  public void actualizar() {
+    millisAnterior = millisActual;
+    millisActual = millis();
+    deltaMillis = millisActual - millisAnterior;
   }
 }
 //      10/5/2017

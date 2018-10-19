@@ -12,7 +12,7 @@ OscP5 oscP5;
 NetAddress consola;
 
 Sistema sistema;
-ManagerUsuarios managerUsuarios;
+ManagerJoints managerJoints;
 
 boolean pausa; 
 boolean fondoAlfa;
@@ -39,9 +39,9 @@ void setup() {
   xmlMaquinarias  = loadXML("maqs.xml"); 
   maquinarias = new Maquinarias(xmlMaquinarias);
 
-  managerUsuarios = new ManagerUsuarios();
+  managerJoints = new ManagerJoints();
 
-  sistema = new Sistema(this, raizDeCantidad*raizDeCantidad, managerUsuarios);
+  sistema = new Sistema(this, raizDeCantidad*raizDeCantidad, managerJoints);
 
   //if (sistema.registroModificadores==null)sistema.registroModificadores = new HashMap();
   //println(sistema.registroModificadores);
@@ -68,7 +68,7 @@ void setup() {
   println(Mod_DibujarRastroCircular.registrador);
   println(Mod_DibujarRastroCuadrado.registrador);
   println(Mod_DibujarRastroShape.registrador);
-  println(Mod_AtraccionALaMano.registrador);
+  println(Mod_AtraccionAlTorso.registrador);
   println(Mod_Egoespacio.registrador);
   println(Mod_PaletaDefault.registrador);
   println(Mod_PaletaPersonalizada.registrador);
@@ -121,14 +121,13 @@ void ciclo() {
   }
 
   sistema.actualizar();
-  managerUsuarios.actualizar();
 
   fill(255);
   text(frameRate, 5, 10);
 
   if ( sistema.debug ) {
     text( "DEBUG", 5, 30 );
-    managerUsuarios.debug( this );    
+    managerJoints.debug( this );    
   }
   consolaDebug();
 }

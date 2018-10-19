@@ -7,7 +7,7 @@ void dibujarDebugCerrado ( UsuarioCerrado cerrado, PGraphics p3d ) {
   p3d.hint(DISABLE_DEPTH_MASK);
   p3d.pushMatrix();
   p3d.translate(cerrado.centroPromedio.x, cerrado.centroPromedio.y, cerrado.centroPromedio.z);
-  p3d.sphere(cerrado.umbralCerrado*0.25);
+  p3d.sphere(cerrado.umbralCerrado);
   p3d.popMatrix();
   p3d.hint(ENABLE_DEPTH_MASK);
   for (int j : cerrado.jointsExtremidades) {

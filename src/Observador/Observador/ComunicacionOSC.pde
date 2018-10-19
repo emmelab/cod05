@@ -20,9 +20,9 @@ public class ComunicacionOSC{
   
     config.cargar(xmlConfig);
     
-    //oscP5 = new OscP5( p5, 12300); 
-    //direccionAPI = new NetAddress("127.0.0.1", 13000 );
-    //direccionSistema = new NetAddress( "127.0.0.1", 12000 );
+    /*oscP5 = new OscP5( p5, 12020); 
+    direccionAPI = new NetAddress("127.0.0.1", 12030 );
+    direccionSistema = new NetAddress( "127.0.0.1", 12010 );*/
     
     oscP5 = new OscP5( p5, config.observador.puerto); 
     direccionAPI = new NetAddress( config.carrete.ip, config.carrete.puerto );

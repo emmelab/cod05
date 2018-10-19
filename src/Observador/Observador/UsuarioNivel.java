@@ -49,6 +49,11 @@ class UsuarioNivel {
     factorUmbralAlto = PApplet.constrain( _factorUmbralAlto, factorUmbralBajo, 1.0f );
   }
   
+  public static void setUmbrales( float _factorUmbralBajo, float _factorUmbralAlto ){
+    factorUmbralBajo = _factorUmbralBajo;
+    factorUmbralAlto = _factorUmbralAlto;
+  }
+  
   public static float getFactorUmbralBajo(){
     return factorUmbralBajo;
   }

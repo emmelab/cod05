@@ -150,9 +150,16 @@ void digerirPort(){
   
   void drawIp(){
     drawGeneric(focus,pos,tam,"999.999.999.999",ipInput);
+    if (config.estado != EstadoModulo.REMOTO) {
+    ipInput = "127.0.0.1";
+    focus = false;
+    }
   }
   void drawPuerto(){
     drawGeneric(focusPort,PVector.add(pos,posInputPuerto),tamInputPuerto,"65535",portInput);
+    if (focusPort && config.estado == EstadoModulo.APAGADO) {
+    focusPort = false;
+    }
   }
   void drawGeneric(boolean focus, PVector pos, PVector tam, String tamRefText, String text){
     pushStyle();
@@ -162,7 +169,7 @@ void digerirPort(){
       noFill();
     } else {
       noStroke();
-      fill(col);
+      fill(config.estado==EstadoModulo.APAGADO? paleta.inactivo:col);
     }
     translate(pos.x, pos.y);
     rect(0, 0, tam.x, tam.y);

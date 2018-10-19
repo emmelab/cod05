@@ -19,7 +19,16 @@ class InterfazYSensorConexion implements AutoDraw {
   TwInOutBack tweenPanel;
   PImage iconoConexion;
   //String iconoConexion;
-  boolean visible = false;
+
+  boolean visible() {
+    if( interfaz.introActiva ) return false;
+    if (config==null)return false;
+    return config.panelConexiones;
+  }
+  boolean visible(boolean valor) {
+    if (config==null)return valor;
+    else return (config.panelConexiones=valor);
+  }
 
   boolean reintantando;
   final String ipLocalHost = "127.0.0.1";
@@ -34,7 +43,7 @@ class InterfazYSensorConexion implements AutoDraw {
   BotonBasico mas, menos;
   PVector ejeMasMenos;
 
-  InterfazYSensorConexion() {
+  InterfazYSensorConexion() {    
     autoDraw.add(this);
     iconoConexion = iconos.get(dicIcos.conexion);
     //if (this.iconoConexion == null) this.iconoConexion = iconos.iconoVacio();
@@ -53,7 +62,7 @@ class InterfazYSensorConexion implements AutoDraw {
     carrete = new CampoIP(xBase, posYBase[2], anchoCampoIP, altoCampoIP, paleta.ips[2], .4f);
   }
   void draw() {
-    boolean sinConexion = oscP5.ip().equals(ipLocalHost);
+    /*boolean sinConexion = oscP5.ip().equals(ipLocalHost);
     pushStyle();
     if (sinConexion)
     {
@@ -63,11 +72,19 @@ class InterfazYSensorConexion implements AutoDraw {
       textSize(16);
       text("Sin Conexion (posiblemente)", 12, 8);
     }
-    popStyle();
+    popStyle();*/
     panelInferior();
 
-    observador.col = (lienzo.ip .equals( observador.ip) ) ? paleta.ips[0] : paleta.ips[1];
-    carrete.col = (observador.ip .equals( carrete.ip) ) ? observador.col : (lienzo.ip .equals( carrete.ip) ) ? lienzo.col : paleta.ips[2];
+    if (tweenPanel.estado==tweenPanel.duracion || visible()) {
+      observador.col = (lienzo.ip .equals( observador.ip) ) ? paleta.ips[0] : paleta.ips[1];
+      carrete.col = (observador.ip .equals( carrete.ip) ) ? observador.col : (lienzo.ip .equals( carrete.ip) ) ? lienzo.col : paleta.ips[2];
+    } else if(tweenPanel.estado==0){
+      observador.col = carrete.col = lienzo.col = paleta.ips[0];
+    }else{
+      observador.col = lerpColor(paleta.ips[0],observador.col,tweenPanel.estado/tweenPanel.duracion);
+      carrete.col = lerpColor(paleta.ips[0],carrete.col,tweenPanel.estado/tweenPanel.duracion);
+      lienzo.col = lerpColor(paleta.ips[0],lienzo.col,tweenPanel.estado/tweenPanel.duracion);
+    }
   }
 
   void setConfig(ConfiguracionCOD05 config) {
@@ -75,27 +92,27 @@ class InterfazYSensorConexion implements AutoDraw {
     lienzo.set(config.lienzo);
     observador.set(config.observador);
     carrete.set(config.carrete);
-    visible = config.panelConexiones;
+    visible( false );
   }
 
   void panelInferior() {
-    tweenPanel.actualizar(visible?dt:-dt);
+    tweenPanel.actualizar(visible()?dt:-dt);
 
     menos.pos.z = tweenPanel.valor()*HALF_PI+HALF_PI;
     mas.pos.z = menos.pos.z+HALF_PI;
     menos.pos.set(ejeMasMenos.x+ejeMasMenos.z*cos(menos.pos.z), ejeMasMenos.y+ejeMasMenos.z*sin(menos.pos.z));
     mas.pos.set(ejeMasMenos.x+ejeMasMenos.z*cos(mas.pos.z), ejeMasMenos.y+ejeMasMenos.z*sin(mas.pos.z));
 
-    //----- :D
     if (interfaz.todoLocal) {
-      mas.dibujar = false;
+      mas.setAutoActivo( false );
+      menos.setAutoActivo( false );
     } else {
-      mas.dibujar = true;
+      mas.setAutoActivo( true );
+      menos.setAutoActivo( true );
     }
 
     if (menos.presionado || mas.presionado) {
-      visible = !visible;
-      config.panelConexiones = visible;
+      visible( !visible() );
     }
 
     float offsetPanel = height-tweenPanel.valor()*tamPanelInferior;

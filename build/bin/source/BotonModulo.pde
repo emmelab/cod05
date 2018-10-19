@@ -1,4 +1,4 @@
-class BotonModulo implements AutoDraw, AutoMousePressed {
+class BotonModulo extends Auto implements AutoDraw, AutoMousePressed {
   ConfiguracionCOD05.ConfigModulo config;
   EstadoModulo estado = EstadoModulo.LOCAL;
   boolean mostrar = false, remotoEncontrado = false, panelIPsAbierto = false;
@@ -12,31 +12,42 @@ class BotonModulo implements AutoDraw, AutoMousePressed {
   float escala = 0.6f;
   BotonModulo(PVector pos, String icono, color col) {
     this.pos = pos;
-    this.icono = iconos.get(icono);
+    setIcono( icono, 0.6 );
     this.aroCerrado = iconos.get(dicIcos.aroCerrado);
     this.aroAbierto = iconos.get(dicIcos.aroAbierto);
-    if (this.icono == null) this.icono = iconos.iconoVacio();
     this.colEncendido = col;
     this.colApagado = color(red(col)*.299+green(col)*.587+blue(col)*.144);
+    iniciarTweeners();
+    autoDraw.add(this);
+    autoMousePressed.add(this);
+  }
+  
+  void iniciarTweeners(){
     animAlfa = (new TwOutQuad()).inicializar(.5, 0, 255);
     animAro = (new TwOutBack()).inicializar(.5, this.icono.width*.8, this.icono.width*1.2, .5);
     animAroConectado = (new TwOutBack()).inicializar(animAro);
     animPos = (new TwOutBack()).inicializar(.3, pos.y-100, pos.y);
     animColor = (new TwOutQuad()).inicializar(.3);
-    autoDraw.add(this);
-    autoMousePressed.add(this);
+  }
+  
+  void setIcono( String icono, float escala ){
+    this.escala = escala;
+    this.icono = iconos.get(icono);
+    if (this.icono == null) this.icono = iconos.iconoVacio();
+    iniciarTweeners();
   }
 
   void set(ConfiguracionCOD05.ConfigModulo config) {
     this.config = config;
-    estado = config.estado;
+    estado = config.estado;//-*-*-*-*-*-*-*-*
   }
 
   void mousePressed() {
+    if( !autoActivo ) return;
     if (dist(pos.x, pos.y, mouseX, mouseY) < icono.width/2) {
       if (estado == EstadoModulo.APAGADO) estado = EstadoModulo.LOCAL;
       else if (estado == EstadoModulo.LOCAL) estado = panelIPsAbierto ? EstadoModulo.REMOTO : EstadoModulo.APAGADO;
-      else if (estado == EstadoModulo.REMOTO) estado = EstadoModulo.APAGADO;
+      else if (estado == EstadoModulo.REMOTO) estado = panelIPsAbierto? EstadoModulo.APAGADO : EstadoModulo.LOCAL;
       if (config!=null)config.estado = estado;
     }
   }

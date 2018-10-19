@@ -1,6 +1,7 @@
 import SimpleOpenNI.*;
 
 ComunicacionOSC comunicacionOSC;
+Paleta paleta;
 Motor motor;
 
 int estabilidadGeneral = 6;
@@ -9,6 +10,7 @@ void setup(){
   size( 800, 600, P2D );
   
   comunicacionOSC = new ComunicacionOSC( this );
+  paleta = new Paleta();
   motor = new Motor(this);
 
 }
@@ -16,6 +18,11 @@ void setup(){
 void draw(){
   frame.setTitle( "fps: " + frameRate ); 
   motor.ejecutar();
+  pushStyle();
+  fill( 255 );
+  textSize( 35 );
+  text( "fps: " + nf(frameRate,0,-1), 10, height - 20 );
+  popStyle();
 }
 
 void keyPressed(){

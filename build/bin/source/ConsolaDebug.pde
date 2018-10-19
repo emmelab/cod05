@@ -1,5 +1,5 @@
 Reloj reloj = new Reloj();
-ConsolaDebug consolaDebug = new ConsolaDebug( false );
+ConsolaDebug consolaDebug = new ConsolaDebug();
 
 public void consolaDebug() {
   reloj.actualizar();
@@ -26,17 +26,6 @@ public final class ConsolaDebug {
     tamanoAlerta = int( height * 0.12 ); //int( height * 0.023 ); //tamanoAlerta = 20;
 
     debug = verFps = verDatos = verAlertas = true;
-  }
-  
-  public ConsolaDebug( boolean verFps ) {
-    texto = "";
-    colorTexto = color( #000000 );//color( 255 );
-    colorAlerta = color(175, 194, 43);//#FF0000
-    tamanoTexto = int( height * 0.12 ); //int( height * 0.023 ); //tamanoTexto = 20;
-    tamanoAlerta = int( height * 0.12 ); //int( height * 0.023 ); //tamanoAlerta = 20;
-    
-    debug = verDatos = verAlertas = true;
-    this.verFps = verFps;
   }
 
   //--------------------------------------- METODOS PUBLICOS

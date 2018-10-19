@@ -149,7 +149,7 @@ public void draw() {
   }
 
   // ipManager.fondo();//-----esto ya no sirve pero lo dejo aqui para recordarme 
-  //-----que tengoq ue borrar la pesata\u00f1a y todo lo demas qe 
+  //-----que tengoq ue borrar la pesataña y todo lo demas qe 
   //-----tenga uqe ver con esto
 
   revisarConectadoConSistema();
@@ -462,7 +462,7 @@ public void initOSC() {
 
   config.cargar(xmlConfig);
 
-  /* oscP5 = new OscP5(this, 14000);//config.carrete.puerto);
+  /* oscP5 = new OscP5(this, 12030);//config.carrete.puerto);
    sistema = new NetAddress("127.0.0.1", 12010);//"config.lienzo.ip, config.lienzo.puerto);
    */
   oscP5 = new OscP5(this, config.carrete.puerto);
@@ -1610,7 +1610,7 @@ class ColeccionOpciones {
  return false;
  }
  }*/
-//v 22/06/2017
+//v 07/09/2017
 String archivoConfigXML = "../configcod05.xml";
 String xmlTagPanel = "panel", xmlTagEjecucion = "ejecucion";
 
@@ -1618,12 +1618,19 @@ enum EstadoModulo {
   APAGADO, LOCAL, REMOTO
 }
 final EstadoModulo[] EstadoModuloList = new EstadoModulo[]{EstadoModulo.APAGADO, EstadoModulo.LOCAL, EstadoModulo.REMOTO};
-public int EstadoModuloToInt(EstadoModulo estado) {return estado==EstadoModulo.APAGADO?0:estado==EstadoModulo.LOCAL?1:2;};
+public int EstadoModuloToInt(EstadoModulo estado) {
+  return estado==EstadoModulo.APAGADO?0:estado==EstadoModulo.LOCAL?1:2;
+};
 
 class ConfiguracionCOD05 {
   ConfigModulo lienzo, observador, carrete;
   boolean panelConexiones = false;
 
+  ConfiguracionCOD05() {
+    lienzo = new ConfigModulo().Iniciar("lienzo", 12010);
+    observador = new ConfigModulo().Iniciar("observador", 12020);
+    carrete = new ConfigModulo().Iniciar("carrete", 12030);
+  }
   class ConfigModulo {
     String id = "indefinido";
     String ip = "127.0.0.1";
@@ -1653,9 +1660,9 @@ class ConfiguracionCOD05 {
     }
   }
   public void cargar(XML xml) {
-    lienzo = new ConfigModulo().Iniciar("lienzo", 12010);
-    observador = new ConfigModulo().Iniciar("observador", 12020);
-    carrete = new ConfigModulo().Iniciar("carrete", 12030);
+    if (lienzo==null)lienzo = new ConfigModulo().Iniciar("lienzo", 12010);
+    if (observador==null)observador = new ConfigModulo().Iniciar("observador", 12020);
+    if (carrete==null)carrete = new ConfigModulo().Iniciar("carrete", 12030);
     if (xml != null) {
       panelConexiones = xml.getInt("panelConexiones", panelConexiones?1:0)==1;
       XML[] configs = xml.getChildren("ConfigModulo");
@@ -2771,7 +2778,7 @@ class Modificador {
   String nombre;
   boolean sensible;
   boolean hover;
-  boolean hoverExtendido; //---------------como el icono es muy peque\u00f1o el espaio de hover es muy reducido
+  boolean hoverExtendido; //---------------como el icono es muy pequeño el espaio de hover es muy reducido
   //---------------- entonces esto es para extender el espacio de hover sin embargo mantener 
   //----------------el click solo en el espacio de incono
   Categoria categoria;

@@ -18,21 +18,21 @@ class Sistema {
   final int tamano;
   final HashMap<String, Atributo> atributos = new HashMap();
   
-  private ManagerUsuarios managerUsuarios;
+  private ManagerJoints managerJoints;
   
   Sistema(PApplet p5, int tamano) {
     this.p5 = p5;
     this.tamano = tamano;
   }
   
-  Sistema(PApplet p5, int tamano, ManagerUsuarios managerUsuarios) {
+  Sistema(PApplet p5, int tamano, ManagerJoints managerJoints) {
     this.p5 = p5;
     this.tamano = tamano;
-    this.managerUsuarios = managerUsuarios;
+    this.managerJoints = managerJoints;
   }
   
-  ManagerUsuarios getManagerUsuarios(){
-    return managerUsuarios;
+  ManagerJoints getManagerJoints(){
+    return managerJoints;
   }
 
   void actualizar() {

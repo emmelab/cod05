@@ -9,7 +9,10 @@ class DiccionarioIconos {
     ayuda = "ayuda", 
     observador = "observador", 
     carrete = "carrete", 
-    lienzo = "lienzo", 
+    lienzo = "lienzo",  
+    kinect = "kinect",
+    webcam = "webcam",
+    fondoToggle = "fondo-toggle",
     conexion = "conexion";
 }
 
@@ -21,6 +24,8 @@ class Iconos implements AutoSetup {
     dicIcos.lienzo, 
     dicIcos.carrete, 
     dicIcos.observador, 
+    dicIcos.webcam, 
+    dicIcos.kinect, 
     dicIcos.play, 
     dicIcos.aroCerrado, 
     dicIcos.aroAbierto,

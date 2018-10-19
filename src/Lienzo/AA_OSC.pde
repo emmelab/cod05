@@ -16,7 +16,7 @@ void initOSC() {
   noSmooth();
   noStroke();
   /* oscP5 = new OscP5(this, 12010);
-   consola = new NetAddress("127.0.0.1", 14000);*/
+   consola = new NetAddress("127.0.0.1", 12030);*/
   oscP5 = new OscP5(this, config.lienzo.puerto);
   consola = new NetAddress(config.carrete.ip, config.carrete.puerto);
 
@@ -147,11 +147,12 @@ void setMaquinaria(String nombre) {
 }
 
 void recibirUsuarioJoint(int keyUsuario, String nombre_joint, float x, float y, float confianza ) {
-  managerUsuarios.setUsuarioJoint( keyUsuario, nombre_joint, x, y, confianza );
+  managerJoints.setJoint( nombre_joint, x, y, confianza );
 }
 
 void removerUsuario( int keyUsuario ) {
-  println("EN LA PESTANA OSC ESTA COMENTADO REMOVER USUARIO");
+  //Esto es cuando existia ManagerUsuarios
+  //println("EN LA PESTANA OSC ESTA COMENTADO REMOVER USUARIO");
   //managerUsuarios.removerUsuario( keyUsuario );
 }
 
