@@ -12,19 +12,29 @@ class BotonModulo extends Auto implements AutoDraw, AutoMousePressed {
   float escala = 0.6f;
   BotonModulo(PVector pos, String icono, color col) {
     this.pos = pos;
-    this.icono = iconos.get(icono);
+    setIcono( icono, 0.6 );
     this.aroCerrado = iconos.get(dicIcos.aroCerrado);
     this.aroAbierto = iconos.get(dicIcos.aroAbierto);
-    if (this.icono == null) this.icono = iconos.iconoVacio();
     this.colEncendido = col;
     this.colApagado = color(red(col)*.299+green(col)*.587+blue(col)*.144);
+    iniciarTweeners();
+    autoDraw.add(this);
+    autoMousePressed.add(this);
+  }
+  
+  void iniciarTweeners(){
     animAlfa = (new TwOutQuad()).inicializar(.5, 0, 255);
     animAro = (new TwOutBack()).inicializar(.5, this.icono.width*.8, this.icono.width*1.2, .5);
     animAroConectado = (new TwOutBack()).inicializar(animAro);
     animPos = (new TwOutBack()).inicializar(.3, pos.y-100, pos.y);
     animColor = (new TwOutQuad()).inicializar(.3);
-    autoDraw.add(this);
-    autoMousePressed.add(this);
+  }
+  
+  void setIcono( String icono, float escala ){
+    this.escala = escala;
+    this.icono = iconos.get(icono);
+    if (this.icono == null) this.icono = iconos.iconoVacio();
+    iniciarTweeners();
   }
 
   void set(ConfiguracionCOD05.ConfigModulo config) {

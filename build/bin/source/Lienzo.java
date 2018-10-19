@@ -32,7 +32,7 @@ OscP5 oscP5;
 NetAddress consola;
 
 Sistema sistema;
-ManagerUsuarios managerUsuarios;
+ManagerJoints managerJoints;
 
 boolean pausa; 
 boolean fondoAlfa;
@@ -59,9 +59,9 @@ public void setup() {
   xmlMaquinarias  = loadXML("maqs.xml"); 
   maquinarias = new Maquinarias(xmlMaquinarias);
 
-  managerUsuarios = new ManagerUsuarios();
+  managerJoints = new ManagerJoints();
 
-  sistema = new Sistema(this, raizDeCantidad*raizDeCantidad, managerUsuarios);
+  sistema = new Sistema(this, raizDeCantidad*raizDeCantidad, managerJoints);
 
   //if (sistema.registroModificadores==null)sistema.registroModificadores = new HashMap();
   //println(sistema.registroModificadores);
@@ -88,7 +88,7 @@ public void setup() {
   println(Mod_DibujarRastroCircular.registrador);
   println(Mod_DibujarRastroCuadrado.registrador);
   println(Mod_DibujarRastroShape.registrador);
-  println(Mod_AtraccionALaMano.registrador);
+  println(Mod_AtraccionAlTorso.registrador);
   println(Mod_Egoespacio.registrador);
   println(Mod_PaletaDefault.registrador);
   println(Mod_PaletaPersonalizada.registrador);
@@ -141,14 +141,13 @@ public void ciclo() {
   }
 
   sistema.actualizar();
-  managerUsuarios.actualizar();
 
   fill(255);
   text(frameRate, 5, 10);
 
   if ( sistema.debug ) {
     text( "DEBUG", 5, 30 );
-    managerUsuarios.debug( this );    
+    managerJoints.debug( this );    
   }
   consolaDebug();
 }
@@ -187,7 +186,7 @@ public void initOSC() {
   noSmooth();
   noStroke();
   /* oscP5 = new OscP5(this, 12010);
-   consola = new NetAddress("127.0.0.1", 14000);*/
+   consola = new NetAddress("127.0.0.1", 12030);*/
   oscP5 = new OscP5(this, config.lienzo.puerto);
   consola = new NetAddress(config.carrete.ip, config.carrete.puerto);
 
@@ -318,11 +317,12 @@ public void setMaquinaria(String nombre) {
 }
 
 public void recibirUsuarioJoint(int keyUsuario, String nombre_joint, float x, float y, float confianza ) {
-  managerUsuarios.setUsuarioJoint( keyUsuario, nombre_joint, x, y, confianza );
+  managerJoints.setJoint( nombre_joint, x, y, confianza );
 }
 
 public void removerUsuario( int keyUsuario ) {
-  println("EN LA PESTANA OSC ESTA COMENTADO REMOVER USUARIO");
+  //Esto es cuando existia ManagerUsuarios
+  //println("EN LA PESTANA OSC ESTA COMENTADO REMOVER USUARIO");
   //managerUsuarios.removerUsuario( keyUsuario );
 }
 
@@ -385,7 +385,7 @@ public void mensaje_POSICION_ESTADO(String mensaje, int posicion, int estado) {
 //   <maquinaria id="0" nombre="Lumiere">Mover|Dibujar Circulo|Espacio Cerrado</maquinaria>
 //   <maquinaria id="1" nombre="Cohl">Mover|Dibujar Circulo|Espacio Cerrado</maquinaria>
 //   <maquinaria id="2" nombre="Melies">Mover|Dibujar Circulo|Espacio Cerrado</maquinaria>
-//   <maquinaria id="3" nombre="Guy Blach\u00e9">Mover|Dibujar Circulo|Espacio Cerrado</maquinaria>
+//   <maquinaria id="3" nombre="Guy Blaché">Mover|Dibujar Circulo|Espacio Cerrado</maquinaria>
 // </maquinarias>
 
 /*
@@ -450,7 +450,7 @@ class Maquinarias {
 // 0, Capra hircus, Goat
 // 1, Panthera pardus, Leopard
 // 2, Equus zebra, Zebra
-//v 22/06/2017
+//v 07/09/2017
 String archivoConfigXML = "../configcod05.xml";
 String xmlTagPanel = "panel", xmlTagEjecucion = "ejecucion";
 
@@ -466,6 +466,11 @@ class ConfiguracionCOD05 {
   ConfigModulo lienzo, observador, carrete;
   boolean panelConexiones = false;
 
+  ConfiguracionCOD05() {
+    lienzo = new ConfigModulo().Iniciar("lienzo", 12010);
+    observador = new ConfigModulo().Iniciar("observador", 12020);
+    carrete = new ConfigModulo().Iniciar("carrete", 12030);
+  }
   class ConfigModulo {
     String id = "indefinido";
     String ip = "127.0.0.1";
@@ -495,9 +500,9 @@ class ConfiguracionCOD05 {
     }
   }
   public void cargar(XML xml) {
-    lienzo = new ConfigModulo().Iniciar("lienzo", 12010);
-    observador = new ConfigModulo().Iniciar("observador", 12020);
-    carrete = new ConfigModulo().Iniciar("carrete", 12030);
+    if (lienzo==null)lienzo = new ConfigModulo().Iniciar("lienzo", 12010);
+    if (observador==null)observador = new ConfigModulo().Iniciar("observador", 12020);
+    if (carrete==null)carrete = new ConfigModulo().Iniciar("carrete", 12030);
     if (xml != null) {
       panelConexiones = xml.getInt("panelConexiones", panelConexiones?1:0)==1;
       XML[] configs = xml.getChildren("ConfigModulo");
@@ -786,6 +791,8 @@ class Mod_FriccionGlobal extends Modificador {
     //Atr_Posicion posiciones = s.requerir(Atr_Posicion.manager, Atributo.OBLIGATORIO);
 
     for (int i=0; i<s.tamano; i++) {
+      factor = map( vel.v[i].magSq(), 0, 10000, 1.0f, 0.001f );
+      factor = constrain( factor, 0.001f, 1.0f );
       vel.v[i].mult(factor);
       //PVector p=posiciones.p[i];
       //acel.a[i].add(PVector.mult(PVector.fromAngle(s.p5.atan2(s.p5.height/2-p.y, s.p5.width/2-p.x)), s.tamano*factor) );
@@ -796,7 +803,7 @@ class Mod_FriccionGlobal extends Modificador {
 }
   public void settings() {  fullScreen( 2 ); }
   static public void main(String[] passedArgs) {
-    String[] appletArgs = new String[] { "--present", "--window-color=#FFFFFF", "--hide-stop", "Lienzo" };
+    String[] appletArgs = new String[] { "Lienzo" };
     if (passedArgs != null) {
       PApplet.main(concat(appletArgs, passedArgs));
     } else {

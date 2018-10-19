@@ -1,7 +1,10 @@
-//v 22/06/2017
+//v 07/09/2017
 String archivoConfigXML = "../configcod05.xml";
-String xmlTagPanel = "panel", xmlTagEjecucion = "ejecucion";
+String xmlTagModo = "modo", xmlTagPanel = "panel", xmlTagEjecucion = "ejecucion";
 
+enum ModoObservador{
+  WEBCAM, KINECT
+}
 enum EstadoModulo {
   APAGADO, LOCAL, REMOTO
 }
@@ -11,9 +14,15 @@ int EstadoModuloToInt(EstadoModulo estado) {
 };
 
 class ConfiguracionCOD05 {
+  ModoObservador modoObservador;
   ConfigModulo lienzo, observador, carrete;
   boolean panelConexiones = false;
 
+  ConfiguracionCOD05() {
+    lienzo = new ConfigModulo().Iniciar("lienzo", 12010);
+    observador = new ConfigModulo().Iniciar("observador", 12020);
+    carrete = new ConfigModulo().Iniciar("carrete", 12030);
+  }
   class ConfigModulo {
     String id = "indefinido";
     String ip = "127.0.0.1";
@@ -43,15 +52,15 @@ class ConfiguracionCOD05 {
     }
   }
   void cargar(XML xml) {
-    lienzo = new ConfigModulo().Iniciar("lienzo", 12010);
-    observador = new ConfigModulo().Iniciar("observador", 12020);
-    carrete = new ConfigModulo().Iniciar("carrete", 12030);
+    if (lienzo==null)lienzo = new ConfigModulo().Iniciar("lienzo", 12010);
+    if (observador==null)observador = new ConfigModulo().Iniciar("observador", 12020);
+    if (carrete==null)carrete = new ConfigModulo().Iniciar("carrete", 12030);
     if (xml != null) {
       panelConexiones = xml.getInt("panelConexiones", panelConexiones?1:0)==1;
       XML[] configs = xml.getChildren("ConfigModulo");
       for (ConfigModulo cm : new ConfigModulo[]{lienzo, observador, carrete}) {
         for (XML cxml : configs) {
-          if (cm.id.equals(cxml.getString("id", ""))) cm.cargar(cxml);
+          if (cm.id.equals(cxml.getString("id", ""))) cm.cargar(cxml);//-*-*-*-*-*-*-*-*
         }
       }
     }
@@ -59,6 +68,7 @@ class ConfiguracionCOD05 {
   XML guardar(String nombre) {
     XML xml = new XML(nombre);
     xml.setInt("panelConexiones", panelConexiones?1:0);
+    xml.setString( "modo", modoObservador.toString() );
     for (ConfigModulo cm : new ConfigModulo[]{lienzo, observador, carrete}) {
       xml.addChild(cm.generar());
     }

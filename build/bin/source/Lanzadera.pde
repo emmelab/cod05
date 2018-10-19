@@ -21,7 +21,7 @@ void settings() {
 }
 
 void setup(){
-  consola.setDebug( true );
+  consola.setDebug( false );
   inicializarTipografias(29);
   oscP5 = new OscP5(this,oscP5Port);
   for(AutoSetup auto : autoSetup) auto.setup();

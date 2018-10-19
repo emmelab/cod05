@@ -26,8 +26,6 @@ Paleta paleta;
 Motor motor;
 GuiP5 gui;
 
-boolean test = false;
-
 public void setup(){
   
   p5 = this;
@@ -47,106 +45,6 @@ public void draw(){
   gui.ejecutar();
   consola.ejecutar();
 }
-float umbralEje = 10f;
-float umbralNivel = 0.6f;
-float umbralCerrado = 0.2f;
-
-class UsuarioNivel {
-  boolean entroAlto;
-  boolean entroMedio;
-  boolean entroBajo;
-  int nivel;
-  int p_nivel;
-  UsuarioNivel() {
-  }
-  public void set(int v) {
-    nivel = v;
-    actualizar();
-  }
-  public void actualizar() {
-    entroAlto = false;
-    entroMedio = false;
-    entroBajo = false;
-    if (p_nivel != nivel) {
-      if (p_nivel==0) {
-        if (nivel == 1) {
-          entroMedio = true;
-        } else if (nivel == 2) {
-          entroBajo = true;
-        }
-      }
-      if (p_nivel==1) {
-        if (nivel == 0) {
-          entroAlto = true;
-        } else if (nivel == 2) {
-          entroBajo = true;
-        }
-      }
-      if (p_nivel==2) {
-        if (nivel == 0) {
-          entroAlto = true;
-        } else if (nivel == 1) {
-          entroMedio = true;
-        }
-      }
-      p_nivel = nivel;
-    }
-  }
-}
-class UsuarioCerrado {
-  boolean cerro;
-  boolean abrio;
-  boolean cerrado;
-  int cerrado_valor;
-  int p_cerrado_valor;
-  UsuarioCerrado() {
-  }
-  public void set(int v) {
-    cerrado_valor = v;
-    cerrado = (cerrado_valor == 0);
-    actualizar();
-  }
-  public void actualizar() {
-    cerro = false;
-    abrio = false;
-    if (p_cerrado_valor != cerrado_valor) {
-      if (p_cerrado_valor==0) {        
-        cerro = true;
-      } else if (p_cerrado_valor==1) {
-        abrio = true;
-      }
-    }
-    p_cerrado_valor = cerrado_valor;
-  }
-}
-class UsuarioDesequilibrio { 
-  /*boolean izquierda;
-   boolean derecha;*/  // esto podriamos agregarlo si es necesario
-  boolean salioDerecha;
-  boolean salioIzquierda;
-  int desequilibrio;
-  int p_desequilibrio;
-  UsuarioDesequilibrio() {
-  }
-  public void set(int v) {
-    desequilibrio = v;
-    actualizar();
-  }
-  public void actualizar() {
-    salioDerecha = false;
-    salioIzquierda = false;
-
-    if (p_desequilibrio != desequilibrio && desequilibrio == 0) {    
-      if (p_desequilibrio == 1) {        
-        salioDerecha = true;
-      }
-      if (p_desequilibrio == -1) {       
-        salioIzquierda = true;
-      }
-    }
-    p_desequilibrio = desequilibrio;
-  }
-} 
 
 
 ConfiguracionCOD05 config;// = new ConfiguracionCOD05();
@@ -199,16 +97,21 @@ public class ComunicacionOSC {
   //----
 
   //----- HACIA LA API
-  public void enviarMensajesAPI( UsuarioDesequilibrio uDeseq, UsuarioNivel uNivel, UsuarioCerrado uCerrado ) {
+  public void enviarMensajesAPI( Posturas p ) {
     if( millis() < 10000 ) return;
+    
+    Posturas.Nivel uNivel = p.nivel;
+    Posturas.Apertura uCerrado = p.apertura;
+    Posturas.Desequilibrio uDeseq = p.desequilibrio;
+    
     if (uNivel.entroAlto) enviarMensaje("/nivel", 0);
     else if (uNivel.entroMedio) enviarMensaje("/nivel", 1);
     else if (uNivel.entroBajo) enviarMensaje("/nivel", 2);
     if (uCerrado.abrio) enviarMensaje("/cerrado", 0);
     else if (uCerrado.cerro)enviarMensaje("/cerrado", 1);
 
-    if (uDeseq.desequilibrio <= -1) enviarMensaje("/desequilibrio", 0);
-    else if (uDeseq.desequilibrio >= 1) enviarMensaje("/desequilibrio", 4);
+    if ( uDeseq.estado == EstadoDesequilibrio.IZQUIERDA ) enviarMensaje("/desequilibrio", 0);
+    else if ( uDeseq.estado == EstadoDesequilibrio.DERECHA ) enviarMensaje("/desequilibrio", 4);
     /*else if (uDeseq.izquierda) enviarMensaje("/desequilibrio", 1);
      else if (uDeseq.derecha) enviarMensaje("/desequilibrio", 3);*/
     else if (uDeseq.salioDerecha || uDeseq.salioIzquierda) enviarMensaje("/desequilibrio", 2);
@@ -220,12 +123,23 @@ public class ComunicacionOSC {
      } else if (uDeseq.entroDerecha) {
      enviarMensajes("/MenuNavegarDerecha");
      } else*/
+     
+    /*
+    ACAAA CAMBIO -BIENAL-
     if (abs(uDeseq.desequilibrio) >= 1) {
       if (frameCount % 12 == 0) {
         if (uDeseq.desequilibrio > 0) enviarMensajes("/MenuNavegarDerecha");
         else enviarMensajes("/MenuNavegarIzquierda");
       }
+    }*/
+    //Por lo siguiente -BIENAL-
+    if ( uDeseq.estado != EstadoDesequilibrio.NULO && uDeseq.estado != EstadoDesequilibrio.CENTRO ) {
+      if (frameCount % 12 == 0) {
+        if ( uDeseq.estado == EstadoDesequilibrio.DERECHA ) enviarMensajes("/MenuNavegarDerecha");
+        else enviarMensajes("/MenuNavegarIzquierda");
+      }
     }
+
 
     if (/*uNivel.entroMedio ||*/ uNivel.entroBajo) {
       if (uCerrado.cerrado) {
@@ -661,17 +575,10 @@ class GuiP5 extends ControlP5{
   String pestanaActiva;
   static final String
   PESTANA_CAMARA = "Cámara",
-  PESTANA_PROCESOS = "Proceso",
-  PESTANA_DESEQUILIBRIO = "Desequilibrio",
-  PESTANA_NIVEL = "Nivel",
-  PESTANA_CERRADO = "Cerrado";
+  PESTANA_CAPTURA = "Captura",
+  PESTANA_POSTURAS = "Posturas";
   
-  //Pestana principal - CAMARA
   ScrollableList listaDeCamaras;
-  
-  //Pestanas
-  GuiPestanaProceso pestanaProceso;
-  GuiPestanaDesequilibrio pestanaDesequilibrio;
   
   GuiP5( PApplet p5 ){
     super( p5 );
@@ -691,7 +598,7 @@ class GuiP5 extends ControlP5{
   }
   
   public void iniciarPestanas(){
-    String[] pestanas = { PESTANA_CAMARA, PESTANA_PROCESOS, PESTANA_DESEQUILIBRIO, PESTANA_NIVEL, PESTANA_CERRADO };
+    String[] pestanas = { PESTANA_CAMARA, PESTANA_CAPTURA, PESTANA_POSTURAS };
     pestanaActiva = PESTANA_CAMARA;
     //------------ PESTANAS
     for( int i = 1; i < pestanas.length; i++ ){
@@ -730,12 +637,12 @@ class GuiP5 extends ControlP5{
   public void iniciarContenidoPestanas(){
     
     //Global
-    gui.addButton( "nuevoFondo" )
+    addButton( "nuevoFondo" )
     //primero que nada desactivo el "desencadenamiento de enventos"
     .setBroadcast(false)
-    .setLabel( "Nuevo fondo" )
-    .setWidth( 100 )
-    .setHeight( 20 )
+    .setLabel( "Capturar fondo" )
+    .setWidth( 125 )
+    .setHeight( 30 )
     .setPosition( width * 0.825f, 540 )
     //una vez configurado todo, vuelvo a activar el "desencadenamiento de enventos"
     .setBroadcast(true)
@@ -756,19 +663,33 @@ class GuiP5 extends ControlP5{
      .setBroadcast(true)
      ;
      
-    //PESTANA 1 - Procesos
-    pestanaProceso = new GuiPestanaProceso();
-    
-    //PESTANA 2 - Desequilibrio
-    pestanaDesequilibrio = new GuiPestanaDesequilibrio();
+     //PESTANA 1 - CAPTURA
+     float posX = width * 0.825f;
+     int posY = 140, saltoY = 80, saltoCorto = 50;
+     crearSlider(  "sliderUmbral", "Umbral", PESTANA_CAPTURA, posX, posY, 130, 20, 0, 255, 100 );
+     crearToggle( "toggleActivarAmortiguacion", "Amortiguar", PESTANA_CAPTURA, posX, posY += saltoY, 30, 20 );
+     Slider sAmor = crearSlider(  "sliderAmortiguacion", "Factor amortiguador", PESTANA_CAPTURA, posX, posY += saltoCorto, 130, 20, 0.0f, 1.0f, 0.2f );
+     sAmor.setVisible( false );
+     crearToggle( "toggleAutocaptura", "Autocaptura", PESTANA_CAPTURA, posX, posY += saltoY, 30, 20 );
+     Slider sAuto = crearSlider(  "sliderSensibilidadAutocaptura", "Sensibilidad autocap.", PESTANA_CAPTURA, posX, posY += saltoCorto, 130, 20, 0.0f, 1.0f, 0.1f );
+     sAuto.setVisible( false );
+     Slider sTAuto = crearSlider(  "sliderTiempoAutocaptura", "Tiempo autocaptura", PESTANA_CAPTURA, posX, posY += saltoCorto, 130, 20, 0, 3000, 2000 );
+     sTAuto.setVisible( false );
+     
+     //PESTANA 2 - POSTURAS
+     posX = width * 0.6f;
+     /*int*/ posY = 140;/*,*/ saltoY = 100;
+     crearSlider(  "sliderUmbralDesequilibrio", "Umbral desequilibrio", PESTANA_POSTURAS, posX, posY, 200, 20, 0, 80, 10 );
+     crearRango( "rangoNivel", "Umbrales de nivel", PESTANA_POSTURAS, posX, posY += saltoY, 200, 20, 0.0f, 1.0f, 0.45f, 0.55f );
+     crearRango( "rangoApertura", "Umbrales de apertura", PESTANA_POSTURAS, posX, posY += saltoY, 200, 20, 0.0f, 1.0f, 0.45f, 0.55f );
    
   }
   
-  public void crearSlider( String nombre, String etiqueta, String pestana, float x, float y, float ancho, float alto, float minimo, float maximo, float valor ){
-    Slider s = gui.addSlider( nombre )
+  public Slider crearSlider( String nombre, String etiqueta, String pestana, float x, float y, float ancho, float alto, float minimo, float maximo, float valor ){
+    Slider s = addSlider( nombre )
     .setBroadcast(false)
     .setLabel( etiqueta )
-    .setSize( 130, 20 )
+    .setSize( round(ancho), round(alto) )
     .setPosition( x, y )
     .setRange( minimo, maximo )
     .setValue( valor/*motor.movimiento.!!variable correspondiente!!*/ )
@@ -778,6 +699,39 @@ class GuiP5 extends ControlP5{
     ;
     //gui.getController(nombre).getCaptionLabel().align(ControlP5.LEFT, ControlP5.BOTTOM_OUTSIDE).setPaddingY(5).toUpperCase( false );
     s.getCaptionLabel().align(ControlP5.LEFT, ControlP5.BOTTOM_OUTSIDE).setPaddingY(5).toUpperCase( false );
+    return s;
+  }
+  
+  public void crearRango( String nombre, String etiqueta, String pestana, float x, float y, float ancho, float alto, float minimo, float maximo, float valorMinimo, float valorMaximo ){
+    Range r = addRange( nombre )
+   // disable broadcasting since setRange and setRangeValues will trigger an event
+   .setBroadcast(false) 
+   .setLabel( etiqueta )
+   .setPosition(x,y)
+   .setSize(round(ancho),round(alto))
+   .setHandleSize(20)
+   .setRange(minimo,maximo)
+   .setRangeValues(valorMinimo,valorMaximo)
+   // after the initialization we turn broadcast back on again
+   .setBroadcast(true)
+   //.setColorForeground(color(255,40))
+   //.setColorBackground(color(255,40))  
+   .moveTo( pestana )
+   ;
+   
+   r.getCaptionLabel().align(ControlP5.LEFT, ControlP5.BOTTOM_OUTSIDE).setPaddingY(5).toUpperCase( false );
+   
+  }
+  
+  public void crearToggle( String nombre, String etiqueta, String pestana, float x, float y, float ancho, float alto ){
+    Toggle t = addToggle( nombre )
+    .setBroadcast(false) 
+    .setLabel( etiqueta )
+    .setPosition( x, y )
+    .setSize( round(ancho), round(alto) )
+    .setBroadcast(true)
+    .moveTo( pestana );
+    t.getCaptionLabel().toUpperCase( false );
   }
   
   //seters y geters
@@ -793,17 +747,11 @@ class GuiP5 extends ControlP5{
   
   public void setPestanaActiva( int numero ){
     switch( numero ){
-      case 4:
-        pestanaActiva = PESTANA_CERRADO;
-        break;
-      case 3:
-        pestanaActiva = PESTANA_NIVEL;
-        break;
       case 2:
-        pestanaActiva = PESTANA_DESEQUILIBRIO;
+        pestanaActiva = PESTANA_POSTURAS;
         break;
       case 1:
-        pestanaActiva = PESTANA_PROCESOS;
+        pestanaActiva = PESTANA_CAPTURA;
         break;
       default:
         pestanaActiva = PESTANA_CAMARA;
@@ -849,9 +797,9 @@ class GuiP5 extends ControlP5{
         pestanas();
         break;
     }
-    
+
     popStyle();
-    if( motor.movimiento != null ) motor.movimiento.conteo();
+    
   }
   
   public void comprobandoCamaras(){
@@ -878,15 +826,11 @@ class GuiP5 extends ControlP5{
       case PESTANA_CAMARA:
         pestanaCamara();
         break;
-      case PESTANA_PROCESOS:
-        pestanaProceso.ejecutar();
+      case PESTANA_CAPTURA:
+        pestanaProcesos();
         break;
-      case PESTANA_DESEQUILIBRIO:
-        pestanaDesequilibrio.ejecutar();
-        break;
-      case PESTANA_NIVEL:
-        break;
-      case PESTANA_CERRADO:
+      case PESTANA_POSTURAS:
+        pestanaPosturas();
         break;
       default:
        break;
@@ -898,6 +842,25 @@ class GuiP5 extends ControlP5{
     image( motor.camara, width*0.45f, height * 0.35f );
   }
   
+  public void pestanaProcesos(){
+    
+    image( motor.camara, 10, 100 );
+    image( motor.movimiento.imagenAcomparar, 10+Motor.ANCHO_CAMARA, 100 );
+    image( motor.movimiento.substraccion, 10, 100+Motor.ALTO_CAMARA );
+    //image( movimiento.bitonal, ancho, 0 );
+    image( motor.movimiento.getImagenAnalisis(), 10+Motor.ANCHO_CAMARA, 100+Motor.ALTO_CAMARA );
+    
+  }
+  
+  public void pestanaPosturas(){
+    image( motor.movimiento.getImagenAnalisis(), 10, 100 );
+    textAlign( LEFT );
+    fill( paleta.amarillo );
+    text( "Desequilibrio: " + motor.posturas.desequilibrio.estado.toString(), 10, 440 );
+    text( "Nivel: " + motor.posturas.nivel.estado.toString(), 10, 470 );
+    text( "Apertura: " + motor.posturas.apertura.estado.toString(), 10, 500 );
+  }
+  
 }
 
 public void controlEvent(ControlEvent evento) {
@@ -905,6 +868,12 @@ public void controlEvent(ControlEvent evento) {
   if( evento.isTab() ) {
     gui.setPestanaActiva( evento.getTab().getId() );
     gui.actualizarColorPestanas();
+  }else if( evento.isFrom( "rangoNivel" ) ){
+    motor.posturas.nivel.rangoInferior = evento.getController().getArrayValue( 0 );
+    motor.posturas.nivel.rangoSuperior = evento.getController().getArrayValue( 1 );
+  }else if( evento.isFrom( "rangoApertura" ) ){
+    motor.posturas.apertura.rangoInferior = evento.getController().getArrayValue( 0 );
+    motor.posturas.apertura.rangoSuperior = evento.getController().getArrayValue( 1 );
   }
   
 }
@@ -913,104 +882,40 @@ public void SeleccionarCamara( int numeroCamara ){
   motor.camaraSeleccionada = motor.camarasAptas[ numeroCamara ];
   motor.estado = Motor.ESTADO_INICIAR_CAMARA;
 }
-class GuiPestanaDesequilibrio{
-  
-  GuiPestanaDesequilibrio(){
-    
-    float posX = width*0.5f + 50;
-    int posY = 175, saltoY = 100;
-    
-    crearSlider( "sliderUmbralEje", "Umbral eje", posX, posY, 0f, 100f, 10f );
-    crearSlider( "sliderUmbralNivel", "Umbral nivel", posX, posY += saltoY, 0f, 1f, 0.6f );
-    crearSlider( "sliderUmbralCerrado", "Umbral cerrado", posX, posY += saltoY, 0f, 0.3f, 0.2f );
-    
-  }
-  
-  public void crearSlider( String nombre, String etiqueta, float x, float y, float minimo, float maximo, float valor ){
-    gui.crearSlider( nombre, etiqueta, GuiP5.PESTANA_DESEQUILIBRIO, x, y, 200, 20, minimo, maximo, valor );
-  }
-  
-  public void ejecutar(){
-    PImage resultado = motor.movimiento.getImagenAnalisis();
-    image(resultado, width*0.5f-Motor.ANCHO_CAMARA, height*0.5f-Motor.ALTO_CAMARA*0.5f );
-    
-    UsuarioDesequilibrio d = motor.uDeseq;
-    UsuarioNivel n = motor.uNivel;
-    UsuarioCerrado c = motor.uCerrado;
-    
-    String texto = "Deseq: " + ( d.salioIzquierda? "salio IZQ" : d.salioDerecha? "salio DER" : "..." );
-    texto += "\nNivel: " + (n.entroBajo? "entro bajo" : n.entroMedio? "entro medio" : n.entroAlto? "entro alto" : "...");
-    texto += "\nCerrado: " + ( c.cerro? "cerro" : c.abrio? "abrio" : "..." );
-    texto += "\n\t" + c.cerrado;
-    
-    textoDebug( texto );
-    
-  }
-  
-  public void textoDebug( String texto ){
-    float posX = width*0.5f-Motor.ANCHO_CAMARA;
-    float posY = height*0.5f+Motor.ALTO_CAMARA*0.5f+50;
-    fill( paleta.blanco );
-    textAlign( LEFT );
-    text( texto, posX, posY );
-  }
-}
-
-public void sliderUmbralEje( float valor ){
-  umbralEje = valor;
-}
-
-public void sliderUmbralNivel( float valor ){
-  umbralNivel = valor;
-}
-
-public void sliderUmbralCerrado( float valor ){
-  umbralCerrado = valor;
-}
-class GuiPestanaProceso{
-  
-  GuiPestanaProceso(){
-    float posX = width * 0.825f;
-    int posY = 140, saltoY = 100;
-    crearSlider( "sliderConvolucion", "Convolucion", posX, posY, 3, 10, 7 );
-    crearSlider( "sliderUmbral", "Umbral", posX, posY += saltoY, 0, 255, 50 );
-    crearSlider( "sliderFotogramasRetardo", "Fotogramas retardo", posX, posY += saltoY, 1, 120, 2 );
-    crearSlider( "sliderBlend", "Blend", posX, posY += saltoY, 0, 0.2f, 0.2f );
-  }
-  
-  public void crearSlider( String nombre, String etiqueta, float x, float y, float minimo, float maximo, float valor ){
-    gui.crearSlider( nombre, etiqueta, GuiP5.PESTANA_PROCESOS, x, y, 130, 20, minimo, maximo, valor );
-  }
-  
-  public void ejecutar(){
-    image( motor.camara, 10, 100 );
-    image( motor.movimiento.imagenesAcomparar[1], 10+Motor.ANCHO_CAMARA, 100 );
-    image( motor.movimiento.substraccion, 10, 100+Motor.ALTO_CAMARA );
-    //image( movimiento.bitonal, ancho, 0 );
-    
-    PImage resultado = motor.movimiento.getImagenAnalisis();
-    image(resultado, 10+Motor.ANCHO_CAMARA, 100+Motor.ALTO_CAMARA );
-  }
-}
-
-public void sliderConvolucion( int valor ){
-  motor.movimiento.convolucion = valor;
-}
-
-public void sliderUmbral( float valor ){
-  motor.movimiento.umbral = valor;
-}
-
-public void sliderFotogramasRetardo( int valor ){
-  motor.movimiento.fotogramasRetardo = valor;
-}
-
-public void sliderBlend( float valor ){
-  motor.movimiento.blend = valor;
-}
 
 public void nuevoFondo(){
   motor.movimiento.recapturarFondo();
+}
+
+public void sliderUmbral( float valor ){
+  motor.movimiento.setUmbral( valor );
+}
+
+public void toggleActivarAmortiguacion( boolean toggle ){
+  motor.movimiento.amortiguacionActivada = toggle;
+  gui.getController( "sliderAmortiguacion" ).setVisible( toggle );
+}
+
+public void sliderAmortiguacion( float valor ){
+  motor.movimiento.factorAmortiguacion = valor;
+}
+
+public void toggleAutocaptura( boolean toggle ){
+  motor.movimiento.autocaptura = toggle;
+  gui.getController( "sliderSensibilidadAutocaptura" ).setVisible( toggle );
+  gui.getController( "sliderTiempoAutocaptura" ).setVisible( toggle );
+}
+
+public void sliderSensibilidadAutocaptura( float valor ){
+  motor.movimiento.setSensibilidadAutocaptura( valor );
+}
+
+public void sliderTiempoAutocaptura( int valor ){
+  motor.movimiento.tiempoTolenranciaAutocaptura = valor;
+}
+
+public void sliderUmbralDesequilibrio( float valor ){
+  motor.posturas.desequilibrio.umbralDesequilibrio = valor;
 }
 
 
@@ -1029,11 +934,8 @@ class Motor{
   Capture camara;
   static final int ANCHO_CAMARA = 320, ALTO_CAMARA = 240, FPS_CAMARA = 30;
   
-  PMoCap movimiento;
-  UsuarioNivel uNivel = new UsuarioNivel();
-  UsuarioCerrado uCerrado = new UsuarioCerrado();
-  UsuarioDesequilibrio uDeseq = new UsuarioDesequilibrio();
-  
+  Movimiento movimiento;
+  Posturas posturas;
   ComunicacionOSC osc;
   
   Motor(){
@@ -1087,13 +989,10 @@ class Motor{
     if( camaraSeleccionada != null ){
       camara = new Capture( p5, camaraSeleccionada.ancho, camaraSeleccionada.alto, camaraSeleccionada.nombre, camaraSeleccionada.fps );
       camara.start();
-      
-      float umbral = 50;
-      int cantidadDeCuadrosDeRetardo = 2;
-      
-      movimiento = new PMoCap( p5, camaraSeleccionada.ancho, camaraSeleccionada.alto, umbral, 
-      cantidadDeCuadrosDeRetardo, 7 );
-      
+
+      movimiento = new Movimiento( camaraSeleccionada.ancho, camaraSeleccionada.alto, 100, 5, true );
+      posturas = new Posturas( movimiento );
+     
     }
     estado = ESTADO_CORRIENDO;
   }
@@ -1106,10 +1005,8 @@ class Motor{
     if( camara.available() ){
       camara.read();
       movimiento.capturar( camara );
-      uNivel.set( movimiento.getNivel( umbralNivel ) );
-      uCerrado.set( movimiento.getCerrado( umbralCerrado ) );
-      uDeseq.set( movimiento.getDesequilibrio( umbralEje ) );
-      osc.enviarMensajesAPI( uDeseq, uNivel, uCerrado );
+      posturas.ejecutar();
+      osc.enviarMensajesAPI( posturas );
     }
   }
   
@@ -1122,12 +1019,16 @@ public void reconocerCamaras(){
   DetallesCamara[] todasLasCamaras = new DetallesCamara[ iRecoMax ];
   IntList idCamarasAptas = new IntList();
   for( iReco = 0; iReco < iRecoMax; iReco++ ){
-    todasLasCamaras[ iReco ] = new DetallesCamara( listaCamaras[ iReco ] );
-    if( todasLasCamaras[iReco].ancho == Motor.ANCHO_CAMARA &&
-        todasLasCamaras[iReco].alto == Motor.ALTO_CAMARA &&
-        todasLasCamaras[iReco].fps == Motor.FPS_CAMARA
-    ){
-      idCamarasAptas.append( iReco );
+    try{
+      todasLasCamaras[ iReco ] = new DetallesCamara( listaCamaras[ iReco ] );
+      if( todasLasCamaras[iReco].ancho == Motor.ANCHO_CAMARA &&
+          todasLasCamaras[iReco].alto == Motor.ALTO_CAMARA &&
+          todasLasCamaras[iReco].fps == Motor.FPS_CAMARA
+      ){
+        idCamarasAptas.append( iReco );
+      }
+    }catch( Exception e ){
+      println( "Exception 'reconocerCamaras()': " + e.getMessage() );
     }
   }
   
@@ -1172,6 +1073,126 @@ class DetallesCamara{
   }
   
 }
+class Movimiento extends PMoCap{
+  
+  boolean amortiguacionActivada;
+  float factorAmortiguacion = 0.2f;
+  float amor_x, amor_y, amor_yBoundingBox, amor_xBoundingBox;
+  int amor_arriba, amor_abajo, amor_izquierda, amor_derecha;
+  
+  boolean autocaptura;
+  int umbralAutocaptura, tiempoAutocaptura, tiempoTolenranciaAutocaptura = 2000;
+  final int UMBRAL_MAXIMO_AUTOCAPTURA;
+  
+  Movimiento( int ancho, int alto, float umbral, int fotogramasRetardo, boolean comparaConFondo ){
+    super( ancho, alto, umbral, fotogramasRetardo, comparaConFondo );
+    UMBRAL_MAXIMO_AUTOCAPTURA = round((ancho*alto)*0.25f);
+    umbralAutocaptura = round(UMBRAL_MAXIMO_AUTOCAPTURA*0.1f);
+  }
+  
+  public void setSensibilidadAutocaptura( float sensibilidad ){
+    sensibilidad = constrain( sensibilidad, 0.0f, 1.0f );
+    umbralAutocaptura = round(UMBRAL_MAXIMO_AUTOCAPTURA*sensibilidad);
+  }
+  
+  public void capturar( PImage entrada ){
+    super.capturar( entrada );
+    if( amortiguacionActivada ) actualizarAmortiguaciones();
+    if( autocaptura ) autocaptura();
+  }
+  
+  public void actualizarAmortiguaciones(){
+    amor_x = amortiguar( x, amor_x );
+    amor_y = amortiguar( y, amor_y );
+    
+    amor_xBoundingBox = amortiguar( xBoundingBox, amor_xBoundingBox );
+    amor_yBoundingBox = amortiguar( yBoundingBox, amor_yBoundingBox );
+    
+    amor_arriba = amortiguar( arriba, amor_arriba );
+    amor_abajo = amortiguar( abajo, amor_abajo );
+    amor_izquierda = amortiguar( izquierda, amor_izquierda );
+    amor_derecha = amortiguar( derecha, amor_derecha );
+  }
+  
+  public float amortiguar( float valorCrudo, float valorFiltrado ){
+    return valorCrudo * factorAmortiguacion + valorFiltrado * ( 1.0f - factorAmortiguacion );
+  }
+  
+  public int amortiguar( int valorCrudo, int valorFiltrado ){
+    return round( valorCrudo * factorAmortiguacion + valorFiltrado * ( 1.0f - factorAmortiguacion ) );
+  }
+  
+  public void autocaptura(){
+    if( hayMovimiento && area < umbralAutocaptura ){
+      tiempoAutocaptura += reloj.getDeltaMillis();
+      if( tiempoAutocaptura > tiempoTolenranciaAutocaptura ){
+        recapturarFondo();
+        consola.printlnAlerta("Autocaptura!!");
+        tiempoAutocaptura = 0;
+      }
+    }else
+      tiempoAutocaptura = 0;
+  }
+  
+  //Metodos gets
+  
+  public PImage getImagenAnalisis() {
+    
+    if( amortiguacionActivada && hayMovimiento ){
+      PGraphics grafico = createGraphics( ancho, alto, P2D );
+      PImage resultado = super.getImagenAnalisis();
+      //se inicia el dibujo del grafico
+      grafico.beginDraw();
+      grafico.image( resultado, 0, 0 );
+      //se dibujan el centro y el borde del area de movimiento
+      grafico.stroke( paleta.amarillo );
+      grafico.noFill();
+      grafico.ellipse( amor_x, amor_y, 5, 5);
+      grafico.rect( amor_xBoundingBox, amor_yBoundingBox, 5, 5 );
+      grafico.rectMode( CORNERS );
+      grafico.rect( amor_izquierda, amor_arriba, amor_derecha, amor_abajo );
+      grafico.endDraw();
+      //se copia el grafico a la imagen
+      resultado.copy( grafico, 0, 0, grafico.width, grafico.height, 0, 0, resultado.width, resultado.height );
+      return resultado;
+    }else
+      return super.getImagenAnalisis();
+  }
+  
+  public float getX(){
+    return amortiguacionActivada? amor_x : x;
+  }
+  
+  public float getY(){
+    return amortiguacionActivada? amor_y : y;
+  }
+  
+  public float getXBoundingBox(){
+    return amortiguacionActivada? amor_xBoundingBox : xBoundingBox;
+  }
+  
+  public float getYBoundingBox(){
+    return amortiguacionActivada? amor_yBoundingBox : yBoundingBox;
+  }
+  
+  public int getArriba(){
+    return amortiguacionActivada? amor_arriba : arriba;
+  }
+  
+  public int getAbajo(){
+    return amortiguacionActivada? amor_abajo : abajo;
+  }
+  
+  public int getIzquierda(){
+    return amortiguacionActivada? amor_izquierda : izquierda;
+  }
+  
+  public int getDerecha(){
+    return amortiguacionActivada? amor_derecha : derecha;
+  }
+  //end metodos gets
+  
+}
 //---------------------------------------------
 // version 1.10 actualizada al 24/Nov/2013
 // clase Processing Motion Capture
@@ -1193,7 +1214,7 @@ class DetallesCamara{
  
  void recapturarFondo() - toma el siguiente cuadro como fondo fijo para la substraccion
  
- PImage getalisis() - devuelve una PImage con la imagen bitonal y el analisis del movimiento
+ PImage imagenAnalisis() - devuelve una PImage con la imagen bitonal y el analisis del movimiento
  
  boolean movEnPixel( int x, int y ) - verifica si hay movimiento en el pixel (x,y)
  boolean movEnPixel( int x, int y, PImage imagen ) - idem. pero sobreimprime el resultado en el PImage pasado como parametro
@@ -1232,10 +1253,10 @@ class PMoCap {
   // variable que indica si existe movimiento en el fotograma actual
   boolean hayMovimiento;
   // variable que indica el tipo de captura, "compara con fondo" o "compara con fotograma anterior"
-  //boolean comparaConFondo;
+  boolean comparaConFondo;
 
   // objetos PImage para almacenar el fondo actual de comparación
-  PImage[] imagenesAcomparar = new PImage[2];
+  PImage imagenAcomparar;
   // objetos PImage para almacenar el fondo fijo de para todo el proceso
   PImage fondoFijo;
   // objetos PImage para almacenar el resultado de la substracción
@@ -1247,132 +1268,67 @@ class PMoCap {
   float umbral;
 
   // variables que indican las posiciones límites del área de movimiento
-  int arriba, abajo, derecha, izquierda;
+  protected int arriba, abajo, derecha, izquierda;
   // area del movimiento
-  int area;
+  protected int area;
   // X e Y del centro de gravedad del área del movimiento
-  float x, y;
-  //X e Y del centro del bounding box
-  float xBoundingBox, yBoundingBox;
-  // variables de ancho y alto del bounding box
-  int anchoBoundingBox, altoBoundingBox;
-  int convolucion;
-  // X e Y del centro de gravedad del área del movimiento
-  VerticeDeControl[] verticesDeControl = new VerticeDeControl[16];
+  protected float x, y;
+  // X e Y del centro del Bounding Box
+  protected float xBoundingBox, yBoundingBox;
 
   // buffer de almacenamiento de imágenes
   BufferVideo retardo;  
-  int fotogramasRetardo;
-  float blend;
-  //UI
-  //-_-//UI ui;
+
   //-------------------------------
   //constructor de la clase
-  PMoCap(PApplet p5, int ancho_, int alto_, float umbral_, int fotogramasRetardo_, /*boolean comparaConFondo_,*/ int convolucion_) {
-    convolucion = convolucion_;
+  PMoCap( int ancho_, int alto_, float umbral_, int fotogramasRetardo, boolean comparaConFondo_ ) {
 
-
-    //-_-//ui = new UI(p5, width-150, 0, 20);
-    //-_-//ui.crearSlider("convolucion", 3, 10, convolucion_);
     //se inician las propiedades con los parametros
-    //comparaConFondo = comparaConFondo_;
+    comparaConFondo = comparaConFondo_;
     ancho = ancho_;
     alto = alto_;
     largo = ancho*alto;
-
     umbral = umbral_;
-    //-_-//ui.crearSlider("umbral", 0, 255, umbral_);
-    fotogramasRetardo = fotogramasRetardo_;
-    //-_-//ui.crearSlider("fotogramasRetardo", 1, 120, fotogramasRetardo_);
+
     //indica que aun no hay ningún fondo captado
     fondoTomado = false;
 
     //inicializa el buffer
-    retardo = new BufferVideo( ancho, alto, fotogramasRetardo_ );
+    retardo = new BufferVideo( ancho, alto, fotogramasRetardo );
 
     //inicializa los objetos PImage
     fondoFijo = createImage( ancho, alto, RGB );
     substraccion = createImage( ancho, alto, RGB );
     bitonal = createImage( ancho, alto, RGB );
-    
-    //blend = fotogramasRetardo_;
-    blend = 0.2f;
-    //-_-//ui.crearSlider("blend", 0, 0.2, fotogramasRetardo_);
-
-    //-_-//ui.cp5.addButton("nuevofondo")
-      //.setValue(0)
-      //.setPosition(width-150, height-100)
-      //.setSize(100, 19)
-      //;
   }
-
-
   //---------------------------------------------------
   // método de captura
-
-  public float sqDif(float y, float y_, float limite) {
-    return map(sq(y-y_), 0, sq(limite), 0, limite);
-  }
-
-  public void actualizar() {
-    if (convolucion%2==0)
-      convolucion++;
-    /*//-_-//
-    convolucion = int(ui.cp5.getController("convolucion").getValue());
-    if (convolucion%2==0)
-      convolucion++;
-    fotogramasRetardo = int(ui.cp5.getController("fotogramasRetardo").getValue());
-    umbral = int(ui.cp5.getController("umbral").getValue());
-    blend = ui.cp5.getController("blend").getValue();*/
-  }
-
-  float cont = 3;
-  float decremento = 0.1f;
-
   public void capturar( PImage entrada ) {
-    actualizar();
-    //println(convolucion);
+
     // se decide en función del método de captura "compara con fondo" 
     // o "compara con fotograma anterior"
-    //if ( !comparaConFondo ) {
-    // siendo el método "comparar con un fotograma anterior"
-    // carga la nueva imagen en el buffer
-    retardo.cargar( entrada );
-    // toma una imagen del buffer como fondo actual para comparar
-    imagenesAcomparar[0] = retardo.punteroPrimero();
-    //} else {
-    //cuando el método es "comparar con fondo" 
-    if ( !fondoTomado ) {
-      if (cont <= 0) {
-        if (test) {
-          //---- esto es para crear un fondo blanco para testear
-          fondoFijo.loadPixels();
-          for (int i = 0; i < fondoFijo.pixels.length; i++) {
-            fondoFijo.pixels[i] = color(255);
-          }
-          //se indica que el fondo fijo ha sido tomado
-          fondoTomado = true;
-        } else {
-          //si aun no se a tomado un fondo, se toma la imagen actual como nuevo fondo fijo
-          fondoFijo.copy( entrada, 0, 0, ancho, alto, 0, 0, ancho, alto);
-
-          //se indica que el fondo fijo ha sido tomado
-          fondoTomado = true;
-        }
-      } else {
-        cont-=decremento;
-        //println(cont);
-      }
+    if ( !comparaConFondo ) {
+      // siendo el método "comparar con un fotograma anterior"
+      // carga la nueva imagen en el buffer
+      retardo.cargar( entrada );
+      // toma una imagen del buffer como fondo actual para comparar
+      imagenAcomparar = retardo.punteroPrimero();
     }
-    //tomar la imagen del fondo fijo como imagen para comparar
-    blendFondo(entrada, blend);
-    imagenesAcomparar[1] = fondoFijo;
-    //}
+    else {
+      //cuando el método es "comparar con fondo" 
+      if ( !fondoTomado ) {
+        //si aun no se a tomado un fondo, se toma la imagen actual como nuevo fondo fijo
+        fondoFijo.copy( entrada, 0, 0, ancho, alto, 0, 0, ancho, alto);
+        //se indica que el fondo fijo ha sido tomado
+        fondoTomado = true;
+      }
+      //tomar la imagen del fondo fijo como imagen para comparar
+      imagenAcomparar = fondoFijo;
+    }
 
     //propara las dos imagenes para leer sus pixeles
     entrada.loadPixels();
-    imagenesAcomparar[0].loadPixels();
-    imagenesAcomparar[1].loadPixels();
+    imagenAcomparar.loadPixels();
 
     //inicializa las variables
     hayMovimiento = false;
@@ -1385,108 +1341,78 @@ class PMoCap {
     long toty = 0;
 
     //usa el ciclo for para recorrer los pixeles de las imágenes
-    int inicio = (convolucion-1)/2;
-    int aumento = 3;
-    for ( int x=inicio; x<ancho-inicio; x+=aumento) {
-      for ( int y=inicio; y<alto-inicio; y+=aumento) {
+    for ( int i=0 ; i<largo ; i++ ) {
 
-        //obtiene la posicion en X e Y en función del orden del pixel
-        int i = y*ancho+x;
-        posx = i % ancho;
-        posy = i / ancho;
-        float dif = getConv_dif(entrada, imagenesAcomparar[1], i, convolucion) ;
-        setConv(substraccion, i, aumento, color(dif));
-        //substraccion.pixels[i] = color(dif);
-        //si la diferencia supera el valor de umbral, se lo considera movimiento
+      //obtiene la posicion en X e Y en función del orden del pixel
+      posx = i % ancho;
+      posy = i / ancho;
 
-        boolean conMovimiento = (dif>umbral);
+      //toma el color del pixel i-ésimo de cada una de las imágenes
+      int actual = entrada.pixels[i];
+      int delFondo = imagenAcomparar.pixels[i];
 
-        //variable de color para la image bitonal
-        int bitono;
+      // oftiene la diferencia (absoluta, es decir en valor positivo) de cada uno de los componentes
+      // color: rojo, verde y azul
+      float difRed = abs( red(actual) - red(delFondo) );
+      float difGreen = abs( green(actual) - green(delFondo) );
+      float difBlue = abs( blue(actual) - blue(delFondo) );
+      // obtiene la diferencia promedio
+      float gris = ( difRed + difGreen + difBlue ) / 3.0f;
 
-        //si hay movimiento en este pixel
-        if ( conMovimiento ) {
+      //carga el resultado de la substracción en la imagen para tal fin
+      substraccion.pixels[i] = color( gris, gris, gris );
 
-          //el pixel de la image bitonal sera blanco
-          bitono = color(255, 255, 255);
+      //si la diferencia supera el valor de umbral, se lo considera movimiento
+      boolean conMovimiento = gris>umbral;
 
-          //si no había movimiento en los pixeles anteriores
-          if ( !hayMovimiento ) {
-            //marca la existencia de movimiento
-            hayMovimiento = true;
-            //inicia los valores de los bordes del área de movimiento
-            abajo = arriba = posy;
-            derecha = izquierda = posx;
-          }
-          //actualiza los valores de los bordes del área de movimiento si
-          //la posición es de un borde
-          abajo = max( abajo, posy );
-          arriba = min( arriba, posy );
-          derecha = max( derecha, posx );
-          izquierda = min( izquierda, posx );
-          //suma la posición para obtener la posición promedio
-          totx += posx;
-          toty += posy;
-          //contabiliza el nuevo pixel en el área de movimiento
-          area ++;
-        } else {
-          // si no hubo movimiento el pixel de la imagen bitonal será negro
-          bitono = color(0, 0, 0);
+      //variable de color para la image bitonal
+      int bitono;
+
+      //si hay movimiento en este pixel
+      if ( conMovimiento ) {
+
+        //el pixel de la image bitonal sera blanco
+        bitono = color(255, 255, 255);
+
+        //si no había movimiento en los pixeles anteriores
+        if ( !hayMovimiento ) {
+          //marca la existencia de movimiento
+          hayMovimiento = true;
+          //inicia los valores de los bordes del área de movimiento
+          abajo = arriba = posy;
+          derecha = izquierda = posx;
         }
-        //pinta el pixel de la imagen bitonal
-        setConv(bitonal, i, aumento, bitono);
-        //bitonal.pixels[i] = bitono;
+        //actualiza los valores de los bordes del área de movimiento si
+        //la posición es de un borde
+        abajo = max( abajo, posy );
+        arriba = min( arriba, posy );
+        derecha = max( derecha, posx );
+        izquierda = min( izquierda, posx );
+        //suma la posición para obtener la posición promedio
+        totx += posx;
+        toty += posy;
+        //contabiliza el nuevo pixel en el área de movimiento
+        area ++;
       }
+      else {
+        // si no hubo movimiento el pixel de la imagen bitonal será negro
+        bitono = color(0, 0, 0);
+      }
+      //pinta el pixel de la imagen bitonal
+      bitonal.pixels[i] = bitono;
     }
-    //el alncho y alto dle bounding box
-    anchoBoundingBox = abs(izquierda-derecha);
-    altoBoundingBox = abs(abajo-arriba);
-
-    xBoundingBox = derecha-anchoBoundingBox/2; 
-    yBoundingBox = abajo-altoBoundingBox/2;
     if ( area>0 ) {
       x = totx / area;
       y = toty / area;
+      xBoundingBox = izquierda + (derecha-izquierda) * 0.5f;
+      yBoundingBox = arriba + (abajo-arriba) * 0.5f;
     }
 
     //actualiza los pixeles de las imagenes resultantes de la substracción y el filtro bitonal
     substraccion.updatePixels();
     bitonal.updatePixels();
-
-
-    verticesDeControl[0] = new VerticeDeControl(izquierda, arriba, 45);
-    for (int i=1; i<4; i++) {
-      verticesDeControl[i] = new VerticeDeControl(izquierda+anchoBoundingBox/4*i, arriba, 90, 0.63f);
-    }    
-    verticesDeControl[4] = new VerticeDeControl(derecha, arriba, 45+90);
-    for (int i=1; i<4; i++) {
-      verticesDeControl[i+4] = new VerticeDeControl(derecha, arriba+altoBoundingBox/4*i, 90+90);
-    }
-    verticesDeControl[8] = new VerticeDeControl(derecha, abajo, 45+180);
-    for (int i=1; i<4; i++) {
-      verticesDeControl[i+8] = new VerticeDeControl(derecha-anchoBoundingBox/4*i, abajo, 90+180, 0.2f);
-    }
-    verticesDeControl[12] = new VerticeDeControl(izquierda, abajo, 45+270);
-    for (int i=1; i<4; i++) {
-      verticesDeControl[i+12] = new VerticeDeControl(izquierda, abajo-altoBoundingBox/4*i, 90+270);
-    }
-
-    for (int i=0; i<verticesDeControl.length; i++) {
-      verticesDeControl[i].setControl(this, null);
-    }
-    setDistanciaPromedio();
-    setDistanciaLateralPromedio();
-  }
-
-  public void conteo() {
-    if ( !fondoTomado ) {
-      pushStyle();
-      textAlign(CENTER, CENTER);
-      textSize(50);
-      fill(0, 255, 0);
-      text(PApplet.parseInt(cont), width/2, height/2);
-      popStyle();
-    }
+    //actualizamos entrada nomas para que podamos dibujar el PImage en un metodo image() - hgm
+    entrada.updatePixels();
   }
   //---------------------------------------------------
   // sobrecarga del método con parámetro del tipo Capture
@@ -1494,83 +1420,17 @@ class PMoCap {
     capturar( (PImage) entrada );
   }
 
-  public void setConv(PImage deQue, int pixel, int t, int c) {
-    if (t%2==0) {
-      t++;
-    }
-    int mov = (t-1)/2;
-    for (int i=(mov*-1); i<=mov; i++) {
-      for (int j=(mov*-1); j<=mov; j++) {
-        int indice = pixel+i*deQue.width+j;
-        deQue.pixels[indice] = c;
-      }
-    }
-  }
-
-  public float getConv_dif(PImage entrada, PImage imagenAcomparar, int cual, int t) {
-    float difRed = 0;
-    float difGreen = 0;
-    float difBlue = 0;
-    /*float difHue = 0;
-     float difBri = 0;
-     float difSat = 0;*/
-    if (imagenAcomparar==null) {
-      return 0;
-    }
-    if (t%2==0) {
-      t++;
-    }
-    int mov = (t-1)/2;
-    float cuantasSumas = 0;
-    for (int i=(mov*-1); i<=mov; i++) {
-      for (int j=(mov*-1); j<=mov; j++) {
-        int indice = cual+i*entrada.width+j;
-        int actual = entrada.pixels[indice];
-        int delFondo = imagenAcomparar.pixels[indice];
-        float importancia = convolucion2D(i, j, mov);
-        difRed += abs( red(actual)-red(delFondo))*importancia;
-        difGreen += abs( green(actual)-green(delFondo))*importancia;
-        difBlue += abs( blue(actual)-blue(delFondo))*importancia;
-        /* difBri += sqDif( brightness(actual), brightness(delFondo), 255)*importancia;
-         difSat += sqDif( saturation(actual), saturation(delFondo), 255)*importancia;*/
-        cuantasSumas+=importancia;
-      }
-    }
-    difRed /= cuantasSumas;
-    difGreen /= cuantasSumas;
-    difBlue /= cuantasSumas;
-
-    /*difBri /= cuantasSumas;
-     difSat /= cuantasSumas;  */
-
-    float difMaxima = max(max(difRed, difGreen), difBlue);
-    float dif = difMaxima;
-    return dif;
-  }
-
-  public float convolucion2D(float x, float y, int rango) {
-    x = map(x, 0, rango, 0, 3);
-    y = map(y, 0, rango, 0, 3);
-    float media = 0;
-    float sigma = 1.0f;
-    float zx = (exp(-1*(pow(x-media, 2.0f)/(2.0f*pow(sigma, 2.0f)))) * (1.0f/(sigma*sqrt(2.0f*PI))));
-    float zy = (exp(-1*(pow(y-media, 2.0f)/(2.0f*pow(sigma, 2.0f)))) * (1.0f/(sigma*sqrt(2.0f*PI))));
-    float z = (zx+zy)/2;
-    return map(z, 0, 0.3989423f, 0, 1);
-  }
-
   //-------------------------------
   // método para volver a tomar una imagen de fondo
   public void recapturarFondo() {
     fondoTomado = false;
-    cont = 3;
   }
   //-------------------------------
   // método para construir la imagen resultante del análisis del movimiento
   public PImage getImagenAnalisis() {
 
     //se inician el grafico y la imagen donde se devolverá el resultado
-    PGraphics grafico = createGraphics( ancho, alto );
+    PGraphics grafico = createGraphics( ancho, alto, P2D );
     PImage resultado = createImage( ancho, alto, RGB );
     // en Processing 2.0
     // PGraphics grafico = createGraphics( ancho, alto );
@@ -1583,31 +1443,12 @@ class PMoCap {
     //si hay movimiento
     if ( hayMovimiento ) {
       //se dibujan el centro y el borde del area de movimiento
-      grafico.stroke(0, 255, 0);
+      grafico.stroke( paleta.rojo );
       grafico.noFill();
-      grafico.rectMode( CORNERS );
       grafico.ellipse(x, y, 5, 5);
-      grafico.ellipse(xBoundingBox, yBoundingBox, 5, 5);
-      grafico.line(x, y, xBoundingBox, yBoundingBox);
+      grafico.rect( xBoundingBox, yBoundingBox, 5, 5 );
+      grafico.rectMode( CORNERS );
       grafico.rect( izquierda, arriba, derecha, abajo );
-      grafico.text("Area: "+area, izquierda, arriba-7);
-      grafico.text("Proporcion: "+anchoBoundingBox/constrain(altoBoundingBox, width, 0.01f), izquierda, arriba-16);
-      grafico.stroke(255, 255, 0);
-      for (int i = 0; i<verticesDeControl.length; i++) {
-        VerticeDeControl v = verticesDeControl[i];
-        if (i==5 || i==15) {
-          grafico.fill(255, 0, 0);
-        } else if (i==6 || i==14) {
-          grafico.fill(0, 255, 0);
-        } else if (i==7 || i==13) {
-          grafico.fill(0, 0, 255);
-        } else {
-          grafico.fill(255);
-        }
-        grafico.ellipse(v.posInicial.x, v.posInicial.y, 10, 10);
-        grafico.line(v.posInicial.x, v.posInicial.y, v.posControl.x, v.posControl.y);
-        grafico.ellipse(v.posControl.x, v.posControl.y, 10, 10);
-      }
     }
     // se cierra el dibujo
     grafico.endDraw();
@@ -1615,107 +1456,6 @@ class PMoCap {
     resultado.copy( grafico, 0, 0, ancho, alto, 0, 0, ancho, alto );
 
     return resultado;
-  }
-  float distanciaPromedio = 0;
-  public void setDistanciaPromedio() {
-
-    float divisorPromedio = 0;
-    for (VerticeDeControl v : verticesDeControl) {
-      distanciaPromedio += (dist(v.posInicial.x, v.posInicial.y, v.posControl.x, v.posControl.y)*v.importancia);
-      divisorPromedio += v.importancia;
-    }
-    distanciaPromedio = distanciaPromedio/divisorPromedio;
-  }
-
-  float distanciaLateralPromedio = 0;
-  public void setDistanciaLateralPromedio() {
-
-    float divisorPromedio = 0;
-    for (int i=4; i<8; i++) {
-      VerticeDeControl v = verticesDeControl[i];
-      distanciaLateralPromedio += (dist(v.posInicial.x, v.posInicial.y, v.posControl.x, v.posControl.y)*v.importancia);
-      divisorPromedio += v.importancia;
-    }
-    for (int i=12; i<16; i++) {
-      VerticeDeControl v = verticesDeControl[i];
-      distanciaLateralPromedio += (dist(v.posInicial.x, v.posInicial.y, v.posControl.x, v.posControl.y)*v.importancia);
-      divisorPromedio += v.importancia;
-    }
-    distanciaLateralPromedio = distanciaLateralPromedio/divisorPromedio;
-  }
-  float anchoEntreVerticesDeControl = 0;
-  public void setAnchoEntreVerticesDeControl() {
-    float record = 0;
-    float[] ancho = new float[3];
-    VerticeDeControl v1_alto = verticesDeControl[5];
-    VerticeDeControl v2_alto = verticesDeControl[15];
-    ancho[0] = (abs(v1_alto.posControl.x - v2_alto.posControl.x));
-    VerticeDeControl v1_medio = verticesDeControl[6];
-    VerticeDeControl v2_medio = verticesDeControl[14];
-    ancho[1] = (abs(v1_medio.posControl.x - v2_medio.posControl.x));
-    VerticeDeControl v1_bajo = verticesDeControl[7];
-    VerticeDeControl v2_bajo = verticesDeControl[13];
-    ancho[2] = (abs(v1_bajo.posControl.x - v2_bajo.posControl.x));
-    for (int i=0; i<3; i++) {
-      if (record<ancho[i]) {      
-        record = ancho[i];
-      }
-    }
-
-    anchoEntreVerticesDeControl = record;
-  }
-
-  public int getCerrado(float umbral) {
-    int cerrado = 0;
-    fill(255, 0, 0);
-    text("este es el cerrado: "+ distanciaPromedio/altoBoundingBox, 50, 50);
-    if (distanciaPromedio/altoBoundingBox>umbral) {
-      cerrado = 1;
-    }
-    return cerrado;
-  }
-  public int getSuperCerrado() {
-    return getCerrado(0.08f);
-  }
-  public int getNivel(float umbral) {
-    int nivel = 0;
-    if (getSuperCerrado()==0) {
-      setAnchoEntreVerticesDeControl();
-    }
-    //float altura = getCerrado(umbralCerrado)<1?anchoBoundingBox/max(0.001, altoBoundingBox):0.4*(anchoBoundingBox/max(0.001, altoBoundingBox))/(0.01*distanciaPromedio);
-    float altura = anchoEntreVerticesDeControl/max(0.001f, altoBoundingBox);
-    String print = anchoEntreVerticesDeControl+" / "+max(0.001f, altoBoundingBox)+" = "+altura;
-    text(print, 0, height-50);
-    //if (getCerrado(umbralCerrado)==0) {
-    if (altura>umbral/1.5f) {
-      nivel = 1;
-    } 
-    if (altura>umbral) {
-      nivel = 2;
-    }
-    /*} else {
-     if (altura>umbral/1.5*1.2) {
-     nivel = 1;
-     } 
-     if (altura>umbral*1.2) {
-     nivel = 2;
-     }
-     }*/
-
-    return nivel;
-  }
-  public int getDesequilibrio(float umbral) {
-    int eje = 0;
-    if (distanciaPromedio>5) {
-      //println(distanciaPromedio);
-      //println(x-xBoundingBox);
-      if (x-xBoundingBox>umbral) {
-        eje = -1;
-      } else if (x-xBoundingBox<umbral*-1) {
-        eje = 1;
-      }
-    }
-    return eje;
   }
 
   //-------------------------------
@@ -1729,10 +1469,10 @@ class PMoCap {
     if ( imagen != null ) {
       int c = ( valor ? color(0, 255, 0) : color(255, 0, 0) );
 
-      for ( int i = max(0, x-margen); i<min(x+margen, ancho); i++ ) {
+      for ( int i = max(0,x-margen) ; i<min(x+margen,ancho) ; i++ ) {
         imagen.set( i, y, c );
       }
-      for ( int i = max(0, y-margen); i<min(y+margen, alto); i++ ) {
+      for ( int i = max(0,y-margen) ; i<min(y+margen,alto) ; i++ ) {
         imagen.set( x, i, c );
       }
     }
@@ -1750,8 +1490,8 @@ class PMoCap {
 
     float cuantos = 0;
 
-    for ( int i=0; i<ancho_; i++ ) {
-      for ( int j=0; j<alto_; j++ ) {
+    for ( int i=0 ; i<ancho_ ; i++ ) {
+      for ( int j=0 ; j<alto_ ; j++ ) {
         int posx = x+i;
         int posy = y+j;
         boolean valor = blue( bitonal.get( posx, posy ) ) > 127;
@@ -1772,12 +1512,12 @@ class PMoCap {
         c = color(0, 255, 0);
       }
 
-      for ( int i=x; i<x+ancho_; i++ ) {
+      for ( int i=x ; i<x+ancho_ ; i++ ) {
         imagen.set( i, y, c );
         imagen.set( i, y+alto_-1, c );
       }
 
-      for ( int i=y; i<y+alto_; i++ ) {
+      for ( int i=y ; i<y+alto_ ; i++ ) {
         imagen.set( x, i, c );
         imagen.set( x+ancho_-1, i, c );
       }
@@ -1836,31 +1576,6 @@ class PMoCap {
     umbral = nuevoUmbral;
   }
   //-------------------------------
-  public void blendFondo(PImage entrada, float factor2) {
-    float escala = 1000;
-    factor2 = factor2*escala;
-    float factor1 = escala-factor2;
-
-    if (frameCount%fotogramasRetardo == 0) {
-      fondoFijo.loadPixels();
-      entrada.loadPixels();
-      /*PImage imagen = createImage(entrada.width, entrada.height, RGB);
-       imagen.loadPixels();*/
-      for (int i = 0; i < fondoFijo.pixels.length; i++) {
-        float dif = brightness(entrada.pixels[i])- brightness(imagenesAcomparar[0].pixels[i]);
-        /*int x = i%bitonal.width;
-         int y = i/bitonal.width;*/
-        if (dif<10) {
-          float r = (red(fondoFijo.pixels[i])*escala*factor1+red(entrada.pixels[i])*escala*factor2)/(escala*escala);
-          float g = (green(fondoFijo.pixels[i])*escala*factor1+green(entrada.pixels[i])*escala*factor2)/(escala*escala);
-          float b = (blue(fondoFijo.pixels[i])*escala*factor1+blue(entrada.pixels[i])*escala*factor2)/(escala*escala);
-          fondoFijo.pixels[i] = color(r, g, b);
-        }
-      }
-      fondoFijo.updatePixels();
-    }
-    //se indica que el fondo
-  }
 }
 //---------------------------------------------
 
@@ -1881,7 +1596,7 @@ class BufferVideo {
     alto = alto_;
 
     buffer = new PImage[ cantidad ];
-    for ( int i=0; i<cantidad; i++ ) {
+    for ( int i=0 ; i<cantidad ; i++ ) {
       buffer[i] = createImage( ancho, alto, RGB );
     }
   }
@@ -1889,15 +1604,12 @@ class BufferVideo {
 
   public void cargar( Capture imagen ) {
     buffer[ cabeza ].copy( imagen, 0, 0, ancho, alto, 0, 0, ancho, alto);
-    //buffer[ cabeza ] = blendImage(buffer[ cabeza-1 ], imagen, 0.999999999, 0.0001);
     cabeza = ( cabeza+1 ) % cantidad;
   }
   //-------------------------------
 
   public void cargar( PImage imagen ) {
     buffer[ cabeza ].copy( imagen, 0, 0, ancho, alto, 0, 0, ancho, alto);
-    /*int indicePrevia = cabeza-1>0?cabeza-1:buffer.length-1;
-     buffer[ cabeza ] = blendImage(buffer[ indicePrevia ], imagen, 0.7, 0.3);*/
     cabeza = ( cabeza+1 ) % cantidad;
   }
   //-------------------------------
@@ -1919,6 +1631,178 @@ class Paleta{
     blanco = color( 0xffCCCCCC );
   }
 }
+enum EstadoDesequilibrio{ NULO, IZQUIERDA, CENTRO, DERECHA };
+enum EstadoNivel{ NULO, ARRIBA, MEDIO, ABAJO };
+enum EstadoApertura{ NULO, ABIERTO, INTERMEDIO, CERRADO };
+
+class Posturas{
+  
+  Movimiento movimiento;
+  Desequilibrio desequilibrio;
+  Nivel nivel;
+  Apertura apertura;
+  
+  Posturas( Movimiento movimiento ){
+    this.movimiento = movimiento;
+    desequilibrio = new Desequilibrio();
+    nivel = new Nivel();
+    apertura = new Apertura();
+  }
+  
+  public void ejecutar(){
+    desequilibrio.analizar();
+    nivel.analizar();
+    apertura.analizar();
+  }
+  
+  //Clase interna Desequilibrio
+  class Desequilibrio{
+  
+    EstadoDesequilibrio estado = EstadoDesequilibrio.NULO, estadoPrevio = estado;
+    float umbralDesequilibrio = 10;
+    
+    //banderas
+    boolean salioDerecha;
+    boolean salioIzquierda;
+    
+    public void analizar(){
+      
+      if( !movimiento.hayMovimiento ){
+        estado = EstadoDesequilibrio.NULO;
+        return;
+      }
+      
+      float diferencia = movimiento.getXBoundingBox() - movimiento.getX();
+      if( abs( diferencia ) > umbralDesequilibrio ){
+        estado = diferencia > 0? EstadoDesequilibrio.IZQUIERDA : EstadoDesequilibrio.DERECHA;
+      }else estado = EstadoDesequilibrio.CENTRO;
+      
+      actualizarBanderas();
+    }
+    
+    public void actualizarBanderas() {
+      salioDerecha = salioIzquierda = false;
+  
+      if ( estadoPrevio != estado && estado == EstadoDesequilibrio.CENTRO ) {    
+        if ( estadoPrevio == EstadoDesequilibrio.DERECHA ) {        
+          salioDerecha = true;
+        }
+        if ( estadoPrevio == EstadoDesequilibrio.IZQUIERDA ) {       
+          salioIzquierda = true;
+        }
+      }
+      estadoPrevio = estado;
+    }
+    
+  }
+  
+  //Clase interna Nivel
+  class Nivel{
+    
+    EstadoNivel estado = EstadoNivel.NULO, estadoPrevio = estado;
+    float rangoInferior = 0.45f;
+    float rangoSuperior = 0.55f;
+    
+    //banderas
+    boolean entroAlto;
+    boolean entroMedio;
+    boolean entroBajo;
+    
+    public void analizar(){
+      
+      if( !movimiento.hayMovimiento ){
+        estado = EstadoNivel.NULO;
+        return;
+      }
+      
+      float alto = movimiento.getAbajo() - movimiento.getArriba();
+      if( alto > movimiento.alto * rangoSuperior )
+        estado = EstadoNivel.ARRIBA;
+      else if( alto > movimiento.alto * rangoInferior )
+        estado = EstadoNivel.MEDIO;
+      else
+        estado = EstadoNivel.ABAJO;
+      
+      actualizarBanderas();
+      
+    }
+    
+    public void actualizarBanderas(){
+      entroAlto = entroMedio = entroBajo = false;
+      
+      if (estadoPrevio != estado) {
+        if ( estadoPrevio == EstadoNivel.ARRIBA ) {
+          if ( estado == EstadoNivel.MEDIO ) {
+            entroMedio = true;
+          } else if ( estado == EstadoNivel.ABAJO ) {
+            entroBajo = true;
+          }
+        }
+        if ( estadoPrevio == EstadoNivel.MEDIO ) {
+          if ( estado == EstadoNivel.ARRIBA ) {
+            entroAlto = true;
+          } else if ( estado == EstadoNivel.ABAJO ) {
+            entroBajo = true;
+          }
+        }
+        if ( estadoPrevio == EstadoNivel.ABAJO ) {
+          if ( estado == EstadoNivel.ARRIBA ) {
+            entroAlto = true;
+          } else if ( estado == EstadoNivel.MEDIO ) {
+            entroMedio = true;
+          }
+        }
+        estadoPrevio = estado;
+      }
+    }
+    
+  }
+  
+  //Clase interna Apertura
+  class Apertura{
+    
+    EstadoApertura estado = EstadoApertura.NULO, estadoPrevio = estado;
+    float rangoInferior = 0.45f;
+    float rangoSuperior = 0.55f;
+    
+    //banderas
+    boolean cerrado, cerro, abrio;
+    
+    public void analizar(){
+      
+      if( !movimiento.hayMovimiento ){
+        estado = EstadoApertura.NULO;
+        return;
+      }
+      
+      float apertura = movimiento.getDerecha() - movimiento.getIzquierda();
+      if( apertura > movimiento.ancho * rangoSuperior )
+        estado = EstadoApertura.ABIERTO;
+      else if( apertura > movimiento.ancho * rangoInferior )
+        estado = EstadoApertura.INTERMEDIO;
+      else
+        estado = EstadoApertura.CERRADO;
+      
+      actualizarBanderas();
+      
+    }
+    
+    public void actualizarBanderas(){
+      cerrado = estado == EstadoApertura.CERRADO;
+      cerro = abrio = false;
+      if ( estadoPrevio != estado ) {
+        if ( estadoPrevio == EstadoApertura.ABIERTO ) {        
+          cerro = true;
+        } else if ( estadoPrevio == EstadoApertura.CERRADO ) {
+          abrio = true;
+        }
+      }
+      estadoPrevio = estado;
+    }
+    
+  }
+  
+}
 public class Reloj{
   
   private int millisActual, millisAnterior, deltaMillis;
@@ -1938,43 +1822,7 @@ public class Reloj{
   }
   
 }
-class VerticeDeControl {
-  PVector posInicial;
-  PVector posControl;
-  float direccion;
-  float importancia;
-  VerticeDeControl(float x_, float y_, float direccion_) {
-    posInicial = new PVector(x_, y_);
-    posControl = new PVector(x_, y_);
-    direccion = direccion_;
-    importancia = 1;
-  }
-  VerticeDeControl(float x_, float y_, float direccion_, float importancia_) {
-    posInicial = new PVector(x_, y_);
-    posControl = new PVector(x_, y_);
-    direccion = direccion_;
-    importancia = importancia_;
-  }
-  public void setControl(PMoCap mC, PImage img) {
-    float x = posInicial.x;
-    float y = posInicial.y;
-    boolean encontreUnPuntoMovido = mC.movEnPixel(PApplet.parseInt(x), PApplet.parseInt(y), img);
-    float distancia = 0;
-    while (!encontreUnPuntoMovido && distancia < 200) {  
-      distancia++;
-      x = x+cos(radians(direccion));
-      y = y+sin(radians(direccion));
-      encontreUnPuntoMovido = mC.movEnPixel(PApplet.parseInt(x), PApplet.parseInt(y), img);
-    }
-    if (distancia>=200) {
-      x = posInicial.x;
-      y = posInicial.y;
-    }
-
-    posControl.set(x, y);
-  }
-}
-  public void settings() {  size( 800, 600 ); }
+  public void settings() {  size( 800, 600, P2D ); }
   static public void main(String[] passedArgs) {
     String[] appletArgs = new String[] { "ObservadorBasico" };
     if (passedArgs != null) {

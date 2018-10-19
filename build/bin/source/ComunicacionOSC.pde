@@ -50,16 +50,21 @@ public class ComunicacionOSC {
   //----
 
   //----- HACIA LA API
-  public void enviarMensajesAPI( UsuarioDesequilibrio uDeseq, UsuarioNivel uNivel, UsuarioCerrado uCerrado ) {
+  public void enviarMensajesAPI( Posturas p ) {
     if( millis() < 10000 ) return;
+    
+    Posturas.Nivel uNivel = p.nivel;
+    Posturas.Apertura uCerrado = p.apertura;
+    Posturas.Desequilibrio uDeseq = p.desequilibrio;
+    
     if (uNivel.entroAlto) enviarMensaje("/nivel", 0);
     else if (uNivel.entroMedio) enviarMensaje("/nivel", 1);
     else if (uNivel.entroBajo) enviarMensaje("/nivel", 2);
     if (uCerrado.abrio) enviarMensaje("/cerrado", 0);
     else if (uCerrado.cerro)enviarMensaje("/cerrado", 1);
 
-    if (uDeseq.desequilibrio <= -1) enviarMensaje("/desequilibrio", 0);
-    else if (uDeseq.desequilibrio >= 1) enviarMensaje("/desequilibrio", 4);
+    if ( uDeseq.estado == EstadoDesequilibrio.IZQUIERDA ) enviarMensaje("/desequilibrio", 0);
+    else if ( uDeseq.estado == EstadoDesequilibrio.DERECHA ) enviarMensaje("/desequilibrio", 4);
     /*else if (uDeseq.izquierda) enviarMensaje("/desequilibrio", 1);
      else if (uDeseq.derecha) enviarMensaje("/desequilibrio", 3);*/
     else if (uDeseq.salioDerecha || uDeseq.salioIzquierda) enviarMensaje("/desequilibrio", 2);
@@ -71,12 +76,23 @@ public class ComunicacionOSC {
      } else if (uDeseq.entroDerecha) {
      enviarMensajes("/MenuNavegarDerecha");
      } else*/
+     
+    /*
+    ACAAA CAMBIO -BIENAL-
     if (abs(uDeseq.desequilibrio) >= 1) {
       if (frameCount % 12 == 0) {
         if (uDeseq.desequilibrio > 0) enviarMensajes("/MenuNavegarDerecha");
         else enviarMensajes("/MenuNavegarIzquierda");
       }
+    }*/
+    //Por lo siguiente -BIENAL-
+    if ( uDeseq.estado != EstadoDesequilibrio.NULO && uDeseq.estado != EstadoDesequilibrio.CENTRO ) {
+      if (frameCount % 12 == 0) {
+        if ( uDeseq.estado == EstadoDesequilibrio.DERECHA ) enviarMensajes("/MenuNavegarDerecha");
+        else enviarMensajes("/MenuNavegarIzquierda");
+      }
     }
+
 
     if (/*uNivel.entroMedio ||*/ uNivel.entroBajo) {
       if (uCerrado.cerrado) {

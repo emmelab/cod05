@@ -41,7 +41,7 @@ public void settings() {
 }
 
 public void setup(){
-  consola.setDebug( true );
+  consola.setDebug( false );
   inicializarTipografias(29);
   oscP5 = new OscP5(this,oscP5Port);
   for(AutoSetup auto : autoSetup) auto.setup();
@@ -114,15 +114,15 @@ Iconos iconos = new Iconos();
 Interfaz interfaz = new Interfaz();
 class BarraSuperior implements AutoDraw {
   float margen, alto;
-  PImage marca, ayuda, fondoIp;
+  PImage marca, ayuda;
+  BotonAtras botonAtras;
 
   BarraSuperior() {
     marca = iconos.get(dicIcos.marca);
     ayuda = iconos.get(dicIcos.ayuda);
-    fondoIp = iconos.get(dicIcos.fondoIp);
-        
     alto = marca.height*1.5f;
     margen = alto/2;
+    botonAtras = new BotonAtras( "< Atrás", margen + marca.width, alto - margen*0.74f, 20 );
     autoDraw.add(this);
   }
 
@@ -135,14 +135,55 @@ class BarraSuperior implements AutoDraw {
       rect(0, 0, width, alto);
       image(marca, marca.width/2+ margen/2, margen);
       image(ayuda, width - ayuda.width/2 - margen/2, margen);
-      tint(paleta.ips[0]);
-      imageMode(CORNER);
+      
+      botonAtras.dibujar( paleta.inactivo );
+      
       textSize(20);
-      image(fondoIp,0,alto+fondoIp.height/2.2f);
-      fill(paleta.fondo);
-      text(oscP5.ip(), margen, alto+35);
+      fill(paleta.inactivo);
+      String textIP = "IP: " + oscP5.ip();
+      text( textIP, width - margen * 1.1f - ayuda.width - textWidth( textIP ), alto - margen * 0.74f );
+      
       popStyle();   
   }
+  
+  class BotonAtras extends Auto implements AutoMousePressed{
+    
+    String text;
+    int tamanoTexto;
+    int x, y;
+    int anchoTexto;
+    boolean activo;
+    
+    BotonAtras( String text, float x, float y, int tamanoTexto ){
+      this.text = text;
+      this.x = round( x );
+      this.y = round( y );
+      this.tamanoTexto = tamanoTexto;
+      pushStyle();textSize( tamanoTexto );
+      anchoTexto = ceil(textWidth( text ));popStyle();
+      setNombre( "botonAtras" );
+      autoMousePressed.add(this);
+    }
+    
+    public void dibujar( int col ){
+      if( !autoActivo ) return;
+      fill( col );
+      textSize( tamanoTexto );
+      text( text, this.x, this.y );
+    }
+    
+    public void mousePressed(){
+      if( !autoActivo ) return;
+      if( mouseX > x && mouseX < x + anchoTexto ){
+        if( mouseY>y-tamanoTexto && mouseY<y ){
+          interfaz.resetIntro();
+          setAutoActivo( false );
+        }
+      }
+    }
+    
+  }//end BotonAtras
+  
 }
 class BotonBasico extends Auto implements AutoDraw, AutoMousePressed {
   PVector pos;
@@ -209,19 +250,29 @@ class BotonModulo extends Auto implements AutoDraw, AutoMousePressed {
   float escala = 0.6f;
   BotonModulo(PVector pos, String icono, int col) {
     this.pos = pos;
-    this.icono = iconos.get(icono);
+    setIcono( icono, 0.6f );
     this.aroCerrado = iconos.get(dicIcos.aroCerrado);
     this.aroAbierto = iconos.get(dicIcos.aroAbierto);
-    if (this.icono == null) this.icono = iconos.iconoVacio();
     this.colEncendido = col;
     this.colApagado = color(red(col)*.299f+green(col)*.587f+blue(col)*.144f);
+    iniciarTweeners();
+    autoDraw.add(this);
+    autoMousePressed.add(this);
+  }
+  
+  public void iniciarTweeners(){
     animAlfa = (new TwOutQuad()).inicializar(.5f, 0, 255);
     animAro = (new TwOutBack()).inicializar(.5f, this.icono.width*.8f, this.icono.width*1.2f, .5f);
     animAroConectado = (new TwOutBack()).inicializar(animAro);
     animPos = (new TwOutBack()).inicializar(.3f, pos.y-100, pos.y);
     animColor = (new TwOutQuad()).inicializar(.3f);
-    autoDraw.add(this);
-    autoMousePressed.add(this);
+  }
+  
+  public void setIcono( String icono, float escala ){
+    this.escala = escala;
+    this.icono = iconos.get(icono);
+    if (this.icono == null) this.icono = iconos.iconoVacio();
+    iniciarTweeners();
   }
 
   public void set(ConfiguracionCOD05.ConfigModulo config) {
@@ -1081,7 +1132,8 @@ class Ejecutador {
     }
     this.modoUtileria = modoUtileria;
     if (modoUtileria)templateLanzador = "\""+javaPath+"\\bin\\java\" -cp "+dirUtileria+" "+ejecutarKeyword ;
-    else templateLanzador = "start cmd /k echo off ^& "+dirReal.substring(0, dirReal.indexOf(':')+1)+" ^& cd \"" + dirReal+"\" ^& "+ejecutarKeyword + " ^& echo \"iniciando "+ejecutarKeyword+"\"";
+    //cmd /k -> deja la terminal abierta para debuguear, cmd /c cierra la terminal
+    else templateLanzador = "start cmd /c echo off ^& "+dirReal.substring(0, dirReal.indexOf(':')+1)+" ^& cd \"" + dirReal+"\" ^& "+ejecutarKeyword + " ^& echo \"iniciando "+ejecutarKeyword+"\"";
   }
 
   public boolean enEjecucion() {
@@ -1165,7 +1217,6 @@ class DiccionarioIconos {
     observador = "observador", 
     carrete = "carrete", 
     lienzo = "lienzo",  
-    fondoIp = "fondo-ip",
     kinect = "kinect",
     webcam = "webcam",
     fondoToggle = "fondo-toggle",
@@ -1180,6 +1231,8 @@ class Iconos implements AutoSetup {
     dicIcos.lienzo, 
     dicIcos.carrete, 
     dicIcos.observador, 
+    dicIcos.webcam, 
+    dicIcos.kinect, 
     dicIcos.play, 
     dicIcos.aroCerrado, 
     dicIcos.aroAbierto,
@@ -1364,6 +1417,15 @@ class Interfaz implements AutoSetup, AutoDraw {
   public boolean introCheck(float t) {
     return introTime < t && introTime+dt >= t;
   }
+  
+  public void resetIntro(){
+    introTime = 0;
+    introActiva = true;
+    botonPlay.autoActivo = lienzo.autoActivo = observador.autoActivo = carrete.autoActivo = false;
+    lienzo.mostrar = observador.mostrar = carrete.mostrar = false;
+    lienzo.iniciarTweeners(); observador.iniciarTweeners(); carrete.iniciarTweeners();
+    interfazModObs.reset();
+  }
 
   public void grisPorTodoLocal() {
     carrete.panelIPsAbierto = observador.panelIPsAbierto = lienzo.panelIPsAbierto = interfazYSensorConexion.visible();
@@ -1425,13 +1487,13 @@ class InterfazModoObservador extends Auto implements AutoDraw {
     icoKin.resize(icoKin.width*3/4,icoKin.height*3/4);
     fondoToggle.resize(fondoToggle.width*3/4,fondoToggle.height*3/4);
     
-    botonCam = new BotonBasico( width*2.5f/8, height*0.5f, 0, dicIcos.webcam, paleta.inactivo );
+    botonCam = new BotonBasico( width*0.4f, height*0.5f, 0, dicIcos.webcam, paleta.inactivo );
     botonCam.escala = 1.0f;
     botonCam.hoverEscala = new TwOutBack().inicializar(.25f, 1, 1.1f, 0);
     botonCam.toggleAlfa = new TwOutQuad().inicializar(.25f, 255, 25, 0);
     botonCam.setAutoActivo( true );
     
-    botonKin = new BotonBasico( width*5.5f/8, height*0.5f, 0, dicIcos.kinect, paleta.inactivo );
+    botonKin = new BotonBasico( width*0.6f, height*0.5f, 0, dicIcos.kinect, paleta.inactivo );
     botonKin.escala = 1.0f;
     botonKin.hoverEscala = new TwOutBack().inicializar(.25f, 1, 1.1f, 0);
     botonKin.toggleAlfa = new TwOutQuad().inicializar(.25f, 255, 25, 0);
@@ -1443,25 +1505,30 @@ class InterfazModoObservador extends Auto implements AutoDraw {
     this.config = config;
   }
   
+  public void reset(){
+    botonCam.toggle = false;
+    botonKin.toggle = false;
+    setAutoActivo( true );
+  }
+  
   public void draw() {
     if ( autoActivo ) {
       imageMode(CENTER);
       noStroke();
       fill(paleta.panelSuperior);
-      //tint(paleta.fondo);
-      ellipse(width*2.5f/8,height/2,icoCam.width-3,icoCam.height-3);
-      //image(icoCam,width*2.5/8,height/2);
-      ellipse(width*5.5f/8,height/2,icoKin.width-3,icoKin.height-3);
-      //image(icoKin,width*5.5/8,height/2);
-      //ellipse(width/4,height/2,icoCam.width-1,icoCam.height-1);
-      //image(fondoToggle,width/2,height/2);
+      ellipse( botonCam.pos.x, botonCam.pos.y, icoCam.width*botonCam.escala, icoCam.height*botonCam.escala );
+      ellipse( botonKin.pos.x, botonCam.pos.y, icoKin.width*botonKin.escala, icoKin.height*botonKin.escala );
       
       if( botonCam.toggle ){
         setAutoActivo( false );
+        interfaz.barraSuperior.botonAtras.setAutoActivo( true );
         config.modoObservador = ModoObservador.WEBCAM;
+        interfaz.observador.setIcono( dicIcos.webcam, 0.84f );
       }else if( botonKin.toggle ){
         setAutoActivo( false );
+        interfaz.barraSuperior.botonAtras.setAutoActivo( true );
         config.modoObservador = ModoObservador.KINECT;
+        interfaz.observador.setIcono( dicIcos.kinect, 0.84f );
       }
       
     }

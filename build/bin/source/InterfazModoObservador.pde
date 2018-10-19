@@ -16,13 +16,13 @@ class InterfazModoObservador extends Auto implements AutoDraw {
     icoKin.resize(icoKin.width*3/4,icoKin.height*3/4);
     fondoToggle.resize(fondoToggle.width*3/4,fondoToggle.height*3/4);
     
-    botonCam = new BotonBasico( width*2.5/8, height*0.5, 0, dicIcos.webcam, paleta.inactivo );
+    botonCam = new BotonBasico( width*0.4, height*0.5, 0, dicIcos.webcam, paleta.inactivo );
     botonCam.escala = 1.0f;
     botonCam.hoverEscala = new TwOutBack().inicializar(.25, 1, 1.1, 0);
     botonCam.toggleAlfa = new TwOutQuad().inicializar(.25, 255, 25, 0);
     botonCam.setAutoActivo( true );
     
-    botonKin = new BotonBasico( width*5.5/8, height*0.5, 0, dicIcos.kinect, paleta.inactivo );
+    botonKin = new BotonBasico( width*0.6, height*0.5, 0, dicIcos.kinect, paleta.inactivo );
     botonKin.escala = 1.0f;
     botonKin.hoverEscala = new TwOutBack().inicializar(.25, 1, 1.1, 0);
     botonKin.toggleAlfa = new TwOutQuad().inicializar(.25, 255, 25, 0);
@@ -34,25 +34,30 @@ class InterfazModoObservador extends Auto implements AutoDraw {
     this.config = config;
   }
   
+  void reset(){
+    botonCam.toggle = false;
+    botonKin.toggle = false;
+    setAutoActivo( true );
+  }
+  
   void draw() {
     if ( autoActivo ) {
       imageMode(CENTER);
       noStroke();
       fill(paleta.panelSuperior);
-      //tint(paleta.fondo);
-      ellipse(width*2.5/8,height/2,icoCam.width-3,icoCam.height-3);
-      //image(icoCam,width*2.5/8,height/2);
-      ellipse(width*5.5/8,height/2,icoKin.width-3,icoKin.height-3);
-      //image(icoKin,width*5.5/8,height/2);
-      //ellipse(width/4,height/2,icoCam.width-1,icoCam.height-1);
-      //image(fondoToggle,width/2,height/2);
+      ellipse( botonCam.pos.x, botonCam.pos.y, icoCam.width*botonCam.escala, icoCam.height*botonCam.escala );
+      ellipse( botonKin.pos.x, botonCam.pos.y, icoKin.width*botonKin.escala, icoKin.height*botonKin.escala );
       
       if( botonCam.toggle ){
         setAutoActivo( false );
+        interfaz.barraSuperior.botonAtras.setAutoActivo( true );
         config.modoObservador = ModoObservador.WEBCAM;
+        interfaz.observador.setIcono( dicIcos.webcam, 0.84 );
       }else if( botonKin.toggle ){
         setAutoActivo( false );
+        interfaz.barraSuperior.botonAtras.setAutoActivo( true );
         config.modoObservador = ModoObservador.KINECT;
+        interfaz.observador.setIcono( dicIcos.kinect, 0.84 );
       }
       
     }
