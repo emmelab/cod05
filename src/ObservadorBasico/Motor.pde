@@ -15,11 +15,8 @@ class Motor{
   Capture camara;
   static final int ANCHO_CAMARA = 320, ALTO_CAMARA = 240, FPS_CAMARA = 30;
   
-  PMoCap movimiento;
-  UsuarioNivel uNivel = new UsuarioNivel();
-  UsuarioCerrado uCerrado = new UsuarioCerrado();
-  UsuarioDesequilibrio uDeseq = new UsuarioDesequilibrio();
-  
+  Movimiento movimiento;
+  Posturas posturas;
   ComunicacionOSC osc;
   
   Motor(){
@@ -73,13 +70,10 @@ class Motor{
     if( camaraSeleccionada != null ){
       camara = new Capture( p5, camaraSeleccionada.ancho, camaraSeleccionada.alto, camaraSeleccionada.nombre, camaraSeleccionada.fps );
       camara.start();
-      
-      float umbral = 50;
-      int cantidadDeCuadrosDeRetardo = 2;
-      
-      movimiento = new PMoCap( p5, camaraSeleccionada.ancho, camaraSeleccionada.alto, umbral, 
-      cantidadDeCuadrosDeRetardo, 7 );
-      
+
+      movimiento = new Movimiento( camaraSeleccionada.ancho, camaraSeleccionada.alto, 100, 5, true );
+      posturas = new Posturas( movimiento );
+     
     }
     estado = ESTADO_CORRIENDO;
   }
@@ -92,10 +86,8 @@ class Motor{
     if( camara.available() ){
       camara.read();
       movimiento.capturar( camara );
-      uNivel.set( movimiento.getNivel( umbralNivel ) );
-      uCerrado.set( movimiento.getCerrado( umbralCerrado ) );
-      uDeseq.set( movimiento.getDesequilibrio( umbralEje ) );
-      osc.enviarMensajesAPI( uDeseq, uNivel, uCerrado );
+      posturas.ejecutar();
+      osc.enviarMensajesAPI( posturas );
     }
   }
   
@@ -108,12 +100,16 @@ void reconocerCamaras(){
   DetallesCamara[] todasLasCamaras = new DetallesCamara[ iRecoMax ];
   IntList idCamarasAptas = new IntList();
   for( iReco = 0; iReco < iRecoMax; iReco++ ){
-    todasLasCamaras[ iReco ] = new DetallesCamara( listaCamaras[ iReco ] );
-    if( todasLasCamaras[iReco].ancho == Motor.ANCHO_CAMARA &&
-        todasLasCamaras[iReco].alto == Motor.ALTO_CAMARA &&
-        todasLasCamaras[iReco].fps == Motor.FPS_CAMARA
-    ){
-      idCamarasAptas.append( iReco );
+    try{
+      todasLasCamaras[ iReco ] = new DetallesCamara( listaCamaras[ iReco ] );
+      if( todasLasCamaras[iReco].ancho == Motor.ANCHO_CAMARA &&
+          todasLasCamaras[iReco].alto == Motor.ALTO_CAMARA &&
+          todasLasCamaras[iReco].fps == Motor.FPS_CAMARA
+      ){
+        idCamarasAptas.append( iReco );
+      }
+    }catch( Exception e ){
+      println( "Exception 'reconocerCamaras()': " + e.getMessage() );
     }
   }
   

@@ -5,10 +5,8 @@ Paleta paleta;
 Motor motor;
 GuiP5 gui;
 
-boolean test = false;
-
 void setup(){
-  size( 800, 600 );
+  size( 800, 600, P2D );
   p5 = this;
   reloj = new Reloj();
   consola = new Consola();

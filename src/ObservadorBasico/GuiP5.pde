@@ -9,17 +9,10 @@ class GuiP5 extends ControlP5{
   String pestanaActiva;
   static final String
   PESTANA_CAMARA = "Cámara",
-  PESTANA_PROCESOS = "Proceso",
-  PESTANA_DESEQUILIBRIO = "Desequilibrio",
-  PESTANA_NIVEL = "Nivel",
-  PESTANA_CERRADO = "Cerrado";
+  PESTANA_CAPTURA = "Captura",
+  PESTANA_POSTURAS = "Posturas";
   
-  //Pestana principal - CAMARA
   ScrollableList listaDeCamaras;
-  
-  //Pestanas
-  GuiPestanaProceso pestanaProceso;
-  GuiPestanaDesequilibrio pestanaDesequilibrio;
   
   GuiP5( PApplet p5 ){
     super( p5 );
@@ -39,7 +32,7 @@ class GuiP5 extends ControlP5{
   }
   
   void iniciarPestanas(){
-    String[] pestanas = { PESTANA_CAMARA, PESTANA_PROCESOS, PESTANA_DESEQUILIBRIO, PESTANA_NIVEL, PESTANA_CERRADO };
+    String[] pestanas = { PESTANA_CAMARA, PESTANA_CAPTURA, PESTANA_POSTURAS };
     pestanaActiva = PESTANA_CAMARA;
     //------------ PESTANAS
     for( int i = 1; i < pestanas.length; i++ ){
@@ -78,12 +71,12 @@ class GuiP5 extends ControlP5{
   void iniciarContenidoPestanas(){
     
     //Global
-    gui.addButton( "nuevoFondo" )
+    addButton( "nuevoFondo" )
     //primero que nada desactivo el "desencadenamiento de enventos"
     .setBroadcast(false)
-    .setLabel( "Nuevo fondo" )
-    .setWidth( 100 )
-    .setHeight( 20 )
+    .setLabel( "Capturar fondo" )
+    .setWidth( 125 )
+    .setHeight( 30 )
     .setPosition( width * 0.825, 540 )
     //una vez configurado todo, vuelvo a activar el "desencadenamiento de enventos"
     .setBroadcast(true)
@@ -104,19 +97,33 @@ class GuiP5 extends ControlP5{
      .setBroadcast(true)
      ;
      
-    //PESTANA 1 - Procesos
-    pestanaProceso = new GuiPestanaProceso();
-    
-    //PESTANA 2 - Desequilibrio
-    pestanaDesequilibrio = new GuiPestanaDesequilibrio();
+     //PESTANA 1 - CAPTURA
+     float posX = width * 0.825;
+     int posY = 140, saltoY = 80, saltoCorto = 50;
+     crearSlider(  "sliderUmbral", "Umbral", PESTANA_CAPTURA, posX, posY, 130, 20, 0, 255, 100 );
+     crearToggle( "toggleActivarAmortiguacion", "Amortiguar", PESTANA_CAPTURA, posX, posY += saltoY, 30, 20 );
+     Slider sAmor = crearSlider(  "sliderAmortiguacion", "Factor amortiguador", PESTANA_CAPTURA, posX, posY += saltoCorto, 130, 20, 0.0, 1.0, 0.2 );
+     sAmor.setVisible( false );
+     crearToggle( "toggleAutocaptura", "Autocaptura", PESTANA_CAPTURA, posX, posY += saltoY, 30, 20 );
+     Slider sAuto = crearSlider(  "sliderSensibilidadAutocaptura", "Sensibilidad autocap.", PESTANA_CAPTURA, posX, posY += saltoCorto, 130, 20, 0.0, 1.0, 0.1 );
+     sAuto.setVisible( false );
+     Slider sTAuto = crearSlider(  "sliderTiempoAutocaptura", "Tiempo autocaptura", PESTANA_CAPTURA, posX, posY += saltoCorto, 130, 20, 0, 3000, 2000 );
+     sTAuto.setVisible( false );
+     
+     //PESTANA 2 - POSTURAS
+     posX = width * 0.6;
+     /*int*/ posY = 140;/*,*/ saltoY = 100;
+     crearSlider(  "sliderUmbralDesequilibrio", "Umbral desequilibrio", PESTANA_POSTURAS, posX, posY, 200, 20, 0, 80, 10 );
+     crearRango( "rangoNivel", "Umbrales de nivel", PESTANA_POSTURAS, posX, posY += saltoY, 200, 20, 0.0, 1.0, 0.45, 0.55 );
+     crearRango( "rangoApertura", "Umbrales de apertura", PESTANA_POSTURAS, posX, posY += saltoY, 200, 20, 0.0, 1.0, 0.45, 0.55 );
    
   }
   
-  void crearSlider( String nombre, String etiqueta, String pestana, float x, float y, float ancho, float alto, float minimo, float maximo, float valor ){
-    Slider s = gui.addSlider( nombre )
+  Slider crearSlider( String nombre, String etiqueta, String pestana, float x, float y, float ancho, float alto, float minimo, float maximo, float valor ){
+    Slider s = addSlider( nombre )
     .setBroadcast(false)
     .setLabel( etiqueta )
-    .setSize( 130, 20 )
+    .setSize( round(ancho), round(alto) )
     .setPosition( x, y )
     .setRange( minimo, maximo )
     .setValue( valor/*motor.movimiento.!!variable correspondiente!!*/ )
@@ -126,6 +133,39 @@ class GuiP5 extends ControlP5{
     ;
     //gui.getController(nombre).getCaptionLabel().align(ControlP5.LEFT, ControlP5.BOTTOM_OUTSIDE).setPaddingY(5).toUpperCase( false );
     s.getCaptionLabel().align(ControlP5.LEFT, ControlP5.BOTTOM_OUTSIDE).setPaddingY(5).toUpperCase( false );
+    return s;
+  }
+  
+  void crearRango( String nombre, String etiqueta, String pestana, float x, float y, float ancho, float alto, float minimo, float maximo, float valorMinimo, float valorMaximo ){
+    Range r = addRange( nombre )
+   // disable broadcasting since setRange and setRangeValues will trigger an event
+   .setBroadcast(false) 
+   .setLabel( etiqueta )
+   .setPosition(x,y)
+   .setSize(round(ancho),round(alto))
+   .setHandleSize(20)
+   .setRange(minimo,maximo)
+   .setRangeValues(valorMinimo,valorMaximo)
+   // after the initialization we turn broadcast back on again
+   .setBroadcast(true)
+   //.setColorForeground(color(255,40))
+   //.setColorBackground(color(255,40))  
+   .moveTo( pestana )
+   ;
+   
+   r.getCaptionLabel().align(ControlP5.LEFT, ControlP5.BOTTOM_OUTSIDE).setPaddingY(5).toUpperCase( false );
+   
+  }
+  
+  void crearToggle( String nombre, String etiqueta, String pestana, float x, float y, float ancho, float alto ){
+    Toggle t = addToggle( nombre )
+    .setBroadcast(false) 
+    .setLabel( etiqueta )
+    .setPosition( x, y )
+    .setSize( round(ancho), round(alto) )
+    .setBroadcast(true)
+    .moveTo( pestana );
+    t.getCaptionLabel().toUpperCase( false );
   }
   
   //seters y geters
@@ -141,17 +181,11 @@ class GuiP5 extends ControlP5{
   
   public void setPestanaActiva( int numero ){
     switch( numero ){
-      case 4:
-        pestanaActiva = PESTANA_CERRADO;
-        break;
-      case 3:
-        pestanaActiva = PESTANA_NIVEL;
-        break;
       case 2:
-        pestanaActiva = PESTANA_DESEQUILIBRIO;
+        pestanaActiva = PESTANA_POSTURAS;
         break;
       case 1:
-        pestanaActiva = PESTANA_PROCESOS;
+        pestanaActiva = PESTANA_CAPTURA;
         break;
       default:
         pestanaActiva = PESTANA_CAMARA;
@@ -197,9 +231,9 @@ class GuiP5 extends ControlP5{
         pestanas();
         break;
     }
-    
+
     popStyle();
-    if( motor.movimiento != null ) motor.movimiento.conteo();
+    
   }
   
   void comprobandoCamaras(){
@@ -226,15 +260,11 @@ class GuiP5 extends ControlP5{
       case PESTANA_CAMARA:
         pestanaCamara();
         break;
-      case PESTANA_PROCESOS:
-        pestanaProceso.ejecutar();
+      case PESTANA_CAPTURA:
+        pestanaProcesos();
         break;
-      case PESTANA_DESEQUILIBRIO:
-        pestanaDesequilibrio.ejecutar();
-        break;
-      case PESTANA_NIVEL:
-        break;
-      case PESTANA_CERRADO:
+      case PESTANA_POSTURAS:
+        pestanaPosturas();
         break;
       default:
        break;
@@ -246,6 +276,25 @@ class GuiP5 extends ControlP5{
     image( motor.camara, width*0.45, height * 0.35 );
   }
   
+  void pestanaProcesos(){
+    
+    image( motor.camara, 10, 100 );
+    image( motor.movimiento.imagenAcomparar, 10+Motor.ANCHO_CAMARA, 100 );
+    image( motor.movimiento.substraccion, 10, 100+Motor.ALTO_CAMARA );
+    //image( movimiento.bitonal, ancho, 0 );
+    image( motor.movimiento.getImagenAnalisis(), 10+Motor.ANCHO_CAMARA, 100+Motor.ALTO_CAMARA );
+    
+  }
+  
+  void pestanaPosturas(){
+    image( motor.movimiento.getImagenAnalisis(), 10, 100 );
+    textAlign( LEFT );
+    fill( paleta.amarillo );
+    text( "Desequilibrio: " + motor.posturas.desequilibrio.estado.toString(), 10, 440 );
+    text( "Nivel: " + motor.posturas.nivel.estado.toString(), 10, 470 );
+    text( "Apertura: " + motor.posturas.apertura.estado.toString(), 10, 500 );
+  }
+  
 }
 
 void controlEvent(ControlEvent evento) {
@@ -253,6 +302,12 @@ void controlEvent(ControlEvent evento) {
   if( evento.isTab() ) {
     gui.setPestanaActiva( evento.getTab().getId() );
     gui.actualizarColorPestanas();
+  }else if( evento.isFrom( "rangoNivel" ) ){
+    motor.posturas.nivel.rangoInferior = evento.getController().getArrayValue( 0 );
+    motor.posturas.nivel.rangoSuperior = evento.getController().getArrayValue( 1 );
+  }else if( evento.isFrom( "rangoApertura" ) ){
+    motor.posturas.apertura.rangoInferior = evento.getController().getArrayValue( 0 );
+    motor.posturas.apertura.rangoSuperior = evento.getController().getArrayValue( 1 );
   }
   
 }
@@ -260,4 +315,39 @@ void controlEvent(ControlEvent evento) {
 void SeleccionarCamara( int numeroCamara ){
   motor.camaraSeleccionada = motor.camarasAptas[ numeroCamara ];
   motor.estado = Motor.ESTADO_INICIAR_CAMARA;
+}
+
+void nuevoFondo(){
+  motor.movimiento.recapturarFondo();
+}
+
+void sliderUmbral( float valor ){
+  motor.movimiento.setUmbral( valor );
+}
+
+void toggleActivarAmortiguacion( boolean toggle ){
+  motor.movimiento.amortiguacionActivada = toggle;
+  gui.getController( "sliderAmortiguacion" ).setVisible( toggle );
+}
+
+void sliderAmortiguacion( float valor ){
+  motor.movimiento.factorAmortiguacion = valor;
+}
+
+void toggleAutocaptura( boolean toggle ){
+  motor.movimiento.autocaptura = toggle;
+  gui.getController( "sliderSensibilidadAutocaptura" ).setVisible( toggle );
+  gui.getController( "sliderTiempoAutocaptura" ).setVisible( toggle );
+}
+
+void sliderSensibilidadAutocaptura( float valor ){
+  motor.movimiento.setSensibilidadAutocaptura( valor );
+}
+
+void sliderTiempoAutocaptura( int valor ){
+  motor.movimiento.tiempoTolenranciaAutocaptura = valor;
+}
+
+void sliderUmbralDesequilibrio( float valor ){
+  motor.posturas.desequilibrio.umbralDesequilibrio = valor;
 }
