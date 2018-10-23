@@ -20,7 +20,7 @@ public final class ConsolaDebug {
 
   public ConsolaDebug() {
     texto = "";
-    colorTexto = color( #000000 );//color( 255 );
+    colorTexto = color( 255 );//color( 255 );
     colorAlerta = color(175, 194, 43);//#FF0000
     tamanoTexto = int( height * 0.12 ); //int( height * 0.023 ); //tamanoTexto = 20;
     tamanoAlerta = int( height * 0.12 ); //int( height * 0.023 ); //tamanoAlerta = 20;
@@ -109,7 +109,7 @@ public final class ConsolaDebug {
       hasta = texto.indexOf( "\n", desde );
       String aux = texto.substring( desde, hasta );
 
-      rect( 0, iteracion * (tamanoTexto * LEADIN), textWidth( aux ) + 3, tamanoTexto * ( LEADIN * 1.1666666 ) );
+      //rect( 0, iteracion * (tamanoTexto * LEADIN), textWidth( aux ) + 3, tamanoTexto * ( LEADIN * 1.1666666 ) );
 
       desde = hasta + 1;
       iteracion++;

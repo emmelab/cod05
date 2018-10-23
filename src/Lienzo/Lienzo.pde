@@ -102,6 +102,20 @@ void setup() {
     String categoria = sistema.registroModificadores.get(n).categoria();
     // println(categoria);
   }
+  iniciarTitle();
+}
+
+String version;
+String getVersion(){
+  String v;
+  try{ v = loadStrings( "../version.txt" )[0]; }
+  catch( Exception e ){ v = "vExcep."; System.err.println( "Exception title: " + e.getMessage() );}
+  return v;
+}
+
+void iniciarTitle(){
+  version = getVersion();
+  surface.setTitle( getClass().getName() + " "+version);
 }
 
 void draw() {
@@ -122,11 +136,9 @@ void ciclo() {
 
   sistema.actualizar();
 
-  fill(255);
-  text(frameRate, 5, 10);
-
   if ( sistema.debug ) {
-    text( "DEBUG", 5, 30 );
+    consolaDebug.println( ""+version );
+    consolaDebug.println( ""+nf(frameRate, 0, 2) );
     managerJoints.debug( this );    
   }
   consolaDebug();

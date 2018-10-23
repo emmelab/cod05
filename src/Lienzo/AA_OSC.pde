@@ -41,7 +41,7 @@ void accionOpciones(String cual) {
   if (cual.equals("ciclo")) ciclo();
   if (cual.equals("reset")) sistema.reset();
   if (cual.equals("fondoAlfa")) fondoAlfa = !fondoAlfa;
-  if (cual.equals("pausa")) sistema.debug = !sistema.debug;
+  if (cual.equals("sistema.debug")) sistema.debug = !sistema.debug;
 }
 
 void cargarOpciones() {

@@ -25,12 +25,19 @@ void setup(){
   inicializarTipografias(29);
   oscP5 = new OscP5(this,oscP5Port);
   for(AutoSetup auto : autoSetup) auto.setup();
+  iniciarTitle();
 }
 
 void inicializarTipografias(float textSize){
     openSans_Semibold = createFont( "OpenSans-Semibold.ttf", textSize);
     openSans_Light = createFont( "OpenSans-Light.ttf", textSize);
     textFont(openSans_Semibold);
+}
+
+void iniciarTitle(){
+  try{String version = loadStrings( "../version.txt" )[0];
+  surface.setTitle( getClass().getName() + " "+(version!=null?version:""));}
+  catch( Exception e ){System.err.println( "Exception title: " + e.getMessage() );}
 }
 
 void draw() {

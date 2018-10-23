@@ -1,9 +1,3 @@
-// Soy un triangulooo....
-// No soy un cuadradoooo...
-//No soy un circulo....
-// Tengo Arriba....
-//Soy 2D
-
 ///////////////////////CONTROLES TECLADO
 //--- flechas izquierda y derecha: para navegacion
 //--- enter:  ingresar en un submenu o activar un modificador
@@ -103,8 +97,14 @@ void setup() {
 
   consola = new Consola(paleta);
   controlador = new Controlador(consola);
+  iniciarTitle();
 }
 
+void iniciarTitle(){
+  try{String version = loadStrings( "../version.txt" )[0];
+  surface.setTitle( getClass().getName() + " "+(version!=null?version:""));}
+  catch( Exception e ){System.err.println( "Exception title: " + e.getMessage() );}
+}
 
 void draw() {
 

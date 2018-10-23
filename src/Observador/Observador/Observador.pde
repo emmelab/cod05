@@ -8,21 +8,20 @@ int estabilidadGeneral = 6;
 
 void setup(){
   size( 800, 600, P2D );
-  
   comunicacionOSC = new ComunicacionOSC( this );
   paleta = new Paleta();
   motor = new Motor(this);
+  iniciarTitle();
+}
 
+void iniciarTitle(){
+  try{String version = loadStrings( "../../version.txt" )[0];
+  frame.setTitle( getClass().getName() + " "+(version!=null?version:""));}
+  catch( Exception e ){System.err.println( "Exception title: " + e.getMessage() );}
 }
 
 void draw(){
-  frame.setTitle( "fps: " + frameRate ); 
   motor.ejecutar();
-  pushStyle();
-  fill( 255 );
-  textSize( 35 );
-  text( "fps: " + nf(frameRate,0,-1), 10, height - 20 );
-  popStyle();
 }
 
 void keyPressed(){

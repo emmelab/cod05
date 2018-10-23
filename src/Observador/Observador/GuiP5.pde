@@ -13,6 +13,7 @@ class GuiP5 extends ControlP5{
   
   public GuiP5( PApplet p5, String[] pestanas ){
     super( p5 );
+    addFrameRate().setInterval(5).setPosition(0,height - 15).moveTo( "global" );
     
     logoCOD05 = loadImage( "logoCOD05.png" );
     logoObservador = loadImage( "observador.png" );
