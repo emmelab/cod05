@@ -9,8 +9,8 @@ class Ejecutador {
 
   String dirReal = sketchPath(""), //sketchPath("..\\lib\\*"),
     lienzoReal = "Lienzo", 
-    observadorReal = "cd Observador ^& Observador", 
-    observadorBasicoReal = "ObservadorBasico",
+    observadorReal = "cd Observador_Kinect ^& Observador_Kinect", 
+    observadorBasicoReal = "Observador_Webcam",
     carreteReal = "Carrete";
 
   String dirUtileria = sketchPath("..\\modulosDeUtileria\\lib\\*"), 
